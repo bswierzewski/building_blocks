@@ -15,6 +15,18 @@
     <Company>BuildingBlocks</Company>
     <Product>BuildingBlocks</Product>
     <Copyright>Copyright © 2025 BuildingBlocks</Copyright>
+    <PackageId>$(MSBuildProjectName)</PackageId>
+    <Description>Shared kernel components for .NET applications built with Clean Architecture and Domain-Driven Design principles. Provides base classes for entities, aggregates, value objects, domain events, CQRS patterns, and EF Core infrastructure.</Description>
+    <PackageReleaseNotes>Initial release of SharedKernel components for Clean Architecture applications.</PackageReleaseNotes>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/bswierzewski/BuildingBlocks</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/bswierzewski/BuildingBlocks</PackageProjectUrl>
+    <PackageTags>building-blocks;ddd-lite</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageOutputPath>$(MSBuildThisFileDirectory)artifacts</PackageOutputPath>
   </PropertyGroup>
 
 </Project>
