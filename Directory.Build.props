@@ -17,4 +17,21 @@
     <Copyright>Copyright © 2025 BuildingBlocks</Copyright>
   </PropertyGroup>
 
+  <!-- NuGet Package Properties -->
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageVersion>1.0.0</PackageVersion>
+    <PackageTags>clean-architecture;building-blocks;dotnet</PackageTags>
+    <PackageProjectUrl>https://github.com/your-username/building-blocks</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/your-username/building-blocks</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <!-- Include README in all packages -->
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" Condition="Exists('README.md')" />
+  </ItemGroup>
+
 </Project>

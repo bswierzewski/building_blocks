@@ -4,10 +4,23 @@
     <ProjectReference Include="..\BuildingBlocks.Domain\BuildingBlocks.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="MediatR" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>BuildingBlocks.Application</PackageId>
+    <Title>BuildingBlocks Application Layer</Title>
+    <Description>A comprehensive .NET application layer library providing essential building blocks for Clean Architecture applications with MediatR, FluentValidation, and common behavioral patterns.</Description>
+    <PackageTags>$(PackageTags);mediatr;cqrs;fluentvalidation;behaviors</PackageTags>
   </PropertyGroup>
 
 </Project>
