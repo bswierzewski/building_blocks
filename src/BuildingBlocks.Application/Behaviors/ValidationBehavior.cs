@@ -10,19 +10,14 @@ namespace BuildingBlocks.Application.Behaviors;
 /// </summary>
 /// <typeparam name="TRequest">The type of the MediatR request.</typeparam>
 /// <typeparam name="TResponse">The type of the response.</typeparam>
-public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+/// <remarks>
+/// Initializes a new instance of the ValidationBehavior class.
+/// </remarks>
+/// <param name="validators">The collection of validators for the request type.</param>
+public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
-    private readonly IEnumerable<IValidator<TRequest>> _validators;
-
-    /// <summary>
-    /// Initializes a new instance of the ValidationBehavior class.
-    /// </summary>
-    /// <param name="validators">The collection of validators for the request type.</param>
-    public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
-    {
-        _validators = validators;
-    }
+    private readonly IEnumerable<IValidator<TRequest>> _validators = validators;
 
     /// <summary>
     /// Handles the request with validation.

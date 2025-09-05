@@ -8,18 +8,13 @@ namespace BuildingBlocks.Infrastructure.Persistence.Interceptors;
 /// <summary>
 /// Interceptor that automatically publishes domain events after SaveChanges.
 /// </summary>
-public sealed class DispatchDomainEventsInterceptor : SaveChangesInterceptor
+/// <remarks>
+/// Initializes a new instance of the <see cref="DispatchDomainEventsInterceptor"/> class.
+/// </remarks>
+/// <param name="mediator">The MediatR publisher.</param>
+public sealed class DispatchDomainEventsInterceptor(IPublisher mediator) : SaveChangesInterceptor
 {
-    private readonly IPublisher _mediator;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DispatchDomainEventsInterceptor"/> class.
-    /// </summary>
-    /// <param name="mediator">The MediatR publisher.</param>
-    public DispatchDomainEventsInterceptor(IPublisher mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IPublisher _mediator = mediator;
 
     /// <summary>
     /// Intercepts SaveChanges calls.

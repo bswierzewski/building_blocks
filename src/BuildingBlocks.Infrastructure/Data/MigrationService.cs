@@ -8,22 +8,16 @@ namespace BuildingBlocks.Infrastructure.Data;
 /// <summary>
 /// Generic migration service that runs database migrations for a specific DbContext on startup.
 /// </summary>
-public class MigrationService<TContext> : IHostedService 
+/// <remarks>
+/// Initializes a new instance of the <see cref="MigrationService{TContext}"/> class.
+/// </remarks>
+/// <param name="serviceProvider">The service provider.</param>
+/// <param name="logger">The logger.</param>
+public class MigrationService<TContext>(IServiceProvider serviceProvider, ILogger<MigrationService<TContext>> logger) : IHostedService
     where TContext : DbContext
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<MigrationService<TContext>> _logger;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MigrationService{TContext}"/> class.
-    /// </summary>
-    /// <param name="serviceProvider">The service provider.</param>
-    /// <param name="logger">The logger.</param>
-    public MigrationService(IServiceProvider serviceProvider, ILogger<MigrationService<TContext>> logger)
-    {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly ILogger<MigrationService<TContext>> _logger = logger;
 
     /// <summary>
     /// Starts the migration service and applies pending migrations.
@@ -38,11 +32,11 @@ public class MigrationService<TContext> : IHostedService
         {
             var contextName = typeof(TContext).Name;
             _logger.LogInformation("Checking migrations for {ContextName}...", contextName);
-            
+
             var pendingMigrations = await context.Database.GetPendingMigrationsAsync(cancellationToken);
             if (pendingMigrations.Any())
             {
-                _logger.LogInformation("Found {Count} pending migrations for {ContextName}: [{Migrations}]", 
+                _logger.LogInformation("Found {Count} pending migrations for {ContextName}: [{Migrations}]",
                     pendingMigrations.Count(), contextName, string.Join(", ", pendingMigrations));
                 await context.Database.MigrateAsync(cancellationToken);
                 _logger.LogInformation("{ContextName} database migrations applied successfully", contextName);

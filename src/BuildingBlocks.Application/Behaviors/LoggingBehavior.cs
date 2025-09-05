@@ -11,22 +11,16 @@ namespace BuildingBlocks.Application.Behaviors;
 /// </summary>
 /// <typeparam name="TRequest">The type of the MediatR request.</typeparam>
 /// <typeparam name="TResponse">The type of the response.</typeparam>
-public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+/// <remarks>
+/// Initializes a new instance of the LoggingBehavior class.
+/// </remarks>
+/// <param name="logger">The logger instance.</param>
+/// <param name="user">The current user service.</param>
+public class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior<TRequest, TResponse>> logger, IUser user) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
-    private readonly ILogger<LoggingBehavior<TRequest, TResponse>> _logger;
-    private readonly IUser _user;
-
-    /// <summary>
-    /// Initializes a new instance of the LoggingBehavior class.
-    /// </summary>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="user">The current user service.</param>
-    public LoggingBehavior(ILogger<LoggingBehavior<TRequest, TResponse>> logger, IUser user)
-    {
-        _logger = logger;
-        _user = user;
-    }
+    private readonly ILogger<LoggingBehavior<TRequest, TResponse>> _logger = logger;
+    private readonly IUser _user = user;
 
     /// <summary>
     /// Handles the request with comprehensive logging.

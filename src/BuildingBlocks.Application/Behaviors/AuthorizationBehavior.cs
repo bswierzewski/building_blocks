@@ -13,22 +13,16 @@ namespace BuildingBlocks.Application.Behaviors;
 /// </summary>
 /// <typeparam name="TRequest">The type of the MediatR request.</typeparam>
 /// <typeparam name="TResponse">The type of the response.</typeparam>
-public class AuthorizationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+/// <remarks>
+/// Initializes a new instance of the AuthorizationBehavior class.
+/// </remarks>
+/// <param name="user">The current user service.</param>
+/// <param name="logger">The logger instance.</param>
+public class AuthorizationBehavior<TRequest, TResponse>(IUser user, ILogger<AuthorizationBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
-    private readonly IUser _user;
-    private readonly ILogger<AuthorizationBehavior<TRequest, TResponse>> _logger;
-
-    /// <summary>
-    /// Initializes a new instance of the AuthorizationBehavior class.
-    /// </summary>
-    /// <param name="user">The current user service.</param>
-    /// <param name="logger">The logger instance.</param>
-    public AuthorizationBehavior(IUser user, ILogger<AuthorizationBehavior<TRequest, TResponse>> logger)
-    {
-        _user = user;
-        _logger = logger;
-    }
+    private readonly IUser _user = user;
+    private readonly ILogger<AuthorizationBehavior<TRequest, TResponse>> _logger = logger;
 
     /// <summary>
     /// Handles the request with authorization checks.

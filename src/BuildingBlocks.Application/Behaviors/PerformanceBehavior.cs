@@ -11,12 +11,17 @@ namespace BuildingBlocks.Application.Behaviors;
 /// </summary>
 /// <typeparam name="TRequest">The type of the MediatR request.</typeparam>
 /// <typeparam name="TResponse">The type of the response.</typeparam>
-public class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+/// <remarks>
+/// Initializes a new instance of the PerformanceBehavior class.
+/// </remarks>
+/// <param name="logger">The logger instance.</param>
+/// <param name="currentUser">The current user service.</param>
+public class PerformanceBehavior<TRequest, TResponse>(ILogger<PerformanceBehavior<TRequest, TResponse>> logger, IUser currentUser) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
-    private readonly ILogger<PerformanceBehavior<TRequest, TResponse>> _logger;
-    private readonly IUser _user;
-    private readonly Stopwatch _timer;
+    private readonly ILogger<PerformanceBehavior<TRequest, TResponse>> _logger = logger;
+    private readonly IUser _user = currentUser;
+    private readonly Stopwatch _timer = new Stopwatch();
 
     /// <summary>
     /// The threshold in milliseconds for logging performance warnings.
@@ -29,18 +34,6 @@ public class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavior<TReque
     /// Requests taking longer than this will be logged as errors.
     /// </summary>
     public const int CriticalPerformanceThresholdMs = 2000;
-
-    /// <summary>
-    /// Initializes a new instance of the PerformanceBehavior class.
-    /// </summary>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="currentUser">The current user service.</param>
-    public PerformanceBehavior(ILogger<PerformanceBehavior<TRequest, TResponse>> logger, IUser currentUser)
-    {
-        _logger = logger;
-        _user = currentUser;
-        _timer = new Stopwatch();
-    }
 
     /// <summary>
     /// Handles the request with performance monitoring.

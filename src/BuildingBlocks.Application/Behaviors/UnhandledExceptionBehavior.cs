@@ -1,4 +1,3 @@
-using BuildingBlocks.Application.Models;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -10,19 +9,14 @@ namespace BuildingBlocks.Application.Behaviors;
 /// </summary>
 /// <typeparam name="TRequest">The type of the MediatR request.</typeparam>
 /// <typeparam name="TResponse">The type of the response.</typeparam>
-public class UnhandledExceptionBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+/// <remarks>
+/// Initializes a new instance of the UnhandledExceptionBehavior class.
+/// </remarks>
+/// <param name="logger">The logger instance.</param>
+public class UnhandledExceptionBehavior<TRequest, TResponse>(ILogger<UnhandledExceptionBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
-    private readonly ILogger<UnhandledExceptionBehavior<TRequest, TResponse>> _logger;
-
-    /// <summary>
-    /// Initializes a new instance of the UnhandledExceptionBehavior class.
-    /// </summary>
-    /// <param name="logger">The logger instance.</param>
-    public UnhandledExceptionBehavior(ILogger<UnhandledExceptionBehavior<TRequest, TResponse>> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<UnhandledExceptionBehavior<TRequest, TResponse>> _logger = logger;
 
     /// <summary>
     /// Handles the request and catches any unhandled exceptions.

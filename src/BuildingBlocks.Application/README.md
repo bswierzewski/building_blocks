@@ -10,13 +10,27 @@ dotnet add package BuildingBlocks.Application
 
 ## 🚀 Quick Start
 
-### 1. Register Services
+### 1. Register Basic Application Services
 
 ```csharp
 using BuildingBlocks.Application;
 
 // In your Program.cs
-builder.Services.AddApplicationServices();
+builder.Services.AddBuildingBlocksApplication();
+```
+
+### 1a. Register Module (Recommended)
+
+```csharp
+using BuildingBlocks.Infrastructure;
+
+// Full module with both Application and Infrastructure (all features enabled by default)
+services.AddModule<OrdersDbContext>();
+
+// Or with custom configuration
+services.AddModule<OrdersDbContext>(
+    configureApplication: app => app.DisableValidation().DisableAuthorization()
+);
 ```
 
 ### 2. Implement a Request Handler
@@ -61,9 +75,21 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
 
 ## 🔧 Features
 
+### Opt-Out Configuration Approach
+
+All application features are **enabled by default**. Use `DisableX()` methods to turn off specific features:
+
+- **Handlers** - MediatR request handlers registration
+- **Validators** - FluentValidation validators registration
+- **Logging** - Request/response logging behavior
+- **Exception Handling** - Unhandled exception behavior
+- **Authorization** - Request-level authorization behavior
+- **Validation** - Request validation behavior
+- **Performance Monitoring** - Performance monitoring behavior
+
 ### Pipeline Behaviors
 
-The library automatically registers the following MediatR pipeline behaviors in order:
+The library automatically registers the following MediatR pipeline behaviors in order (all enabled by default):
 
 1. **LoggingBehavior** - Comprehensive request/response logging with timing
 2. **UnhandledExceptionBehavior** - Global exception handling and logging
@@ -176,6 +202,51 @@ var paginatedResult = await query.ToPaginatedListAsync(1, 10, cancellationToken)
 ```
 
 ## 📋 Configuration
+
+### ModuleApplicationBuilder Methods
+
+#### Disable Methods
+- `DisableHandlers()` - Turn off MediatR handlers registration
+- `DisableValidators()` - Turn off FluentValidation validators registration  
+- `DisableLogging()` - Turn off logging behavior
+- `DisableExceptionHandling()` - Turn off exception handling behavior
+- `DisableAuthorization()` - Turn off authorization behavior
+- `DisableValidation()` - Turn off validation behavior
+- `DisablePerformanceMonitoring()` - Turn off performance monitoring behavior
+
+#### Predefined Setups
+- `UseMinimalSetup()` - Keep only handlers, logging, and exception handling
+- `UseReadOnlySetup()` - Keep only handlers, logging, and performance monitoring
+
+### Usage Examples
+
+```csharp
+// Full module (default - everything enabled)
+services.AddModule<OrdersDbContext>();
+
+// Minimal setup
+services.AddModule<OrdersDbContext>(
+    configureApplication: app => app.UseMinimalSetup()
+);
+
+// Read-only module (queries only)
+services.AddModule<ReportsDbContext>(
+    configureApplication: app => app.UseReadOnlySetup()
+);
+
+// Custom configuration
+services.AddModule<OrdersDbContext>(
+    configureApplication: app => app
+        .DisableAuthorization()
+        .DisablePerformanceMonitoring()
+);
+
+// Standalone application-only configuration
+services.AddModule(
+    Assembly.GetExecutingAssembly(),
+    app => app.DisableValidation().DisableAuthorization()
+);
+```
 
 ### Logging Configuration
 

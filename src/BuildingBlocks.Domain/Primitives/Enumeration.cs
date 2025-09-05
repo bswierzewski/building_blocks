@@ -8,31 +8,25 @@ namespace BuildingBlocks.Domain.Primitives;
 /// and better encapsulation of related behavior.
 /// </summary>
 /// <typeparam name="TEnum">The type of the enumeration class.</typeparam>
-public abstract class Enumeration<TEnum> : IEquatable<Enumeration<TEnum>>, IComparable<Enumeration<TEnum>>
+/// <remarks>
+/// Initializes a new instance of the <see cref="Enumeration{TEnum}"/> class.
+/// </remarks>
+/// <param name="value">The numeric value of the enumeration.</param>
+/// <param name="name">The name of the enumeration.</param>
+public abstract class Enumeration<TEnum>(int value, string name) : IEquatable<Enumeration<TEnum>>, IComparable<Enumeration<TEnum>>
     where TEnum : Enumeration<TEnum>
 {
     private static readonly Lazy<TEnum[]> _enumerations = new(GetEnumerations);
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Enumeration{TEnum}"/> class.
-    /// </summary>
-    /// <param name="value">The numeric value of the enumeration.</param>
-    /// <param name="name">The name of the enumeration.</param>
-    protected Enumeration(int value, string name)
-    {
-        Value = value;
-        Name = name;
-    }
-
-    /// <summary>
     /// Gets the numeric value of the enumeration.
     /// </summary>
-    public int Value { get; protected init; }
+    public int Value { get; protected init; } = value;
 
     /// <summary>
     /// Gets the name of the enumeration.
     /// </summary>
-    public string Name { get; protected init; }
+    public string Name { get; protected init; } = name;
 
     /// <summary>
     /// Gets all defined enumeration values of type <typeparamref name="TEnum"/>.

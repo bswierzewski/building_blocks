@@ -9,21 +9,15 @@ namespace BuildingBlocks.Infrastructure.Persistence.Interceptors;
 /// <summary>
 /// Interceptor that automatically sets audit fields on entities that implement IAuditable.
 /// </summary>
-public sealed class AuditableEntityInterceptor : SaveChangesInterceptor
+/// <remarks>
+/// Initializes a new instance of the <see cref="AuditableEntityInterceptor"/> class.
+/// </remarks>
+/// <param name="user">The current user (nullable for scenarios without authentication).</param>
+/// <param name="dateTime">The time provider for consistent time handling.</param>
+public sealed class AuditableEntityInterceptor(IUser? user, TimeProvider dateTime) : SaveChangesInterceptor
 {
-    private readonly IUser? _user;
-    private readonly TimeProvider _dateTime;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AuditableEntityInterceptor"/> class.
-    /// </summary>
-    /// <param name="user">The current user (nullable for scenarios without authentication).</param>
-    /// <param name="dateTime">The time provider for consistent time handling.</param>
-    public AuditableEntityInterceptor(IUser? user, TimeProvider dateTime)
-    {
-        _user = user;
-        _dateTime = dateTime;
-    }
+    private readonly IUser? _user = user;
+    private readonly TimeProvider _dateTime = dateTime;
 
     /// <summary>
     /// Intercepts SaveChanges calls to update audit fields.
@@ -38,8 +32,8 @@ public sealed class AuditableEntityInterceptor : SaveChangesInterceptor
     /// Intercepts SaveChangesAsync calls to update audit fields.
     /// </summary>
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
-        DbContextEventData eventData, 
-        InterceptionResult<int> result, 
+        DbContextEventData eventData,
+        InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
         UpdateEntities(eventData.Context);
@@ -58,13 +52,13 @@ public sealed class AuditableEntityInterceptor : SaveChangesInterceptor
             if (entry.State is EntityState.Added or EntityState.Modified || entry.HasChangedOwnedEntities())
             {
                 var utcNow = _dateTime.GetUtcNow();
-                
+
                 if (entry.State == EntityState.Added)
                 {
                     entry.Entity.CreatedBy = _user?.Id;
                     entry.Entity.CreatedAt = utcNow;
                 }
-                
+
                 entry.Entity.ModifiedBy = _user?.Id;
                 entry.Entity.ModifiedAt = utcNow;
             }
