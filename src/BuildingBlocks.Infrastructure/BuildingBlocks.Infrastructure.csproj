@@ -21,6 +21,11 @@
     <Title>BuildingBlocks Infrastructure Layer</Title>
     <Description>A comprehensive .NET infrastructure layer library providing implementations for external concerns like data access, caching, messaging, and third-party integrations for Clean Architecture applications.</Description>
     <PackageTags>$(PackageTags);infrastructure;entity-framework;caching;messaging;external-services</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
 </Project>

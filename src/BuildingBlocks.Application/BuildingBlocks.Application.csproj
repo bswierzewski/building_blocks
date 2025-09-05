@@ -21,6 +21,11 @@
     <Title>BuildingBlocks Application Layer</Title>
     <Description>A comprehensive .NET application layer library providing essential building blocks for Clean Architecture applications with MediatR, FluentValidation, and common behavioral patterns.</Description>
     <PackageTags>$(PackageTags);mediatr;cqrs;fluentvalidation;behaviors</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
 </Project>
