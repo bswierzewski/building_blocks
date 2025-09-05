@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using BuildingBlocks.Infrastructure.Persistence.Interceptors;
-using BuildingBlocks.Infrastructure.Data;
+using BuildingBlocks.Infrastructure.Persistence.Migrations;
 
 namespace BuildingBlocks.Infrastructure.Configuration;
 

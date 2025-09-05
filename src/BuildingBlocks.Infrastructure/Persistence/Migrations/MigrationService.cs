@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace BuildingBlocks.Infrastructure.Data;
+namespace BuildingBlocks.Infrastructure.Persistence.Migrations;
 
 /// <summary>
 /// Generic migration service that runs database migrations for a specific DbContext on startup.
