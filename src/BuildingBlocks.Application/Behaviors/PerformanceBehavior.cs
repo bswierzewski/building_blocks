@@ -15,12 +15,12 @@ namespace BuildingBlocks.Application.Behaviors;
 /// Initializes a new instance of the PerformanceBehavior class.
 /// </remarks>
 /// <param name="logger">The logger instance.</param>
-/// <param name="currentUser">The current user service.</param>
-public class PerformanceBehavior<TRequest, TResponse>(ILogger<PerformanceBehavior<TRequest, TResponse>> logger, IUser currentUser) : IPipelineBehavior<TRequest, TResponse>
+/// <param name="user">The current user service.</param>
+public class PerformanceBehavior<TRequest, TResponse>(ILogger<PerformanceBehavior<TRequest, TResponse>> logger, IUser user) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
     private readonly ILogger<PerformanceBehavior<TRequest, TResponse>> _logger = logger;
-    private readonly IUser _user = currentUser;
+    private readonly IUser _user = user;
     private readonly Stopwatch _timer = new Stopwatch();
 
     /// <summary>
