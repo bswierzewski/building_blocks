@@ -14,20 +14,20 @@ public abstract class AuditableEntity<TId> : Entity<TId>, IAuditable
     where TId : notnull
 {
     /// <summary>
-    /// Gets the date and time when the entity was created.
+    /// Gets or sets the date and time when the entity was created.
     /// </summary>
-    public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
     /// <summary>
-    /// Gets the identifier of the user who created the entity.
+    /// Gets or sets the identifier of the user who created the entity.
     /// </summary>
-    public string? CreatedBy { get; init; }
+    public string? CreatedBy { get; set; }
 
     /// <summary>
     /// Gets or sets the date and time when the entity was last modified.
     /// Can be null if the entity has never been modified.
     /// </summary>
-    public DateTime? ModifiedAt { get; set; }
+    public DateTimeOffset? ModifiedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the identifier of the user who last modified the entity.

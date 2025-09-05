@@ -7,20 +7,20 @@ namespace BuildingBlocks.Domain.Abstractions;
 public interface IAuditable
 {
     /// <summary>
-    /// Gets the date and time when the entity was created.
+    /// Gets or sets the date and time when the entity was created.
     /// </summary>
-    DateTime CreatedAt { get; init; }
+    DateTimeOffset CreatedAt { get; set; }
 
     /// <summary>
-    /// Gets the identifier of the user who created the entity.
+    /// Gets or sets the identifier of the user who created the entity.
     /// </summary>
-    string? CreatedBy { get; init; }
+    string? CreatedBy { get; set; }
 
     /// <summary>
     /// Gets or sets the date and time when the entity was last modified.
     /// Can be null if the entity has never been modified.
     /// </summary>
-    DateTime? ModifiedAt { get; set; }
+    DateTimeOffset? ModifiedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the identifier of the user who last modified the entity.
