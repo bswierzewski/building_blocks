@@ -14,10 +14,6 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <PackageId>BuildingBlocks.Infrastructure</PackageId>
     <Title>BuildingBlocks Infrastructure Layer</Title>
     <Description>A comprehensive .NET infrastructure layer library providing implementations for external concerns like data access, caching, messaging, and third-party integrations for Clean Architecture applications.</Description>
     <PackageTags>$(PackageTags);infrastructure;entity-framework;caching;messaging;external-services</PackageTags>

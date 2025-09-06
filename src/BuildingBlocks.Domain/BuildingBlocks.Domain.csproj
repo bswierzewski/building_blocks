@@ -1,10 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <PackageId>BuildingBlocks.Domain</PackageId>
     <Title>BuildingBlocks Domain Layer</Title>
     <Description>A comprehensive .NET domain layer library providing essential building blocks for Domain-Driven Design (DDD) and Clean Architecture applications.</Description>
     <PackageTags>$(PackageTags);ddd;domain-driven-design;entities;value-objects;domain-events</PackageTags>

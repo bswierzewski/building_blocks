@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using FluentValidation;
 using BuildingBlocks.Application.Behaviors;
 
-namespace BuildingBlocks.Application.Configuration;
+namespace BuildingBlocks.Application;
 
 /// <summary>
 /// Builder for configuring application services and MediatR behaviors for a specific module.

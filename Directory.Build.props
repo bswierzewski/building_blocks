@@ -1,5 +1,6 @@
 <Project>
 
+  <!-- Build Configuration -->
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -10,35 +11,27 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
+  <!-- Package Metadata -->
   <PropertyGroup>
     <Authors>BuildingBlocks</Authors>
     <Company>BuildingBlocks</Company>
     <Product>BuildingBlocks</Product>
     <Copyright>Copyright © 2025 BuildingBlocks</Copyright>
     <PackageId>$(MSBuildProjectName)</PackageId>
-    <Description>Shared kernel components for .NET applications built with Clean Architecture and Domain-Driven Design principles. Provides base classes for entities, aggregates, value objects, domain events, CQRS patterns, and EF Core infrastructure.</Description>
-    <PackageReleaseNotes>Initial release of SharedKernel components for Clean Architecture applications.</PackageReleaseNotes>
+    <VersionPrefix>0.0.0</VersionPrefix>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/bswierzewski/BuildingBlocks</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/bswierzewski/building-blocks</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/bswierzewski/building-blocks</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageProjectUrl>https://github.com/bswierzewski/BuildingBlocks</PackageProjectUrl>
-    <PackageTags>building-blocks;ddd-lite</PackageTags>
+    <PackageTags>clean-architecture;building-blocks;dotnet</PackageTags>
+  </PropertyGroup>
+
+  <!-- Package Generation -->
+  <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(MSBuildThisFileDirectory)artifacts</PackageOutputPath>
-  </PropertyGroup>
-
-  <!-- NuGet Package Properties -->
-  <PropertyGroup>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <VersionPrefix>0.0.0</VersionPrefix>
-    <PackageTags>clean-architecture;building-blocks;dotnet</PackageTags>
-    <PackageProjectUrl>https://github.com/your-username/building-blocks</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/your-username/building-blocks</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
 </Project>

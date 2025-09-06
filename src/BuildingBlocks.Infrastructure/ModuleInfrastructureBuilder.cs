@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using BuildingBlocks.Infrastructure.Persistence.Interceptors;
 using BuildingBlocks.Infrastructure.Persistence.Migrations;
 
-namespace BuildingBlocks.Infrastructure.Configuration;
+namespace BuildingBlocks.Infrastructure;
 
 /// <summary>
 /// Builder for configuring infrastructure services for a specific DbContext module.
@@ -77,5 +77,19 @@ public class ModuleInfrastructureBuilder<TContext>(IServiceCollection services) 
         // Register domain event dispatch interceptor (enabled by default)
         if (!_disabledFeatures.Contains("DomainEventDispatch"))
             Services.AddScoped<DispatchDomainEventsInterceptor>();
+    }
+
+    /// <summary>
+    /// Gets the types of interceptors that should be added to the DbContext.
+    /// This method should be called when configuring the DbContext to add the appropriate interceptors.
+    /// </summary>
+    /// <returns>An enumerable of interceptor types to register with the DbContext.</returns>
+    internal IEnumerable<Type> GetEnabledInterceptorTypes()
+    {
+        if (!_disabledFeatures.Contains("AuditableInterceptor"))
+            yield return typeof(AuditableEntityInterceptor);
+
+        if (!_disabledFeatures.Contains("DomainEventDispatch"))
+            yield return typeof(DispatchDomainEventsInterceptor);
     }
 }
