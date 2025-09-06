@@ -23,6 +23,9 @@ public class ModuleInfrastructureBuilder<TContext>(IServiceCollection services) 
 
     // Internal flags to track what should be disabled
     private readonly HashSet<string> _disabledFeatures = new();
+    
+    // Custom interceptors registered for this module
+    private readonly List<Type> _customInterceptors = new();
 
     /// <summary>
     /// Disables automatic database migrations that run on application startup.

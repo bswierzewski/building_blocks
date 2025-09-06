@@ -12,17 +12,18 @@ namespace BuildingBlocks.Infrastructure;
 public static class ModuleExtensions
 {
     /// <summary>
-    /// Registers a complete module with Application and Infrastructure configuration.
-    /// Call this BEFORE AddDbContext to register services, interceptors and migrations.
+    /// Registers a complete module with Application, Infrastructure and DbContext configuration.
     /// All features are enabled by default, use configuration actions to disable specific ones.
     /// </summary>
     /// <typeparam name="TContext">The DbContext type for this module.</typeparam>
     /// <param name="services">The service collection to add services to.</param>
+    /// <param name="configureDbContext">Optional configuration action for DbContext (connection strings, etc.). ServiceProvider allows access to configuration, custom services, etc.</param>
     /// <param name="configureApplication">Optional configuration action for the application layer (MediatR, validators, behaviors). If null, all Application features are enabled by default.</param>
     /// <param name="configureInfrastructure">Optional configuration action for the infrastructure layer (interceptors, migrations). If null, all Infrastructure features are enabled by default.</param>
     /// <returns>The service collection for method chaining.</returns>
     public static IServiceCollection AddModule<TContext>(
         this IServiceCollection services,
+        Action<IServiceProvider, DbContextOptionsBuilder<TContext>>? configureDbContext = null,
         Action<ModuleApplicationBuilder>? configureApplication = null,
         Action<ModuleInfrastructureBuilder<TContext>>? configureInfrastructure = null)
         where TContext : DbContext
@@ -40,6 +41,19 @@ public static class ModuleExtensions
         // Register the builder so AddModuleInterceptors can access it
         services.AddSingleton(infrastructureBuilder);
 
+        // Always configure DbContext
+        services.AddDbContext<TContext>((serviceProvider, optionsBuilder) =>
+        {
+            // Cast to typed options builder
+            var typedOptions = (DbContextOptionsBuilder<TContext>)optionsBuilder;
+            
+            // Apply user configuration first (if provided) - gives access to serviceProvider
+            configureDbContext?.Invoke(serviceProvider, typedOptions);
+            
+            // Then automatically add interceptors
+            typedOptions.AddModuleInterceptors(serviceProvider);
+        });
+
         return services;
     }
 
@@ -51,7 +65,7 @@ public static class ModuleExtensions
     /// <param name="optionsBuilder">The DbContextOptionsBuilder.</param>
     /// <param name="serviceProvider">The service provider to resolve interceptors from.</param>
     /// <returns>The DbContextOptionsBuilder for method chaining.</returns>
-    public static DbContextOptionsBuilder<TContext> AddModuleInterceptors<TContext>(
+    internal static DbContextOptionsBuilder<TContext> AddModuleInterceptors<TContext>(
         this DbContextOptionsBuilder<TContext> optionsBuilder,
         IServiceProvider serviceProvider)
         where TContext : DbContext
@@ -78,6 +92,5 @@ public static class ModuleExtensions
         }
         return optionsBuilder;
     }
-
 
 }
