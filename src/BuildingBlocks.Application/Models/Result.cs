@@ -2,47 +2,73 @@ namespace BuildingBlocks.Application.Models;
 
 /// <summary>
 /// Represents the result of an operation that can either succeed or fail.
-/// Provides a simplified way to handle success and error cases.
+/// Provides a strongly-typed way to handle success and error cases.
 /// </summary>
-public class Result
+public sealed class Result
 {
     /// <summary>
     /// Initializes a new instance of the Result class.
     /// </summary>
-    /// <param name="succeeded">Indicates whether the operation succeeded.</param>
-    /// <param name="errors">The collection of error messages.</param>
-    internal Result(bool succeeded, IEnumerable<string> errors)
+    /// <param name="isSuccess">Indicates whether the operation succeeded.</param>
+    /// <param name="errors">The collection of errors.</param>
+    private Result(bool isSuccess, Error[] errors)
     {
-        Succeeded = succeeded;
-        Errors = errors.ToArray();
+        IsSuccess = isSuccess;
+        Errors = errors;
     }
 
     /// <summary>
     /// Gets a value indicating whether the operation succeeded.
     /// </summary>
-    public bool Succeeded { get; init; }
+    public bool IsSuccess { get; }
 
     /// <summary>
-    /// Gets the array of error messages.
+    /// Gets a value indicating whether the operation failed.
     /// </summary>
-    public string[] Errors { get; init; }
+    public bool IsFailure => !IsSuccess;
+
+    /// <summary>
+    /// Gets the collection of errors.
+    /// </summary>
+    public IReadOnlyCollection<Error> Errors { get; }
 
     /// <summary>
     /// Creates a successful result.
     /// </summary>
     /// <returns>A successful result instance.</returns>
-    public static Result Success()
-    {
-        return new Result(true, Array.Empty<string>());
-    }
+    public static Result Success() =>
+        new(true, Array.Empty<Error>());
 
     /// <summary>
     /// Creates a failed result with the specified errors.
     /// </summary>
-    /// <param name="errors">The collection of error messages.</param>
+    /// <param name="errors">The collection of errors.</param>
     /// <returns>A failed result instance.</returns>
-    public static Result Failure(IEnumerable<string> errors)
-    {
-        return new Result(false, errors);
-    }
+    public static Result Failure(params Error[] errors) =>
+        new(false, errors);
+
+    /// <summary>
+    /// Creates a failed result with the specified errors.
+    /// </summary>
+    /// <param name="errors">The enumerable collection of errors.</param>
+    /// <returns>A failed result instance.</returns>
+    public static Result Failure(IEnumerable<Error> errors) =>
+        new(false, errors.ToArray());
+
+    /// <summary>
+    /// Creates a failed result with a single error message.
+    /// </summary>
+    /// <param name="message">The error message.</param>
+    /// <returns>A failed result instance.</returns>
+    public static Result Failure(string message) =>
+        Failure(Error.FromMessage(message));
+
+    /// <summary>
+    /// Creates a failed result with a single error code and message.
+    /// </summary>
+    /// <param name="code">The error code.</param>
+    /// <param name="message">The error message.</param>
+    /// <returns>A failed result instance.</returns>
+    public static Result Failure(string code, string message) =>
+        Failure(Error.Create(code, message));
 }
