@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace BuildingBlocks.Application.Models;
 
 /// <summary>
@@ -46,19 +44,4 @@ public class PaginatedList<T>(IReadOnlyCollection<T> items, int count, int pageN
     /// </summary>
     public bool HasNextPage => PageNumber < TotalPages;
 
-    /// <summary>
-    /// Creates a paginated list asynchronously from an IQueryable source.
-    /// </summary>
-    /// <param name="source">The queryable source to paginate.</param>
-    /// <param name="pageNumber">The current page number (1-based).</param>
-    /// <param name="pageSize">The number of items per page.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A task that represents the asynchronous operation and contains the paginated list.</returns>
-    public static async Task<PaginatedList<T>> CreateAsync(IQueryable<T> source, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
-    {
-        var count = await source.CountAsync(cancellationToken);
-        var items = await source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
-
-        return new PaginatedList<T>(items, count, pageNumber, pageSize);
-    }
 }
