@@ -18,7 +18,7 @@
     <Product>BuildingBlocks</Product>
     <Copyright>Copyright © 2025 BuildingBlocks</Copyright>
     <PackageId>$(MSBuildProjectName)</PackageId>
-    <VersionPrefix>0.0.1</VersionPrefix>
+    <VersionPrefix>0.0.2</VersionPrefix>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/bswierzewski/building-blocks</PackageProjectUrl>
     <RepositoryUrl>https://github.com/bswierzewski/building-blocks</RepositoryUrl>
