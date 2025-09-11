@@ -74,19 +74,68 @@ dotnet add package BuildingBlocks.Application
 
 ## 🔧 Usage
 
-### Setting up Application Services
+### Setting up a Module (Recommended Approach)
 
 ```csharp
 using BuildingBlocks.Application;
+using BuildingBlocks.Infrastructure;
 
-// In your Program.cs or Startup.cs
-builder.Services.AddApplicationServices();
+public static class OrdersModuleExtensions
+{
+    public static void AddOrdersModule(this IHostApplicationBuilder builder)
+    {
+        var connectionString = builder.Configuration.GetConnectionString("OrdersDb");
+        
+        // Application layer setup
+        builder.Services.AddValidators(); // FluentValidation
+        
+        builder.Services.AddMediatR(cfg =>
+        {
+            cfg.RegisterHandlers()                    // Register request handlers
+               .AddLoggingBehavior()                 // Request/response logging
+               .AddUnhandledExceptionBehavior()      // Global exception handling
+               .AddValidationBehavior()              // Input validation
+               .AddAuthorizationBehavior()           // Permission checks
+               .AddPerformanceMonitoringBehavior();  // Performance monitoring
+        });
+        
+        // Infrastructure layer setup
+        builder.Services
+            .AddMigrationService<OrdersDbContext>()   // Auto-migrations
+            .AddAuditableEntityInterceptor()          // Audit fields
+            .AddDomainEventDispatchInterceptor();     // Domain events
+            
+        // DbContext configuration
+        builder.Services.AddDbContext<OrdersDbContext>((sp, options) =>
+        {
+            options.UseSqlServer(connectionString)
+                   .AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
+        });
+    }
+}
 ```
 
-This will register:
-- MediatR with all behaviors
-- FluentValidation validators
-- All application services
+### Individual Service Registration
+
+You can also register services individually for more granular control:
+
+```csharp
+// Application services
+builder.Services.AddValidators();                    // or AddValidators(assembly)
+
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterHandlers();                          // or RegisterHandlers(assembly)
+    cfg.AddLoggingBehavior();
+    cfg.AddValidationBehavior();
+    // Add only the behaviors you need
+});
+
+// Infrastructure services
+builder.Services.AddMigrationService<MyDbContext>();
+builder.Services.AddAuditableEntityInterceptor();
+builder.Services.AddDomainEventDispatchInterceptor();
+```
 
 ### MediatR Pipeline Behaviors Order
 
@@ -132,7 +181,7 @@ BuildingBlocks/
 │   │   ├── Extensions/
 │   │   ├── Models/
 │   │   ├── Security/
-│   │   └── DependencyInjection.cs
+│   │   └── ServiceCollectionExtensions.cs
 │   └── BuildingBlocks.Infrastructure/
 ├── Directory.Build.props
 ├── Directory.Packages.props

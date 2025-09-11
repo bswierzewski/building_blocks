@@ -10,27 +10,50 @@ dotnet add package BuildingBlocks.Application
 
 ## 🚀 Quick Start
 
-### 1. Register Basic Application Services
+### 1. Register Application Services with Individual Control
 
 ```csharp
 using BuildingBlocks.Application;
 
-// In your Program.cs
-builder.Services.AddBuildingBlocksApplication();
+// Register validators from executing assembly
+builder.Services.AddValidators();
+
+// Configure MediatR with behaviors (choose what you need)
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterHandlers()                    // Register request handlers
+       .AddLoggingBehavior()                 // Request/response logging
+       .AddUnhandledExceptionBehavior()      // Global exception handling
+       .AddValidationBehavior()              // Input validation
+       .AddAuthorizationBehavior()           // Permission checks
+       .AddPerformanceMonitoringBehavior();  // Performance monitoring
+});
 ```
 
-### 1a. Register Module (Recommended)
+### 2. Module Example (Recommended Pattern)
 
 ```csharp
-using BuildingBlocks.Infrastructure;
-
-// Full module with both Application and Infrastructure (all features enabled by default)
-services.AddModule<OrdersDbContext>();
-
-// Or with custom configuration
-services.AddModule<OrdersDbContext>(
-    configureApplication: app => app.DisableValidation().DisableAuthorization()
-);
+public static class OrdersModuleExtensions
+{
+    public static void AddOrdersModule(this IHostApplicationBuilder builder)
+    {
+        // Application layer services
+        builder.Services.AddValidators(); // FluentValidation validators
+        
+        builder.Services.AddMediatR(cfg =>
+        {
+            cfg.RegisterHandlers()                    // MediatR handlers
+               .AddLoggingBehavior()                 // Comprehensive logging
+               .AddUnhandledExceptionBehavior()      // Exception handling
+               .AddValidationBehavior()              // Request validation
+               .AddAuthorizationBehavior()           // Authorization checks
+               .AddPerformanceMonitoringBehavior();  // Performance monitoring
+        });
+        
+        // Other module-specific services
+        builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+    }
+}
 ```
 
 ### 2. Implement a Request Handler
@@ -75,17 +98,22 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
 
 ## 🔧 Features
 
-### Opt-Out Configuration Approach
+### Granular Service Registration
 
-All application features are **enabled by default**. Use `DisableX()` methods to turn off specific features:
+Choose exactly what you need for each module using individual extension methods:
 
-- **Handlers** - MediatR request handlers registration
-- **Validators** - FluentValidation validators registration
-- **Logging** - Request/response logging behavior
-- **Exception Handling** - Unhandled exception behavior
-- **Authorization** - Request-level authorization behavior
-- **Validation** - Request validation behavior
-- **Performance Monitoring** - Performance monitoring behavior
+#### ServiceCollectionExtensions
+- **`AddValidators()`** - Registers FluentValidation validators from executing assembly
+- **`AddValidators(Assembly)`** - Registers validators from specific assembly
+
+#### MediatRServiceConfigurationExtensions
+- **`RegisterHandlers()`** - Registers MediatR request handlers from executing assembly  
+- **`RegisterHandlers(Assembly)`** - Registers handlers from specific assembly
+- **`AddLoggingBehavior()`** - Request/response logging behavior
+- **`AddUnhandledExceptionBehavior()`** - Global exception handling behavior
+- **`AddAuthorizationBehavior()`** - Request-level authorization behavior
+- **`AddValidationBehavior()`** - Request validation behavior
+- **`AddPerformanceMonitoringBehavior()`** - Performance monitoring behavior
 
 ### Pipeline Behaviors
 
@@ -203,49 +231,77 @@ var paginatedResult = await query.ToPaginatedListAsync(1, 10, cancellationToken)
 
 ## 📋 Configuration
 
-### ModuleApplicationBuilder Methods
+### Flexible Module Configuration
 
-#### Disable Methods
-- `DisableHandlers()` - Turn off MediatR handlers registration
-- `DisableValidators()` - Turn off FluentValidation validators registration  
-- `DisableLogging()` - Turn off logging behavior
-- `DisableExceptionHandling()` - Turn off exception handling behavior
-- `DisableAuthorization()` - Turn off authorization behavior
-- `DisableValidation()` - Turn off validation behavior
-- `DisablePerformanceMonitoring()` - Turn off performance monitoring behavior
+Each module can be configured exactly as needed by choosing which services to register:
 
-#### Predefined Setups
-- `UseMinimalSetup()` - Keep only handlers, logging, and exception handling
-- `UseReadOnlySetup()` - Keep only handlers, logging, and performance monitoring
-
-### Usage Examples
-
+#### Basic Module Example
 ```csharp
-// Full module (default - everything enabled)
-services.AddModule<OrdersDbContext>();
+public static void AddOrdersModule(this IHostApplicationBuilder builder)
+{
+    builder.Services.AddValidators();
+    
+    builder.Services.AddMediatR(cfg =>
+    {
+        cfg.RegisterHandlers()
+           .AddLoggingBehavior()
+           .AddUnhandledExceptionBehavior()
+           .AddValidationBehavior()
+           .AddAuthorizationBehavior()
+           .AddPerformanceMonitoringBehavior();
+    });
+}
+```
 
-// Minimal setup
-services.AddModule<OrdersDbContext>(
-    configureApplication: app => app.UseMinimalSetup()
-);
+#### Minimal Module (No Authorization/Validation)
+```csharp
+public static void AddReportsModule(this IHostApplicationBuilder builder)
+{
+    // No validators needed for read-only reports
+    
+    builder.Services.AddMediatR(cfg =>
+    {
+        cfg.RegisterHandlers()
+           .AddLoggingBehavior()
+           .AddUnhandledExceptionBehavior()
+           .AddPerformanceMonitoringBehavior();
+        // No validation or authorization needed
+    });
+}
+```
 
-// Read-only module (queries only)
-services.AddModule<ReportsDbContext>(
-    configureApplication: app => app.UseReadOnlySetup()
-);
+#### Public API Module (Maximum Security)
+```csharp
+public static void AddPublicApiModule(this IHostApplicationBuilder builder)
+{
+    builder.Services.AddValidators();
+    
+    builder.Services.AddMediatR(cfg =>
+    {
+        cfg.RegisterHandlers()
+           .AddLoggingBehavior()                 // Log all requests
+           .AddUnhandledExceptionBehavior()      // Handle exceptions
+           .AddAuthorizationBehavior()           // Check permissions
+           .AddValidationBehavior()              // Validate input
+           .AddPerformanceMonitoringBehavior();  // Monitor performance
+    });
+}
+```
 
-// Custom configuration
-services.AddModule<OrdersDbContext>(
-    configureApplication: app => app
-        .DisableAuthorization()
-        .DisablePerformanceMonitoring()
-);
-
-// Standalone application-only configuration
-services.AddModule(
-    Assembly.GetExecutingAssembly(),
-    app => app.DisableValidation().DisableAuthorization()
-);
+#### Test Module Example
+```csharp
+public static void AddTestModule(this IServiceCollection services, Assembly testAssembly)
+{
+    services.AddValidators(testAssembly);
+    
+    services.AddMediatR(cfg =>
+    {
+        cfg.RegisterHandlers(testAssembly)
+           .AddLoggingBehavior()
+           .AddValidationBehavior();
+        // Minimal behaviors for testing
+    });
+}
 ```
 
 ### Logging Configuration

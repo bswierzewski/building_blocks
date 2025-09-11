@@ -10,26 +10,54 @@ dotnet add package BuildingBlocks.Infrastructure
 
 ## 🚀 Quick Start
 
-### 1. Register Basic Infrastructure Services
+### 1. Register Infrastructure Services Individually
 
 ```csharp
 using BuildingBlocks.Infrastructure;
 
-// In your Program.cs
-builder.Services.AddBuildingBlocksInfrastructure();
+// Register infrastructure services (choose what you need)
+builder.Services
+    .AddMigrationService<OrdersDbContext>()    // Auto-migrations
+    .AddAuditableEntityInterceptor()           // Audit fields
+    .AddDomainEventDispatchInterceptor();      // Domain events
 ```
 
-### 2. Register Module with DbContext
+### 2. Configure DbContext with Interceptors
 
 ```csharp
-// Full module (all features enabled by default)
-services.AddModule<OrdersDbContext>();
+// Configure DbContext to use registered interceptors
+builder.Services.AddDbContext<OrdersDbContext>((sp, options) =>
+{
+    options.UseSqlServer(connectionString)
+           .AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
+    // All registered ISaveChangesInterceptor services are automatically included
+});
+```
 
-// Or with custom configuration
-services.AddModule<OrdersDbContext>(
-    configureApplication: app => app.DisableValidation(),
-    configureInfrastructure: infra => infra.DisableMigrations()
-);
+### 3. Complete Module Example
+
+```csharp
+public static class OrdersModuleExtensions
+{
+    public static void AddOrdersModule(this IHostApplicationBuilder builder)
+    {
+        var connectionString = builder.Configuration.GetConnectionString("OrdersDb");
+        
+        // Infrastructure services
+        builder.Services
+            .AddMigrationService<OrdersDbContext>()    // Automatic migrations
+            .AddAuditableEntityInterceptor()           // CreatedAt, ModifiedAt fields
+            .AddDomainEventDispatchInterceptor();      // Domain event publishing
+            
+        // DbContext with interceptors
+        builder.Services.AddDbContext<OrdersDbContext>((sp, options) =>
+        {
+            options.UseSqlServer(connectionString)
+                   .AddInterceptors(sp.GetServices<ISaveChangesInterceptor>())
+                   .ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
+        });
+    }
+}
 ```
 
 ### 3. Configure Your DbContext
@@ -51,13 +79,19 @@ public class OrdersDbContext : DbContext
 
 ## 🔧 Features
 
-### Opt-Out Configuration Approach
+### Individual Service Registration
 
-All infrastructure features are **enabled by default**. Use `DisableX()` methods to turn off specific features:
+Choose exactly what you need for each module using individual extension methods:
 
-- **Migrations** - Automatic database migrations on startup
-- **Auditable Interceptor** - Automatic CreatedAt/CreatedBy/ModifiedAt/ModifiedBy population
-- **Domain Event Dispatch** - Automatic domain event publishing after SaveChanges
+#### ServiceCollectionExtensions
+- **`AddMigrationService<TContext>()`** - Registers automatic migration service for the specified DbContext
+- **`AddAuditableEntityInterceptor()`** - Registers audit interceptor as ISaveChangesInterceptor
+- **`AddDomainEventDispatchInterceptor()`** - Registers domain event interceptor as ISaveChangesInterceptor
+
+#### Key Benefits
+- **Granular control** - Add only the features you need
+- **Standard interfaces** - Interceptors registered as ISaveChangesInterceptor
+- **Automatic discovery** - Use `GetServices<ISaveChangesInterceptor>()` to get all registered interceptors
 
 ### Infrastructure Components
 
@@ -65,10 +99,8 @@ All infrastructure features are **enabled by default**. Use `DisableX()` methods
 Automatically applies pending migrations on application startup with detailed logging:
 
 ```csharp
-// Enabled by default, disable with:
-services.AddModule<OrdersDbContext>(
-    configureInfrastructure: infra => infra.DisableMigrations()
-);
+// Register for specific DbContext
+builder.Services.AddMigrationService<OrdersDbContext>();
 ```
 
 #### 2. Auditable Entity Interceptor
@@ -87,10 +119,8 @@ public class Order : IAuditable
     public string? ModifiedBy { get; set; }
 }
 
-// Disable with:
-services.AddModule<OrdersDbContext>(
-    configureInfrastructure: infra => infra.DisableAuditableInterceptor()
-);
+// Register the interceptor
+builder.Services.AddAuditableEntityInterceptor();
 ```
 
 #### 3. Domain Event Dispatch Interceptor
@@ -111,55 +141,88 @@ public class Order : IHasDomainEvents
     public void ClearDomainEvents() => _domainEvents.Clear();
 }
 
-// Disable with:
-services.AddModule<OrdersDbContext>(
-    configureInfrastructure: infra => infra.DisableDomainEventDispatch()
-);
+// Register the interceptor
+builder.Services.AddDomainEventDispatchInterceptor();
 ```
 
-## 📋 Configuration Options
+## 📋 Configuration Examples
 
-### ModuleInfrastructureBuilder Methods
+### Flexible Module Configuration
 
-#### Disable Methods
-- `DisableMigrations()` - Turn off automatic migrations
-- `DisableAuditableInterceptor()` - Turn off audit field population
-- `DisableDomainEventDispatch()` - Turn off domain event publishing
+Each module can be configured exactly as needed by choosing which infrastructure services to register:
 
-#### Predefined Setups
-- `DisableAllInterceptors()` - Disable both audit and domain event interceptors
-- `UseMinimalSetup()` - Keep only auditable interceptor (disable migrations and domain events)
-- `UseReadOnlySetup()` - Disable all features (for read-only scenarios)
-- `UseMigrationOnlySetup()` - Keep only migrations (disable all interceptors)
-
-### Usage Examples
-
+#### Full Feature Module
 ```csharp
-// Full module (default - everything enabled)
-services.AddModule<OrdersDbContext>();
+public static void AddOrdersModule(this IHostApplicationBuilder builder)
+{
+    var connectionString = builder.Configuration.GetConnectionString("OrdersDb");
+    
+    // All infrastructure features
+    builder.Services
+        .AddMigrationService<OrdersDbContext>()     // Automatic migrations
+        .AddAuditableEntityInterceptor()            // Audit trail
+        .AddDomainEventDispatchInterceptor();       // Domain events
+        
+    builder.Services.AddDbContext<OrdersDbContext>((sp, options) =>
+    {
+        options.UseSqlServer(connectionString)
+               .AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
+    });
+}
+```
 
-// Minimal setup (audit only)
-services.AddModule<OrdersDbContext>(
-    configureInfrastructure: infra => infra.UseMinimalSetup()
-);
+#### Read-Only Module (Reports)
+```csharp
+public static void AddReportsModule(this IHostApplicationBuilder builder)
+{
+    var connectionString = builder.Configuration.GetConnectionString("ReportsDb");
+    
+    // No interceptors needed for read-only
+    // Only migrations for schema updates
+    builder.Services.AddMigrationService<ReportsDbContext>();
+        
+    builder.Services.AddDbContext<ReportsDbContext>((sp, options) =>
+    {
+        options.UseSqlServer(connectionString, opts => opts.QuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
+               .AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
+    });
+}
+```
 
-// Read-only module
-services.AddModule<ReportsDbContext>(
-    configureInfrastructure: infra => infra.UseReadOnlySetup()
-);
+#### Audit-Only Module
+```csharp
+public static void AddAuditLogModule(this IHostApplicationBuilder builder)
+{
+    var connectionString = builder.Configuration.GetConnectionString("AuditDb");
+    
+    // Only auditing, no domain events or migrations (managed separately)
+    builder.Services.AddAuditableEntityInterceptor();
+        
+    builder.Services.AddDbContext<AuditDbContext>((sp, options) =>
+    {
+        options.UseSqlServer(connectionString)
+               .AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
+    });
+}
+```
 
-// Custom configuration
-services.AddModule<OrdersDbContext>(
-    configureInfrastructure: infra => infra
-        .DisableMigrations()
-        .DisableDomainEventDispatch()
-);
-
-// Combined with application configuration
-services.AddModule<OrdersDbContext>(
-    configureApplication: app => app.DisableValidation(),
-    configureInfrastructure: infra => infra.DisableMigrations()
-);
+#### Event-Driven Module
+```csharp
+public static void AddEventDrivenModule(this IHostApplicationBuilder builder)
+{
+    var connectionString = builder.Configuration.GetConnectionString("EventsDb");
+    
+    // Focus on domain events, minimal other features
+    builder.Services
+        .AddMigrationService<EventsDbContext>()
+        .AddDomainEventDispatchInterceptor();  // No auditing needed
+        
+    builder.Services.AddDbContext<EventsDbContext>((sp, options) =>
+    {
+        options.UseSqlServer(connectionString)
+               .AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
+    });
+}
 ```
 
 ## 🏗️ Architecture Integration
@@ -203,57 +266,85 @@ This package depends on:
 
 ## 📚 Advanced Examples
 
-### Custom DbContext with Interceptors
+### Custom DbContext Setup
 
 ```csharp
 public class OrdersDbContext : DbContext
 {
-    private readonly AuditableEntityInterceptor _auditInterceptor;
-    private readonly DispatchDomainEventsInterceptor _domainEventInterceptor;
-    
-    public OrdersDbContext(
-        DbContextOptions<OrdersDbContext> options,
-        AuditableEntityInterceptor auditInterceptor,
-        DispatchDomainEventsInterceptor domainEventInterceptor) : base(options)
-    {
-        _auditInterceptor = auditInterceptor;
-        _domainEventInterceptor = domainEventInterceptor;
-    }
-    
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        // Interceptors are automatically registered if enabled
-        optionsBuilder.AddInterceptors(_auditInterceptor, _domainEventInterceptor);
-    }
+    public OrdersDbContext(DbContextOptions<OrdersDbContext> options) : base(options) { }
     
     public DbSet<Order> Orders { get; set; }
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        
+        // Your entity configurations
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Description).HasMaxLength(500);
+        });
+    }
 }
 ```
 
-### Modular Registration
+### Complete Modular Registration Pattern
 
 ```csharp
-// Register multiple modules with different configurations
+// Extension methods for clean module registration
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddOrdersModule(this IServiceCollection services)
+    public static void AddOrdersModule(this IHostApplicationBuilder builder)
     {
-        return services.AddModule<OrdersDbContext>(
-            configureApplication: app => app
-                .DisableAuthorization(), // Orders don't need auth
-            configureInfrastructure: infra => infra
-                .DisableDomainEventDispatch() // No domain events for orders
-        );
+        var connectionString = builder.Configuration.GetConnectionString("OrdersDb");
+        
+        // Application layer
+        builder.Services.AddValidators();
+        builder.Services.AddMediatR(cfg =>
+        {
+            cfg.RegisterHandlers()
+               .AddLoggingBehavior()
+               .AddValidationBehavior()
+               .AddAuthorizationBehavior();
+        });
+        
+        // Infrastructure layer
+        builder.Services
+            .AddMigrationService<OrdersDbContext>()
+            .AddAuditableEntityInterceptor()
+            .AddDomainEventDispatchInterceptor();
+            
+        // DbContext
+        builder.Services.AddDbContext<OrdersDbContext>((sp, options) =>
+        {
+            options.UseSqlServer(connectionString)
+                   .AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
+        });
+        
+        // Domain services
+        builder.Services.AddScoped<IOrderRepository, OrderRepository>();
     }
     
-    public static IServiceCollection AddReportsModule(this IServiceCollection services)
+    public static void AddReportsModule(this IHostApplicationBuilder builder)
     {
-        return services.AddModule<ReportsDbContext>(
-            configureApplication: app => app
-                .UseReadOnlySetup(), // Read-only queries
-            configureInfrastructure: infra => infra
-                .UseReadOnlySetup() // No writes needed
-        );
+        var connectionString = builder.Configuration.GetConnectionString("ReportsDb");
+        
+        // Minimal setup for read-only module
+        builder.Services.AddMediatR(cfg =>
+        {
+            cfg.RegisterHandlers()
+               .AddLoggingBehavior()
+               .AddPerformanceMonitoringBehavior();
+        });
+        
+        builder.Services.AddMigrationService<ReportsDbContext>();
+        
+        builder.Services.AddDbContext<ReportsDbContext>((sp, options) =>
+        {
+            options.UseSqlServer(connectionString)
+                   .AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
+        });
     }
 }
 ```
