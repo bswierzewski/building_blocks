@@ -110,3 +110,13 @@ jobs:
           min-versions-to-keep: 1
           delete-only-pre-release-versions: true
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clean old pre-release packages - Users
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/v')
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: 'BuildingBlocks.Users'
+          package-type: 'nuget'
+          min-versions-to-keep: 1
+          delete-only-pre-release-versions: true
+          token: ${{ secrets.GITHUB_TOKEN }}
