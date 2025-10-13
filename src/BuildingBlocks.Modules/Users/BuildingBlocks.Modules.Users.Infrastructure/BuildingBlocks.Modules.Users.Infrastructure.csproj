@@ -16,15 +16,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <PackageId>BuildingBlocks.Users</PackageId>
-    <Title>BuildingBlocks Users Module</Title>
-    <Description>Comprehensive user management module for modular monolith applications with support for multiple identity providers (Clerk, Auth0), role-based access control (RBAC), and just-in-time (JIT) user provisioning.</Description>
-    <PackageTags>$(PackageTags);users;authentication;authorization;rbac;permissions;roles;clerk;auth0;jwt;modular-monolith</PackageTags>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="..\README.md" Pack="true" PackagePath="README.md" />
-  </ItemGroup>
 
 </Project>
