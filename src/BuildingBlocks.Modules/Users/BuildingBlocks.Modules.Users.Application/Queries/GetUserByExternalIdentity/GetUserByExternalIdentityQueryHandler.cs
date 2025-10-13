@@ -1,5 +1,4 @@
 using BuildingBlocks.Modules.Users.Application.Abstractions;
-using BuildingBlocks.Modules.Users.Domain.Aggregates;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +7,7 @@ namespace BuildingBlocks.Modules.Users.Application.Queries.GetUserByExternalIden
 /// <summary>
 /// Handler for retrieving a user by their external identity.
 /// </summary>
-public class GetUserByExternalIdentityQueryHandler : IRequestHandler<GetUserByExternalIdentityQuery, User?>
+public class GetUserByExternalIdentityQueryHandler : IRequestHandler<GetUserByExternalIdentityQuery, GetUserByExternalIdentityDto?>
 {
     private readonly IUsersReadDbContext _dbContext;
 
@@ -23,13 +22,30 @@ public class GetUserByExternalIdentityQueryHandler : IRequestHandler<GetUserByEx
     /// <summary>
     /// Handles the query to retrieve a user by their external identity.
     /// </summary>
-    public async Task<User?> Handle(GetUserByExternalIdentityQuery request, CancellationToken cancellationToken)
+    public async Task<GetUserByExternalIdentityDto?> Handle(GetUserByExternalIdentityQuery request, CancellationToken cancellationToken)
     {
-        return await _dbContext.Users
+        var user = await _dbContext.Users
+            .Include(u => u.Roles)
+                .ThenInclude(r => r.Permissions)
+            .Include(u => u.ExternalIdentities)
             .FirstOrDefaultAsync(u =>
                 u.ExternalIdentities.Any(e =>
                     e.Provider == request.Provider &&
                     e.ExternalUserId == request.ExternalUserId),
                 cancellationToken);
+
+        if (user == null)
+            return null;
+
+        return new GetUserByExternalIdentityDto
+        {
+            Id = user.Id.Value,
+            Email = user.Email.Value,
+            DisplayName = user.DisplayName,
+            IsActive = user.IsActive,
+            LastLoginAt = user.LastLoginAt,
+            RoleIds = user.Roles.Select(r => r.Id).ToArray(),
+            PermissionIds = user.GetAllPermissions().Select(p => p.Id).Distinct().ToArray()
+        };
     }
 }
