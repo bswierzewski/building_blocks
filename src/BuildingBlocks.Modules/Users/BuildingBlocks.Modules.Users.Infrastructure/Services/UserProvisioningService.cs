@@ -50,10 +50,6 @@ public class UserProvisioningService : IUserProvisioningService
 
         if (user != null)
         {
-            // Update last login timestamp
-            user.UpdateLastLogin();
-            await _writeContext.SaveChangesAsync(cancellationToken);
-
             _logger.LogDebug(
                 "User {UserId} authenticated via {Provider}",
                 user.Id.Value, provider);
@@ -73,10 +69,11 @@ public class UserProvisioningService : IUserProvisioningService
         if (string.IsNullOrWhiteSpace(externalUserId))
             throw new ArgumentException("External user ID cannot be empty", nameof(externalUserId));
 
+        if (string.IsNullOrWhiteSpace(email))
+            throw new ArgumentException("Email is required for user provisioning", nameof(email));
+
         var userId = UserId.Create();
-        var userEmail = !string.IsNullOrEmpty(email)
-            ? Email.Create(email)
-            : Email.Create($"{userId.Value}@unknown.local"); // Fallback if no email
+        var userEmail = Email.Create(email);
 
         var user = User.Create(userId, userEmail, displayName);
         user.LinkExternalIdentity(provider, externalUserId);
@@ -85,8 +82,8 @@ public class UserProvisioningService : IUserProvisioningService
         await _writeContext.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation(
-            "JIT provisioned new user {UserId} from {Provider}:{ExternalId}",
-            userId.Value, provider, externalUserId);
+            "JIT provisioned new user {UserId} from {Provider}:{ExternalId} with email {Email}",
+            userId.Value, provider, externalUserId, email);
 
         return user;
     }

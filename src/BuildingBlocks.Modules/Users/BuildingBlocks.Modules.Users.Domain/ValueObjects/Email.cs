@@ -1,11 +1,11 @@
-using System.Text.RegularExpressions;
+using System.Net.Mail;
 
 namespace BuildingBlocks.Modules.Users.Domain.ValueObjects;
 
 /// <summary>
 /// Value object representing an email address with validation.
 /// </summary>
-public partial record Email
+public record Email
 {
     private const int MaxLength = 255;
 
@@ -32,8 +32,18 @@ public partial record Email
         if (email.Length > MaxLength)
             throw new ArgumentException($"Email cannot exceed {MaxLength} characters", nameof(email));
 
-        if (!EmailRegex().IsMatch(email))
+        // Validate email format using MailAddress
+        try
+        {
+            var mailAddress = new MailAddress(email);
+            // Ensure the email address matches what was provided (MailAddress may normalize it)
+            if (mailAddress.Address.ToLowerInvariant() != email)
+                throw new ArgumentException($"Invalid email format: {email}", nameof(email));
+        }
+        catch (FormatException)
+        {
             throw new ArgumentException($"Invalid email format: {email}", nameof(email));
+        }
 
         return new Email(email);
     }
@@ -47,7 +57,4 @@ public partial record Email
     /// Implicit conversion from Email to string for EF Core.
     /// </summary>
     public static implicit operator string(Email email) => email.Value;
-
-    [GeneratedRegex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.IgnoreCase, "en-US")]
-    private static partial Regex EmailRegex();
 }
