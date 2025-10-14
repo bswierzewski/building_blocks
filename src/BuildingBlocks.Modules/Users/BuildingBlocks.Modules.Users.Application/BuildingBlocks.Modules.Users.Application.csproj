@@ -1,9 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\BuildingBlocks.Modules.Users.Domain\BuildingBlocks.Modules.Users.Domain.csproj">
-      <PrivateAssets>All</PrivateAssets>
-    </ProjectReference>
+    <ProjectReference Include="..\BuildingBlocks.Modules.Users.Domain\BuildingBlocks.Modules.Users.Domain.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks.Application\BuildingBlocks.Application.csproj" />
   </ItemGroup>
 
