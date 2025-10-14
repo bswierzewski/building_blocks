@@ -13,12 +13,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BuildingBlocks.Modules.Users.Application\BuildingBlocks.Modules.Users.Application.csproj">
-      <PrivateAssets>All</PrivateAssets>
-    </ProjectReference>
-    <ProjectReference Include="..\BuildingBlocks.Modules.Users.Infrastructure\BuildingBlocks.Modules.Users.Infrastructure.csproj">
-      <PrivateAssets>All</PrivateAssets>
-    </ProjectReference>
+    <ProjectReference Include="..\BuildingBlocks.Modules.Users.Application\BuildingBlocks.Modules.Users.Application.csproj" />
+    <ProjectReference Include="..\BuildingBlocks.Modules.Users.Infrastructure\BuildingBlocks.Modules.Users.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
