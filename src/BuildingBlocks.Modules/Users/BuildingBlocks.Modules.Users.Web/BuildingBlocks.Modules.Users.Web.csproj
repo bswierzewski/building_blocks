@@ -13,9 +13,26 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BuildingBlocks.Modules.Users.Application\BuildingBlocks.Modules.Users.Application.csproj" />
-    <ProjectReference Include="..\BuildingBlocks.Modules.Users.Infrastructure\BuildingBlocks.Modules.Users.Infrastructure.csproj" />
+    <ProjectReference Include="..\BuildingBlocks.Modules.Users.Application\BuildingBlocks.Modules.Users.Application.csproj">
+      <PrivateAssets>all</PrivateAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\BuildingBlocks.Modules.Users.Infrastructure\BuildingBlocks.Modules.Users.Infrastructure.csproj">
+      <PrivateAssets>all</PrivateAssets>
+    </ProjectReference>
   </ItemGroup>
+
+  <!-- Include all layer assemblies in the NuGet package -->
+  <PropertyGroup>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeReferencedProjectsInPackage</TargetsForTfmSpecificBuildOutput>
+  </PropertyGroup>
+
+  <Target Name="IncludeReferencedProjectsInPackage">
+    <ItemGroup>
+      <BuildOutputInPackage Include="$(OutputPath)BuildingBlocks.Modules.Users.Domain.dll" />
+      <BuildOutputInPackage Include="$(OutputPath)BuildingBlocks.Modules.Users.Application.dll" />
+      <BuildOutputInPackage Include="$(OutputPath)BuildingBlocks.Modules.Users.Infrastructure.dll" />
+    </ItemGroup>
+  </Target>
 
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="README.md" />
