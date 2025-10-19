@@ -1,5 +1,5 @@
 using BuildingBlocks.Modules.Users.Application.Module;
-using BuildingBlocks.Modules.Users.Web.Module;
+using BuildingBlocks.Modules.Users.Infrastructure.Module;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
