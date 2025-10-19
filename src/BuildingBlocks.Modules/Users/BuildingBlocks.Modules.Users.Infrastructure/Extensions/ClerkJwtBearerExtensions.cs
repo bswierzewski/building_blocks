@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using System.Xml.Linq;
+using BuildingBlocks.Application.Security;
 using BuildingBlocks.Modules.Users.Application.Abstractions;
 using BuildingBlocks.Modules.Users.Domain.Enums;
 using BuildingBlocks.Modules.Users.Infrastructure.Options;
@@ -42,79 +44,85 @@ public static class ClerkJwtBearerExtensions
             {
                 OnTokenValidated = async context =>
                 {
-                    var externalId = context.Principal?.FindFirst("sub")?.Value;
-                    if (string.IsNullOrEmpty(externalId))
-                    {
-                        context.Fail("Missing 'sub' claim in JWT token");
-                        return;
-                    }
-
-                    // Get provisioning service
-                    var provisioningService = context.HttpContext.RequestServices
-                        .GetRequiredService<IUserProvisioningService>();
-
                     try
                     {
-                        // Try to get existing user
+                        // 1. Extract data from JWT token (already in ClaimsPrincipal)
+                        // JWT Bearer middleware automatically maps JWT 'sub' claim to ClaimTypes.NameIdentifier (external ID)
+                        var externalId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                        if (string.IsNullOrEmpty(externalId))
+                        {
+                            context.Fail("Missing 'NameIdentifier' claim in token.");
+                            return;
+                        }
+
+                        var email = context.Principal?.FindFirst(ClaimTypes.Email)?.Value;
+                        if (string.IsNullOrEmpty(email))
+                        {
+                            context.Fail("Missing 'Email' claim in token.");
+                            return;
+                        }
+
+                        var displayName = context.Principal?.FindFirst(ClaimTypes.Name)?.Value
+                            ?? context.Principal?.FindFirst("name")?.Value;
+                        if (string.IsNullOrEmpty(displayName))
+                        {
+                            context.Fail("Missing 'Name' claim in token.");
+                            return;
+                        }
+
+                        // Get identity for claim manipulation
+                        var identity = (ClaimsIdentity)context.Principal!.Identity!;
+
+                        // 2. Get or create user in database
+                        // At this point, IUser.Id returns null because CustomClaimTypes.UserId hasn't been added yet
+                        // This allows AuditableEntityInterceptor to set CreatedBy to null during JIT provisioning
+                        var provisioningService = context.HttpContext.RequestServices
+                            .GetRequiredService<IUserProvisioningService>();
+
                         var user = await provisioningService.GetUserAsync(
                             provider: IdentityProvider.Clerk,
                             externalUserId: externalId,
                             cancellationToken: context.HttpContext.RequestAborted
                         );
 
-                        // If user doesn't exist, create new one (JIT Provisioning)
                         if (user == null)
                         {
-                            var email = context.Principal?.FindFirst("email")?.Value;
-                            var name = context.Principal?.FindFirst("name")?.Value;
-
+                            // JIT provisioning: Create new user
+                            // AuditableEntityInterceptor will set CreatedBy to null (system-created)
                             user = await provisioningService.AddUserAsync(
                                 provider: IdentityProvider.Clerk,
                                 externalUserId: externalId,
                                 email: email,
-                                displayName: name,
+                                displayName: displayName,
                                 cancellationToken: context.HttpContext.RequestAborted
                             );
                         }
-
-                        // Map JWT claims to standard ClaimTypes
-                        var identity = (ClaimsIdentity)context.Principal!.Identity!;
-
-                        // Map email to standard ClaimTypes.Email
-                        var emailClaim = context.Principal?.FindFirst("email")?.Value;
-                        if (!string.IsNullOrEmpty(emailClaim))
+                        else
                         {
-                            identity.AddClaim(new Claim(ClaimTypes.Email, emailClaim));
+                            // Update existing user if profile data changed
+                            if (displayName != user.DisplayName)
+                            {
+                                await provisioningService.UpdateUserAsync(
+                                    user: user,
+                                    displayName: displayName,
+                                    cancellationToken: context.HttpContext.RequestAborted
+                                );
+                            }
                         }
 
-                        // Map name to standard ClaimTypes.Name
-                        var nameClaim = context.Principal?.FindFirst("name")?.Value;
-                        if (!string.IsNullOrEmpty(nameClaim))
-                        {
-                            identity.AddClaim(new Claim(ClaimTypes.Name, nameClaim));
-                        }
+                        // 3. Enrich claims with database-backed data
 
-                        // Map picture URL (keep as "picture" - not part of standard ClaimTypes)
-                        var pictureClaim = context.Principal?.FindFirst("picture")?.Value;
-                        if (!string.IsNullOrEmpty(pictureClaim))
-                        {
-                            identity.AddClaim(new Claim("picture", pictureClaim));
-                        }
-
-                        // Add internal user ID
-                        identity.AddClaim(new Claim("user_id", user.Id.ToString()));
+                        // Add internal user ID (GUID from database) as custom claim
+                        // ClaimTypes.NameIdentifier remains unchanged with external ID from JWT 'sub' claim
+                        identity.AddClaim(new Claim(CustomClaimTypes.UserId, user.Id.Value.ToString()));
 
                         // Add roles from database (using standard ClaimTypes.Role)
                         foreach (var role in user.Roles)
-                        {
                             identity.AddClaim(new Claim(ClaimTypes.Role, role.Name));
-                        }
 
-                        // Add permissions from database
+                        // Add permissions from database (using custom permission claim)
                         foreach (var permission in user.GetAllPermissions())
-                        {
-                            identity.AddClaim(new Claim("permission", permission.Name));
-                        }
+                            identity.AddClaim(new Claim(CustomClaimTypes.Permission, permission.Name));
                     }
                     catch (Exception ex)
                     {

@@ -7,9 +7,12 @@ namespace BuildingBlocks.Application.Abstractions;
 public interface IUser
 {
     /// <summary>
-    /// Gets the unique identifier of the user from the JWT subject claim.
+    /// Gets the unique identifier of the user.
+    /// Returns the internal database GUID from custom "user_id" claim added after JIT provisioning.
+    /// Returns null if the user hasn't been provisioned yet (during initial authentication).
+    /// Null in audit fields (CreatedBy/ModifiedBy) indicates system-created/modified entities.
     /// </summary>
-    string Id { get; }
+    Guid? Id { get; }
 
     /// <summary>
     /// Gets the email address of the user from JWT claims.
@@ -26,7 +29,7 @@ public interface IUser
 
     /// <summary>
     /// Gets the URL to the user's profile picture from JWT claims.
-    /// Typically extracted from 'picture' claim (Auth0, Clerk).
+    /// Uses the 'picture' claim (OpenID Connect standard, supported by Auth0, Clerk, etc.).
     /// Can be null if picture claim is not present in the token.
     /// </summary>
     string? PictureUrl { get; }

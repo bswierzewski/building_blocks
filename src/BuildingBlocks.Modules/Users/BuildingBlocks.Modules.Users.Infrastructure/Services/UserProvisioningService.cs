@@ -87,4 +87,34 @@ public class UserProvisioningService : IUserProvisioningService
 
         return user;
     }
+
+    /// <summary>
+    /// Updates an existing user's profile information from the identity provider.
+    /// </summary>
+    /// <param name="user">The user to update</param>
+    /// <param name="displayName">Updated display name from the identity provider</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Task representing the async operation</returns>
+    public async Task UpdateUserAsync(User user, string? displayName, CancellationToken cancellationToken = default)
+    {
+        if (user == null)
+            throw new ArgumentNullException(nameof(user));
+
+        // Update profile if displayName has changed
+        if (user.DisplayName != displayName)
+        {
+            var oldDisplayName = user.DisplayName;
+            user.UpdateProfile(user.Email, displayName);
+
+            await _writeContext.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation(
+                "Updated user {UserId} profile - DisplayName: '{OldName}' -> '{NewName}'",
+                user.Id.Value, oldDisplayName, displayName);
+        }
+
+        // Update last login timestamp
+        user.UpdateLastLogin();
+        await _writeContext.SaveChangesAsync(cancellationToken);
+    }
 }

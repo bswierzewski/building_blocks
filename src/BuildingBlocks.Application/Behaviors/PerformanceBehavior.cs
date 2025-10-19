@@ -61,7 +61,7 @@ public class PerformanceBehavior<TRequest, TResponse>(ILogger<PerformanceBehavio
                 "User: {UserId}. Request: {@Request}",
                 requestName,
                 elapsedMilliseconds,
-                _user.IsAuthenticated ? _user.Id : "Anonymous",
+                _user.IsAuthenticated && _user.Id.HasValue ? _user.Id.Value.ToString() : "Unknown",
                 request);
         }
         else if (elapsedMilliseconds > PerformanceThresholdMs)
@@ -71,7 +71,7 @@ public class PerformanceBehavior<TRequest, TResponse>(ILogger<PerformanceBehavio
                 "User: {UserId}",
                 requestName,
                 elapsedMilliseconds,
-                _user.IsAuthenticated ? _user.Id : "Anonymous");
+                _user.IsAuthenticated && _user.Id.HasValue ? _user.Id.Value.ToString() : "Unknown");
 
             // Log request details only in debug mode for performance warnings
             if (_logger.IsEnabled(LogLevel.Debug))
@@ -96,7 +96,7 @@ public class PerformanceBehavior<TRequest, TResponse>(ILogger<PerformanceBehavio
         {
             ["RequestName"] = requestName,
             ["ElapsedMilliseconds"] = elapsedMilliseconds,
-            ["UserId"] = _user.IsAuthenticated ? _user.Id : "Anonymous",
+            ["UserId"] = _user.IsAuthenticated && _user.Id.HasValue ? _user.Id.Value : (object)"Unknown",
             ["IsSlowRequest"] = elapsedMilliseconds > PerformanceThresholdMs,
             ["IsCriticalPerformance"] = elapsedMilliseconds > CriticalPerformanceThresholdMs
         }))

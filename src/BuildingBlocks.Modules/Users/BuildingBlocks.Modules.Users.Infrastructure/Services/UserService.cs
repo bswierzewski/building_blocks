@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using BuildingBlocks.Application.Abstractions;
+using BuildingBlocks.Application.Security;
 using Microsoft.AspNetCore.Http;
 
 namespace BuildingBlocks.Modules.Users.Infrastructure.Services;
@@ -23,12 +24,13 @@ public class UserService : IUser
     private ClaimsPrincipal? User => _httpContextAccessor.HttpContext?.User;
 
     /// <summary>
-    /// Gets the internal unified user ID (Guid).
-    /// This is added to claims during token validation after JIT provisioning.
+    /// Gets the internal user ID (GUID from database).
+    /// Uses custom "user_id" claim added during JIT provisioning.
+    ///
+    /// Returns null if the user hasn't been provisioned yet (during initial authentication).
+    /// When null, AuditableEntityInterceptor will set CreatedBy to null, indicating system-created entities.
     /// </summary>
-    public string Id =>
-        User?.FindFirst("user_id")?.Value
-        ?? throw new UnauthorizedAccessException("User not authenticated or internal ID not set");
+    public Guid? Id => Guid.TryParse(User?.FindFirst(CustomClaimTypes.UserId)?.Value, out var guid) ? guid : null;
 
     /// <summary>
     /// Gets the user's email address.
@@ -44,7 +46,7 @@ public class UserService : IUser
 
     /// <summary>
     /// Gets the URL to the user's profile picture.
-    /// Uses the "picture" claim (not part of standard ClaimTypes).
+    /// Uses the "picture" claim (OpenID Connect standard claim, not in .NET ClaimTypes).
     /// </summary>
     public string? PictureUrl => User?.FindFirst("picture")?.Value;
 
@@ -76,7 +78,7 @@ public class UserService : IUser
 
     /// <summary>
     /// Gets the permissions assigned to the current user.
-    /// Uses "permission" claim populated from database during token validation.
+    /// Uses custom "permission" claim populated from database during token validation.
     /// </summary>
     public IEnumerable<string> Permissions
     {
@@ -84,7 +86,7 @@ public class UserService : IUser
         {
             if (User == null) return Enumerable.Empty<string>();
 
-            return User.FindAll("permission")
+            return User.FindAll(CustomClaimTypes.Permission)
                 .Select(c => c.Value)
                 .Distinct();
         }

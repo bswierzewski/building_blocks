@@ -1,0 +1,39 @@
+@BuildingBlocks.Web_HostAddress = http://localhost:7000
+@jwt_token = eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDIyMkFBQSIsImtpZCI6Imluc18yd1lQZ1ROcGJJNjB0UUI5NHBlZFB2Q2RKOGgiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJ5b3VyLWFwaS1pZGVudGlmaWVyIiwiYXpwIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwIiwiZW1haWwiOiJzd2llcnpld3NraS5iYXJ0b3N6QGdtYWlsLmNvbSIsImV4cCI6MTc5MjEyNzU2MiwiaWF0IjoxNzYwNTkxNTYyLCJpc3MiOiJodHRwczovL2ZpdHRpbmctd2FzcC0zMC5jbGVyay5hY2NvdW50cy5kZXYiLCJqdGkiOiIzNTg1MWQ3MjM5ZjljYzFkOTMzZSIsIm5hbWUiOiJCYXJ0b3N6IMWad2llcnpld3NraSIsIm5iZiI6MTc2MDU5MTU1NywicGljdHVyZSI6Imh0dHBzOi8vaW1nLmNsZXJrLmNvbS9leUowZVhCbElqb2ljSEp2ZUhraUxDSnpjbU1pT2lKb2RIUndjem92TDJsdFlXZGxjeTVqYkdWeWF5NWtaWFl2ZFhCc2IyRmtaV1F2YVcxblh6SjNiVXN3TjB0ME1VRmxjamxHZEU5elprMDFjR3B3WlRGRVdTSjkiLCJzdWIiOiJ1c2VyXzJ3WVJpUlBFQjF3dUNuNlhobkJDSno4RUJqSiJ9.XRRlVarEg8GwdRPDnurOWQ4GQq83jBfrnw3WKBLcnjFNcyHtoq9u9pIsMI4gwBlkPCthgY9N_AbDGTL842p833ffBKS7bcsy3jYZZ0bDakOiCOTZqcztKeMWcEv8CLJ9M2wGP_kAYA7MUC8MV2UrgYgpHRv60p8cg41I9Wctz0_yC6Xcv0_bWWakcgkqIeSJxk4i5Zh1eYdFYXqlIfaAje-7VH-bITIp4vjb7fKXSwqFTeQo5SsVD3sqybbd9RBjW2b9WcUTpPCBy7u68TsgNM_3BXKj2QWJwEoTwalBssyshFUSjkx_x4-MxBfTmFIOnR3wdi9jEjMSGIg-H3YuPA
+
+### Get Current User (requires authentication)
+GET {{BuildingBlocks.Web_HostAddress}}/api/users/me
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### Get All Roles
+GET {{BuildingBlocks.Web_HostAddress}}/api/users/roles
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### Get All Permissions
+GET {{BuildingBlocks.Web_HostAddress}}/api/users/permissions
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### Assign Role to User
+# Replace {userId} and {roleId} with actual GUIDs
+POST {{BuildingBlocks.Web_HostAddress}}/api/users/00000000-0000-0000-0000-000000000000/roles/00000000-0000-0000-0000-000000000000
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### Remove Role from User
+# Replace {userId} and {roleId} with actual GUIDs
+DELETE {{BuildingBlocks.Web_HostAddress}}/api/users/00000000-0000-0000-0000-000000000000/roles/00000000-0000-0000-0000-000000000000
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+###

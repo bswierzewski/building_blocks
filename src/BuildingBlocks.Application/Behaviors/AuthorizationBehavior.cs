@@ -77,7 +77,7 @@ public class AuthorizationBehavior<TRequest, TResponse>(IUser user, ILogger<Auth
                 {
                     _logger.LogWarning(
                         "Authorization failed for user {UserId} on request {RequestName}: User does not have any of the required roles: {Roles}",
-                        _user.Id,
+                        _user.Id?.ToString() ?? "Unknown",
                         typeof(TRequest).Name,
                         attribute.Roles);
 
@@ -97,7 +97,7 @@ public class AuthorizationBehavior<TRequest, TResponse>(IUser user, ILogger<Auth
                     {
                         _logger.LogWarning(
                             "Authorization failed for user {UserId} on request {RequestName}: User does not have the required permission: {Permission}",
-                            _user.Id,
+                            _user.Id?.ToString() ?? "Unknown",
                             typeof(TRequest).Name,
                             permission);
 
@@ -123,7 +123,7 @@ public class AuthorizationBehavior<TRequest, TResponse>(IUser user, ILogger<Auth
                     {
                         _logger.LogWarning(
                             "Authorization failed for user {UserId} on request {RequestName}: User does not have the required claim: {Claim}",
-                            _user.Id,
+                            _user.Id?.ToString() ?? "Unknown",
                             typeof(TRequest).Name,
                             claim);
 

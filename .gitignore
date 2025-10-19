@@ -196,6 +196,9 @@ publish/
 # in these scripts will be unencrypted
 PublishScripts/
 
+# ASP.NET Core configuration files (ignore environment-specific settings)
+appsettings.*.json
+
 # NuGet Packages
 *.nupkg
 # NuGet Symbol Packages

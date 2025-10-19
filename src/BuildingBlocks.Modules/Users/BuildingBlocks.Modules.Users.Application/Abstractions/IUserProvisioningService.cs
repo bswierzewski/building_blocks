@@ -38,4 +38,16 @@ public interface IUserProvisioningService
         string? email,
         string? displayName,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates an existing user's profile information from the identity provider.
+    /// </summary>
+    /// <param name="user">The user to update</param>
+    /// <param name="displayName">Updated display name</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Task representing the async operation</returns>
+    Task UpdateUserAsync(
+        User user,
+        string? displayName,
+        CancellationToken cancellationToken = default);
 }

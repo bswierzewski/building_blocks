@@ -29,10 +29,10 @@ public class GetCurrentUserQueryHandler : IRequestHandler<GetCurrentUserQuery, C
     public async Task<CurrentUserDto?> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
         // Get user ID from claims (injected by OnTokenValidated)
-        if (!Guid.TryParse(_currentUser.Id, out var userIdGuid))
+        if (!_currentUser.Id.HasValue)
             return null;
 
-        var userId = UserId.CreateFrom(userIdGuid);
+        var userId = UserId.CreateFrom(_currentUser.Id.Value);
 
         // Load user with roles and permissions
         var user = await _readContext.Users

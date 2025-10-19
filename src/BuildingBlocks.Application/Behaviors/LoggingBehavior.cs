@@ -40,7 +40,7 @@ public class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior<TReque
             "Starting request {RequestName} with ID {RequestId} for user {UserId}",
             requestName,
             requestId,
-            _user.IsAuthenticated ? _user.Id : "Anonymous");
+            _user.IsAuthenticated && _user.Id.HasValue ? _user.Id.Value.ToString() : "Unknown");
 
         // Log request details in debug mode
         if (_logger.IsEnabled(LogLevel.Debug))

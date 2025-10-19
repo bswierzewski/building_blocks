@@ -13,8 +13,9 @@ public interface IAuditable
 
     /// <summary>
     /// Gets or sets the identifier of the user who created the entity.
+    /// Null indicates the entity was created by the system (e.g., during JIT user provisioning).
     /// </summary>
-    string? CreatedBy { get; set; }
+    Guid? CreatedBy { get; set; }
 
     /// <summary>
     /// Gets or sets the date and time when the entity was last modified.
@@ -24,7 +25,7 @@ public interface IAuditable
 
     /// <summary>
     /// Gets or sets the identifier of the user who last modified the entity.
-    /// Can be null if the entity has never been modified.
+    /// Can be null if the entity has never been modified or was modified by the system.
     /// </summary>
-    string? ModifiedBy { get; set; }
+    Guid? ModifiedBy { get; set; }
 }

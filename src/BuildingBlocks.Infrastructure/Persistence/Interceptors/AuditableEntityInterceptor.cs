@@ -42,6 +42,12 @@ public sealed class AuditableEntityInterceptor(IUser? user, TimeProvider dateTim
 
     /// <summary>
     /// Updates audit fields on entities based on their state and owned entity changes.
+    ///
+    /// IMPORTANT: During JIT (Just-In-Time) user provisioning:
+    /// - IUser.Id returns null because ClaimTypes.NameIdentifier (external ID) was removed before provisioning
+    /// - CreatedBy/ModifiedBy will be set to null, indicating system-created entities
+    /// - After JIT provisioning completes, ClaimTypes.NameIdentifier is replaced with internal GUID
+    /// - All subsequent operations will use the internal GUID for audit tracking
     /// </summary>
     private void UpdateEntities(DbContext? context)
     {
@@ -55,10 +61,13 @@ public sealed class AuditableEntityInterceptor(IUser? user, TimeProvider dateTim
 
                 if (entry.State == EntityState.Added)
                 {
+                    // During JIT provisioning, _user.Id will be null (system-created)
+                    // After provisioning, it will be the internal GUID
                     entry.Entity.CreatedBy = _user?.Id;
                     entry.Entity.CreatedAt = utcNow;
                 }
 
+                // For modifications, _user.Id will be the internal GUID
                 entry.Entity.ModifiedBy = _user?.Id;
                 entry.Entity.ModifiedAt = utcNow;
             }

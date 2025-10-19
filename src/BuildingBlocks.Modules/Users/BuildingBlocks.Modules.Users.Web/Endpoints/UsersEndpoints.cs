@@ -1,3 +1,4 @@
+using BuildingBlocks.Application.Models;
 using BuildingBlocks.Modules.Users.Application.Commands.AssignRoleToUser;
 using BuildingBlocks.Modules.Users.Application.Commands.RemoveRoleFromUser;
 using BuildingBlocks.Modules.Users.Application.Queries.GetAllPermissions;
@@ -49,35 +50,50 @@ public static class UsersEndpoints
         group.MapGet("/me", GetCurrentUser)
             .WithName("GetCurrentUser")
             .WithOpenApi()
-            .WithDescription("Get current authenticated user with roles and permissions");
+            .WithDescription("Get current authenticated user with roles and permissions")
+            .Produces<CurrentUserDto>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         // GET /api/users/roles - Query to get all available roles in the system
         // Used for administration interfaces and role assignment UIs
         group.MapGet("/roles", GetAllRoles)
             .WithName("GetAllRoles")
             .WithOpenApi()
-            .WithDescription("Get all system roles with their permissions");
+            .WithDescription("Get all system roles with their permissions")
+            .Produces<IReadOnlyList<RoleDto>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status401Unauthorized);
 
         // GET /api/users/permissions - Query to get all available permissions by module
         // Used for administration interfaces to understand system capabilities
         group.MapGet("/permissions", GetAllPermissions)
             .WithName("GetAllPermissions")
             .WithOpenApi()
-            .WithDescription("Get all system permissions grouped by module");
+            .WithDescription("Get all system permissions grouped by module")
+            .Produces<IReadOnlyList<PermissionDto>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status401Unauthorized);
 
         // POST /api/users/{userId}/roles/{roleId} - Command to assign a role to a user
         // Requires appropriate permissions for user management
         group.MapPost("/{userId}/roles/{roleId}", AssignRoleToUser)
             .WithName("AssignRoleToUser")
             .WithOpenApi()
-            .WithDescription("Assign a role to a user (requires user management permissions)");
+            .WithDescription("Assign a role to a user (requires user management permissions)")
+            .Produces<Result>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         // DELETE /api/users/{userId}/roles/{roleId} - Command to remove a role from a user
         // Requires appropriate permissions for user management
         group.MapDelete("/{userId}/roles/{roleId}", RemoveRoleFromUser)
             .WithName("RemoveRoleFromUser")
             .WithOpenApi()
-            .WithDescription("Remove a role from a user (requires user management permissions)");
+            .WithDescription("Remove a role from a user (requires user management permissions)")
+            .Produces<Result>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return endpoints;
     }
@@ -175,9 +191,9 @@ public static class UsersEndpoints
         var command = new AssignRoleToUserCommand(userId, roleId);
         await mediator.Send(command);
 
-        // Return 200 OK on success
+        // Return 200 OK with Result on success
         // User will receive new permissions on next login (token refresh)
-        return Results.Ok(new { Success = true, Message = "Role assigned successfully" });
+        return Results.Ok(Result.Success());
     }
 
     /// <summary>
@@ -204,8 +220,8 @@ public static class UsersEndpoints
         var command = new RemoveRoleFromUserCommand(userId, roleId);
         await mediator.Send(command);
 
-        // Return 200 OK on success
+        // Return 200 OK with Result on success
         // User will lose permissions on next login (token refresh)
-        return Results.Ok(new { Success = true, Message = "Role removed successfully" });
+        return Results.Ok(Result.Success());
     }
 }
