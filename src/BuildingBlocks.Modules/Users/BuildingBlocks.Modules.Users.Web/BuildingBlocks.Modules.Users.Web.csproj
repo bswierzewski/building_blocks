@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -12,13 +12,11 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
+  <!-- Reference to Domain, Application and Infrastructure layers -->
   <ItemGroup>
-    <ProjectReference Include="..\BuildingBlocks.Modules.Users.Application\BuildingBlocks.Modules.Users.Application.csproj">
-      <PrivateAssets>all</PrivateAssets>
-    </ProjectReference>
-    <ProjectReference Include="..\BuildingBlocks.Modules.Users.Infrastructure\BuildingBlocks.Modules.Users.Infrastructure.csproj">
-      <PrivateAssets>all</PrivateAssets>
-    </ProjectReference>
+    <ProjectReference Include="..\BuildingBlocks.Modules.Users.Domain\BuildingBlocks.Modules.Users.Domain.csproj" />
+    <ProjectReference Include="..\BuildingBlocks.Modules.Users.Application\BuildingBlocks.Modules.Users.Application.csproj" />
+    <ProjectReference Include="..\BuildingBlocks.Modules.Users.Infrastructure\BuildingBlocks.Modules.Users.Infrastructure.csproj" />
   </ItemGroup>
 
   <!-- Include all layer assemblies in the NuGet package -->
@@ -45,6 +43,7 @@
   <ItemGroup>
     <PackageReference Include="MediatR" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
   </ItemGroup>
 
 </Project>
