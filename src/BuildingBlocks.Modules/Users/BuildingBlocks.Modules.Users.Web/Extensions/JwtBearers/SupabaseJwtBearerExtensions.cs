@@ -1,14 +1,12 @@
 using System.Security.Claims;
-using BuildingBlocks.Application.Security;
+using System.Text;
 using BuildingBlocks.Modules.Users.Application.Abstractions;
 using BuildingBlocks.Modules.Users.Domain.Enums;
 using BuildingBlocks.Modules.Users.Web.Options;
-using BuildingBlocks.Modules.Users.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Tokens;
 
 namespace BuildingBlocks.Modules.Users.Web.Extensions.JwtBearers;
@@ -20,8 +18,7 @@ public static class SupabaseJwtBearerExtensions
 {
     /// <summary>
     /// Adds Supabase JWT Bearer authentication with user provisioning.
-    /// Configures JWT validation using JWKS (JSON Web Key Set) and enriches claims with user ID, roles, and permissions from database.
-    /// Uses modern asymmetric key validation (ES256) with automatic key rotation support.
+    /// Configures JWT validation using HS256 symmetric key and enriches claims with user ID, roles, and permissions from database.
     /// </summary>
     /// <param name="builder">The authentication builder</param>
     /// <param name="configureOptions">Optional additional JWT Bearer configuration</param>
@@ -30,38 +27,16 @@ public static class SupabaseJwtBearerExtensions
         this AuthenticationBuilder builder,
         Action<JwtBearerOptions>? configureOptions = null)
     {
-        // Register named HttpClient for JWKS endpoint with appropriate timeouts
-        builder.Services.AddHttpClient(nameof(SupabaseSigningKeyResolver), client =>
-        {
-            client.Timeout = TimeSpan.FromSeconds(30);
-            client.DefaultRequestHeaders.Add("Accept", "application/json");
-        });
-
-        // Register ConfigurationManager for JWKS as singleton
-        // DI container will automatically dispose it on app shutdown
-        builder.Services.AddSingleton<IConfigurationManager<JsonWebKeySet>>(serviceProvider =>
-        {
-            var supabaseOptions = serviceProvider.GetRequiredService<IOptions<SupabaseOptions>>();
-            var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
-            var httpClient = httpClientFactory.CreateClient(nameof(SupabaseSigningKeyResolver));
-
-            return new ConfigurationManager<JsonWebKeySet>(
-                supabaseOptions.Value.JwksUrl,
-                new JwksConfigurationRetriever(),
-                new JwksDocumentRetriever(httpClient));
-        });
-
-        // Register signing key resolver as singleton
-        builder.Services.AddSingleton<SupabaseSigningKeyResolver>();
-
         // Add JWT Bearer authentication
         builder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
         {
+            options.RequireHttpsMetadata = true;
+
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidateIssuer = false, // Supabase doesn't set issuer in JWT
+                ValidateIssuer = true,
                 ValidateAudience = true,
                 ClockSkew = TimeSpan.FromMinutes(5)
             };
@@ -74,8 +49,10 @@ public static class SupabaseJwtBearerExtensions
                     try
                     {
                         // Extract claims from JWT
-                        var externalId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                        var email = context.Principal?.FindFirst(ClaimTypes.Email)?.Value;
+                        var externalId = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier)
+                            ?? context.Principal?.FindFirstValue("sub");
+
+                        var email = context.Principal?.FindFirstValue(ClaimTypes.Email);
 
                         if (string.IsNullOrEmpty(externalId) || string.IsNullOrEmpty(email))
                         {
@@ -84,10 +61,10 @@ public static class SupabaseJwtBearerExtensions
                         }
 
                         // Get display name (fallback to email if not provided)
-                        var displayName = context.Principal?.FindFirst(ClaimTypes.Name)?.Value
-                            ?? context.Principal?.FindFirst("name")?.Value
-                            ?? context.Principal?.FindFirst("user_metadata.name")?.Value
-                            ?? context.Principal?.FindFirst("user_metadata.full_name")?.Value
+                        var displayName = context.Principal?.FindFirstValue("user_metadata.name")
+                            ?? context.Principal?.FindFirstValue(ClaimTypes.Name)
+                            ?? context.Principal?.FindFirstValue("name")
+                            ?? context.Principal?.FindFirstValue("user_metadata.full_name")
                             ?? email;
 
                         // Upsert user in database (JIT provisioning)
@@ -116,20 +93,21 @@ public static class SupabaseJwtBearerExtensions
             configureOptions?.Invoke(options);
         });
 
-        // Configure JWKS resolver and audience from SupabaseOptions
-        builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
-            .Configure<IOptions<SupabaseOptions>, IServiceProvider>((jwtOptions, supabaseOptions, serviceProvider) =>
+        // Configure HS256 signing key, issuer, and audience from SupabaseOptions
+        builder.Services
+            .AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+            .Configure<IOptions<SupabaseOptions>>((jwtOptions, supabaseOptions) =>
             {
-                var keyResolver = serviceProvider.GetRequiredService<SupabaseSigningKeyResolver>();
+                // Create symmetric security key from JWT secret
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(supabaseOptions.Value.JwtSecret));
+                jwtOptions.TokenValidationParameters.IssuerSigningKey = key;
 
-                // Use key resolver with ConfigurationManager caching and automatic refresh
-                jwtOptions.TokenValidationParameters.IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
-                {
-                    return keyResolver.GetSigningKeys();
-                };
+                // Set issuer validation
+                jwtOptions.TokenValidationParameters.ValidIssuer =
+                    $"{supabaseOptions.Value.ProjectUrl}/auth/v1";
 
-                // Set audience from configuration
-                if (!string.IsNullOrEmpty(supabaseOptions.Value.Audience))
+                // Set audience if provided
+                if (!string.IsNullOrWhiteSpace(supabaseOptions.Value.Audience))
                 {
                     jwtOptions.TokenValidationParameters.ValidAudience = supabaseOptions.Value.Audience;
                     jwtOptions.TokenValidationParameters.ValidateAudience = true;

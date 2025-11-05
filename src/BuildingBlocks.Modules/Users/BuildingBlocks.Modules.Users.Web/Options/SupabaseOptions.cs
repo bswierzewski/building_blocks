@@ -28,8 +28,9 @@ public class SupabaseOptions
     public string? Audience { get; set; }
 
     /// <summary>
-    /// Gets the JWKS (JSON Web Key Set) endpoint URL.
-    /// Supabase exposes public keys at: {ProjectUrl}/auth/v1/.well-known/jwks.json
+    /// The JWT secret key for HS256 signature validation.
+    /// This is the secret key from your Supabase project settings.
     /// </summary>
-    public string JwksUrl => $"{ProjectUrl.TrimEnd('/')}/auth/v1/.well-known/jwks.json";
+    [Required(ErrorMessage = "Authentication:Supabase:JwtSecret is required")]
+    public string JwtSecret { get; set; } = null!;
 }
