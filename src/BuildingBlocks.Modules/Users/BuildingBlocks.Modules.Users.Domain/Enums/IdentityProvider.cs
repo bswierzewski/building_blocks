@@ -37,6 +37,11 @@ public enum IdentityProvider
     Keycloak = 5,
 
     /// <summary>
+    /// Supabase identity provider (https://supabase.com)
+    /// </summary>
+    Supabase = 6,
+
+    /// <summary>
     /// Custom or other identity provider
     /// </summary>
     Custom = 99

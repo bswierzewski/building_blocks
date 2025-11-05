@@ -5,49 +5,25 @@ namespace BuildingBlocks.Modules.Users.Application.Abstractions;
 
 /// <summary>
 /// Service responsible for Just-In-Time (JIT) user provisioning.
-/// Handles the creation and retrieval of users during authentication.
+/// Handles the creation, retrieval, and updates of users during authentication.
 /// </summary>
 public interface IUserProvisioningService
 {
     /// <summary>
-    /// Gets an existing user by their external identity.
-    /// Returns null if user is not found.
-    /// </summary>
-    /// <param name="provider">The identity provider</param>
-    /// <param name="externalUserId">The external user ID from the provider (e.g., JWT 'sub' claim)</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The user with their roles and permissions loaded, or null if not found</returns>
-    Task<User?> GetUserAsync(
-        IdentityProvider provider,
-        string externalUserId,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Creates a new user with the specified external identity.
-    /// Used for Just-In-Time (JIT) provisioning during first authentication.
+    /// Creates a new user or updates an existing one (upsert operation).
+    /// If the user doesn't exist, creates them with the provided information.
+    /// If the user exists, updates their profile and last login timestamp.
     /// </summary>
     /// <param name="provider">The identity provider</param>
     /// <param name="externalUserId">The external user ID from the provider (e.g., JWT 'sub' claim)</param>
     /// <param name="email">User's email address</param>
     /// <param name="displayName">User's display name</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The newly created user</returns>
-    Task<User> AddUserAsync(
+    /// <returns>The user with their roles and permissions loaded</returns>
+    Task<User> UpsertUserAsync(
         IdentityProvider provider,
         string externalUserId,
         string? email,
-        string? displayName,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Updates an existing user's profile information from the identity provider.
-    /// </summary>
-    /// <param name="user">The user to update</param>
-    /// <param name="displayName">Updated display name</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Task representing the async operation</returns>
-    Task UpdateUserAsync(
-        User user,
         string? displayName,
         CancellationToken cancellationToken = default);
 }

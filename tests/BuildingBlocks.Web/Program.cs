@@ -1,7 +1,8 @@
 using BuildingBlocks.Modules.Users.Infrastructure;
 using BuildingBlocks.Modules.Users.Infrastructure.Module;
-using BuildingBlocks.Modules.Users.Infrastructure.Extensions;
 using BuildingBlocks.Modules.Users.Web.Endpoints;
+using BuildingBlocks.Modules.Users.Web.Extensions;
+using BuildingBlocks.Modules.Users.Web.Extensions.JwtBearers;
 
 var builder = WebApplication.CreateBuilder(args);
 
