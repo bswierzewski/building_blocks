@@ -112,4 +112,15 @@ public static class MediatRServiceConfigurationExtensions
     {
         return configuration.AddOpenBehavior(typeof(PerformanceBehavior<,>));
     }
+
+    /// <summary>
+    /// Registers MediatR request handlers from the BuildingBlocks.Application assembly.
+    /// This includes shared handlers like GetListEnumValuesHandler.
+    /// </summary>
+    /// <param name="configuration">The MediatR service configuration.</param>
+    /// <returns>The MediatR service configuration for method chaining.</returns>
+    public static MediatRServiceConfiguration AddBuildingBlocksHandlers(this MediatRServiceConfiguration configuration)
+    {
+        return configuration.RegisterServicesFromAssembly(typeof(MediatRServiceConfigurationExtensions).Assembly);
+    }
 }
