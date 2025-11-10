@@ -4,12 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <IsPackable>true</IsPackable>
-    <PackageId>BuildingBlocks.Users</PackageId>
-    <Title>BuildingBlocks Users Module</Title>
-    <Description>Comprehensive user management module for modular monolith applications with support for multiple identity providers (Clerk, Auth0), role-based access control (RBAC), and just-in-time (JIT) user provisioning.</Description>
-    <PackageTags>$(PackageTags);users;authentication;authorization;rbac;permissions;roles;clerk;auth0;jwt;modular-monolith</PackageTags>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <!-- Reference to Domain, Application and Infrastructure layers -->
@@ -17,23 +12,6 @@
     <ProjectReference Include="..\BuildingBlocks.Modules.Users.Domain\BuildingBlocks.Modules.Users.Domain.csproj" />
     <ProjectReference Include="..\BuildingBlocks.Modules.Users.Application\BuildingBlocks.Modules.Users.Application.csproj" />
     <ProjectReference Include="..\BuildingBlocks.Modules.Users.Infrastructure\BuildingBlocks.Modules.Users.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <!-- Include all layer assemblies in the NuGet package -->
-  <PropertyGroup>
-    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeReferencedProjectsInPackage</TargetsForTfmSpecificBuildOutput>
-  </PropertyGroup>
-
-  <Target Name="IncludeReferencedProjectsInPackage">
-    <ItemGroup>
-      <BuildOutputInPackage Include="$(OutputPath)BuildingBlocks.Modules.Users.Domain.dll" />
-      <BuildOutputInPackage Include="$(OutputPath)BuildingBlocks.Modules.Users.Application.dll" />
-      <BuildOutputInPackage Include="$(OutputPath)BuildingBlocks.Modules.Users.Infrastructure.dll" />
-    </ItemGroup>
-  </Target>
-
-  <ItemGroup>
-    <None Include="..\README.md" Pack="true" PackagePath="README.md" />
   </ItemGroup>
 
   <ItemGroup>
