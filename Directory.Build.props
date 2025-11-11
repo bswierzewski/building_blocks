@@ -11,27 +11,5 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <!-- Package Metadata -->
-  <PropertyGroup>
-    <Authors>BuildingBlocks</Authors>
-    <Company>BuildingBlocks</Company>
-    <Product>BuildingBlocks</Product>
-    <Copyright>Copyright © 2025 BuildingBlocks</Copyright>
-    <PackageId>$(MSBuildProjectName)</PackageId>
-    <VersionPrefix>0.0.2</VersionPrefix>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/bswierzewski/building-blocks</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/bswierzewski/building-blocks</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageTags>clean-architecture;building-blocks;dotnet</PackageTags>
-  </PropertyGroup>
-
-  <!-- Package Generation -->
-  <PropertyGroup>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <PackageOutputPath>$(MSBuildThisFileDirectory)artifacts</PackageOutputPath>
-  </PropertyGroup>
 
 </Project>

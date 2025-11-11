@@ -59,17 +59,16 @@ The solution follows Clean Architecture with three main layers:
 
 ## 📦 Installation
 
-### From Source
+### From Source / Git Submodule
 ```bash
+# As a git submodule (recommended)
+git submodule add <repository-url> libs/BuildingBlocks
+
+# Or clone directly
 git clone <repository-url>
 cd building_blocks
 dotnet restore
 dotnet build
-```
-
-### As NuGet Package (Application Layer)
-```bash
-dotnet add package BuildingBlocks.Application
 ```
 
 ## 🔧 Usage

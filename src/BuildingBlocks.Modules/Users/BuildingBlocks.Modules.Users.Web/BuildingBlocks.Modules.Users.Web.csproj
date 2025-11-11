@@ -4,10 +4,8 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-  <!-- Reference to Domain, Application and Infrastructure layers -->
   <ItemGroup>
     <ProjectReference Include="..\BuildingBlocks.Modules.Users.Domain\BuildingBlocks.Modules.Users.Domain.csproj" />
     <ProjectReference Include="..\BuildingBlocks.Modules.Users.Application\BuildingBlocks.Modules.Users.Application.csproj" />
