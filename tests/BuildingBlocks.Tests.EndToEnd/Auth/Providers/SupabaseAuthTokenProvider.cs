@@ -1,66 +1,77 @@
-using Supabase;
-using BuildingBlocks.Tests.EndToEnd.Auth;
+using System.ComponentModel.DataAnnotations;
 using BuildingBlocks.Tests.EndToEnd.Options;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
+using Supabase;
 
 namespace BuildingBlocks.Tests.EndToEnd.Auth.Providers;
 
 /// <summary>
 /// Fetches JWT tokens from Supabase by authenticating with email/password.
-/// Requires SupabaseOptions to be configured with URL, KEY, TEST_EMAIL, and TEST_PASSWORD.
+/// Configuration is loaded lazily from IConfiguration only when this provider is used.
+/// Token is cached internally after first fetch.
 /// </summary>
 public class SupabaseAuthTokenProvider : IAuthTokenProvider
 {
-    private readonly string _url;
-    private readonly string _key;
-    private readonly string _email;
-    private readonly string _password;
+    private readonly SupabaseAuthOptions _options;
+    private string? _cachedToken;
+    private readonly SemaphoreSlim _lock = new(1, 1);
 
     /// <summary>
     /// Initializes a new instance of the SupabaseAuthTokenProvider class.
+    /// Loads configuration from IConfiguration and validates it.
     /// </summary>
-    /// <param name="options">The Supabase authentication options.</param>
-    /// <exception cref="InvalidOperationException">Thrown when required Supabase options are not set.</exception>
-    public SupabaseAuthTokenProvider(IOptions<SupabaseAuthOptions> options)
+    /// <param name="configuration">The configuration to load Supabase settings from.</param>
+    /// <exception cref="ValidationException">Thrown when required configuration is missing.</exception>
+    public SupabaseAuthTokenProvider(IConfiguration configuration)
     {
-        var opts = options.Value;
+        _options = new SupabaseAuthOptions();
+        configuration.GetSection(SupabaseAuthOptions.SectionName).Bind(_options);
 
-        _url = opts.Url
-            ?? throw new InvalidOperationException("Supabase URL configuration is required");
-
-        _key = opts.Key
-            ?? throw new InvalidOperationException("Supabase Key configuration is required");
-
-        _email = opts.TestEmail
-            ?? throw new InvalidOperationException("Supabase TestEmail configuration is required");
-
-        _password = opts.TestPassword
-            ?? throw new InvalidOperationException("Supabase TestPassword configuration is required");
+        // Validate configuration using DataAnnotations
+        var validationContext = new ValidationContext(_options);
+        Validator.ValidateObject(_options, validationContext, validateAllProperties: true);
     }
 
     /// <summary>
     /// Gets a JWT token from Supabase by authenticating with email and password.
+    /// Token is cached after first fetch and reused for subsequent calls.
     /// </summary>
     /// <returns>A task that returns the JWT token string.</returns>
     /// <exception cref="InvalidOperationException">Thrown when authentication with Supabase fails.</exception>
-    public async Task<string> GetTokenAsync()
+    public async Task<string?> GetTokenAsync()
     {
-        var options = new SupabaseOptions
+        // Return cached token if available
+        if (_cachedToken != null)
+            return _cachedToken;
+
+        // Use semaphore to ensure only one authentication happens
+        await _lock.WaitAsync();
+        try
         {
-            AutoRefreshToken = false,
-            AutoConnectRealtime = false
-        };
+            // Double-check after acquiring lock
+            if (_cachedToken != null)
+                return _cachedToken;
 
-        var client = new Client(_url, _key, options);
-        await client.InitializeAsync();
+            var supabaseOptions = new SupabaseOptions
+            {
+                AutoRefreshToken = false,
+                AutoConnectRealtime = false
+            };
 
-        var session = await client.Auth.SignIn(_email, _password);
+            var client = new Client(_options.Url, _options.Key, supabaseOptions);
+            await client.InitializeAsync();
 
-        if (session?.AccessToken == null)
-        {
-            throw new InvalidOperationException("Failed to authenticate with Supabase. Check credentials.");
+            var session = await client.Auth.SignIn(_options.TestEmail, _options.TestPassword);
+
+            if (session?.AccessToken == null)
+                throw new InvalidOperationException("Failed to authenticate with Supabase. Check credentials.");
+
+            _cachedToken = session.AccessToken;
+            return _cachedToken;
         }
-
-        return session.AccessToken;
+        finally
+        {
+            _lock.Release();
+        }
     }
 }
