@@ -16,7 +16,11 @@ internal static class EnvironmentModuleInitializer
     [ModuleInitializer]
     public static void Initialize()
     {
-        if (File.Exists(".env"))
-            Env.Load();
+        Console.WriteLine($"[{nameof(EnvironmentModuleInitializer)}] Current Directory: {Directory.GetCurrentDirectory()}");
+
+        // Find and load .env file from current directory or parent directories
+        var envPath = Env.TraversePath().Load();
+
+        Console.WriteLine($"[{nameof(EnvironmentModuleInitializer)}] .env found and loaded (count: {envPath.Count()})");
     }
 }
