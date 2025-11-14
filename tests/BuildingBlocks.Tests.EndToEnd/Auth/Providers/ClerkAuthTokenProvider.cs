@@ -1,13 +1,14 @@
-using BuildingBlocks.Tests.EndToEnd.Auth;
+using System.ComponentModel.DataAnnotations;
 using BuildingBlocks.Tests.EndToEnd.Options;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 
 namespace BuildingBlocks.Tests.EndToEnd.Auth.Providers;
 
 /// <summary>
 /// Returns a static JWT token from Clerk.
-/// Requires ClerkOptions to be configured with TestToken.
+/// Configuration is loaded lazily from IConfiguration only when this provider is used.
 /// For Clerk, tokens are typically obtained manually through the dashboard or frontend and provided as static values.
+/// Token is cached internally after first fetch.
 /// </summary>
 public class ClerkAuthTokenProvider : IAuthTokenProvider
 {
@@ -15,23 +16,32 @@ public class ClerkAuthTokenProvider : IAuthTokenProvider
 
     /// <summary>
     /// Initializes a new instance of the ClerkAuthTokenProvider class.
+    /// Loads configuration from IConfiguration and validates it.
+    /// Token is cached during initialization.
     /// </summary>
-    /// <param name="options">The Clerk authentication options.</param>
-    /// <exception cref="InvalidOperationException">Thrown when required Clerk options are not set.</exception>
-    public ClerkAuthTokenProvider(IOptions<ClerkAuthOptions> options)
+    /// <param name="configuration">The configuration to load Clerk settings from.</param>
+    /// <exception cref="ValidationException">Thrown when required configuration is missing.</exception>
+    public ClerkAuthTokenProvider(IConfiguration configuration)
     {
-        var opts = options.Value;
+        var options = new ClerkAuthOptions();
+        configuration.GetSection(ClerkAuthOptions.SectionName)
+            .Bind(options);
 
-        _token = opts.TestToken
-            ?? throw new InvalidOperationException("Clerk TestToken configuration is required");
+        // Validate configuration using DataAnnotations
+        var validationContext = new ValidationContext(options);
+        Validator.ValidateObject(options, validationContext, validateAllProperties: true);
+
+        // Cache token during initialization
+        _token = options.TestToken;
     }
 
     /// <summary>
-    /// Gets the static JWT token from environment variables.
+    /// Gets the static JWT token from configuration.
+    /// Token is cached and returned immediately.
     /// </summary>
     /// <returns>A task that returns the JWT token string.</returns>
-    public Task<string> GetTokenAsync()
+    public Task<string?> GetTokenAsync()
     {
-        return Task.FromResult(_token);
+        return Task.FromResult<string?>(_token);
     }
 }

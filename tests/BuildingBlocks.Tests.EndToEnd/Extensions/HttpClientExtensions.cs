@@ -41,13 +41,19 @@ public static class HttpClientExtensions
 
     /// <summary>
     /// Deserializes the response content as JSON to the specified type.
+    /// Returns default value if content is empty or whitespace.
     /// </summary>
     /// <typeparam name="T">The type to deserialize to.</typeparam>
     /// <param name="response">The HTTP response message.</param>
-    /// <returns>The deserialized object.</returns>
+    /// <returns>The deserialized object or default value if content is empty.</returns>
     public static async Task<T?> ReadAsJsonAsync<T>(this HttpResponseMessage response)
     {
         var content = await response.Content.ReadAsStringAsync();
+
+        // Return default if content is empty or whitespace
+        if (string.IsNullOrWhiteSpace(content))
+            return default;
+
         return JsonSerializer.Deserialize<T>(content, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true

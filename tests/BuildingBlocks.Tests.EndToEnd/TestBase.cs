@@ -1,4 +1,3 @@
-using BuildingBlocks.Tests.EndToEnd.Auth;
 using BuildingBlocks.Tests.EndToEnd.Extensions;
 using BuildingBlocks.Tests.EndToEnd.Factories;
 using Microsoft.AspNetCore.TestHost;
@@ -11,12 +10,7 @@ namespace BuildingBlocks.Tests.EndToEnd;
 /// Base class for E2E tests providing common setup, cleanup, and utility methods.
 /// Manages test isolation through database resets and service configuration hooks.
 /// </summary>
-/// <remarks>
-/// Initializes a new instance of the TestBase class.
-/// </remarks>
-/// <param name="factory">The test web application factory.</param>
-/// <param name="authFixture">The authentication fixture providing test tokens.</param>
-public abstract class TestBase(ITestWebApplicationFactory factory, AuthFixture authFixture) : IAsyncLifetime
+public abstract class TestBase(ITestWebApplicationFactory factory) : IAsyncLifetime
 {
     // Fields
     private readonly ITestWebApplicationFactory _factory = factory;
@@ -39,7 +33,7 @@ public abstract class TestBase(ITestWebApplicationFactory factory, AuthFixture a
     protected virtual bool RequiresServiceCustomization => false;
 
     /// <summary>
-    /// Initializes the test by resetting databases, creating an HTTP client, and applying bearer token authentication.
+    /// Initializes the test by resetting databases and creating an HTTP client.
     /// </summary>
     public async Task InitializeAsync()
     {
@@ -54,8 +48,6 @@ public abstract class TestBase(ITestWebApplicationFactory factory, AuthFixture a
 
         Client = factory.CreateClient();
         Services = factory.Services;
-
-        Client.WithBearerToken(authFixture.AuthToken);
 
         await OnInitializeAsync();
     }

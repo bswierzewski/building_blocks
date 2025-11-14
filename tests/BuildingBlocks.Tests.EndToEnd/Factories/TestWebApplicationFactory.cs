@@ -1,7 +1,11 @@
+using BuildingBlocks.Tests.EndToEnd.Auth;
+using BuildingBlocks.Tests.EndToEnd.Auth.Providers;
+using BuildingBlocks.Tests.EndToEnd.Options;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Respawn;
@@ -121,12 +125,37 @@ public abstract class TestWebApplicationFactory<TProgram> : WebApplicationFactor
     }
 
     /// <summary>
+    /// Configures common services for all test applications, including authentication provider selection.
     /// Override this method to configure additional services for the test application.
+    /// IAuthTokenProvider is registered as singleton - provider is created once and caches token internally.
+    /// Each provider validates its own configuration using DataAnnotations when instantiated.
     /// </summary>
     /// <param name="services">The service collection to modify.</param>
     protected virtual void OnConfigureServices(IServiceCollection services)
     {
-        // Base implementation does nothing - subclasses override to configure additional services
+        // Configure provider selection - only this is loaded eagerly
+        // Provider-specific options (Supabase, Clerk) are loaded lazily by providers themselves
+        services.AddOptions<AuthProviderOptions>()
+            .Configure<IConfiguration>((options, configuration) =>
+            {
+                configuration.GetSection(AuthProviderOptions.SectionName).Bind(options);
+            });
+
+        // Register IAuthTokenProvider as singleton
+        // Provider is created once and validates its config in constructor (like ValidateOnStart)
+        services.AddSingleton<IAuthTokenProvider>(sp =>
+        {
+            var providerOptions = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<AuthProviderOptions>>();
+            var configuration = sp.GetRequiredService<IConfiguration>();
+
+            return providerOptions.Value.Provider switch
+            {
+                AuthProvider.None => new NoneAuthTokenProvider(),
+                AuthProvider.Supabase => new SupabaseAuthTokenProvider(configuration),
+                AuthProvider.Clerk => new ClerkAuthTokenProvider(configuration),
+                _ => throw new InvalidOperationException($"Unknown provider: {providerOptions.Value.Provider}")
+            };
+        });
     }
 
     /// <summary>
@@ -134,6 +163,6 @@ public abstract class TestWebApplicationFactory<TProgram> : WebApplicationFactor
     /// </summary>
     ITestWebApplicationFactory ITestWebApplicationFactory.WithWebHostBuilder(Action<IWebHostBuilder> configure)
     {
-        return (ITestWebApplicationFactory)this.WithWebHostBuilder(configure);
+        return (ITestWebApplicationFactory)WithWebHostBuilder(configure);
     }
 }

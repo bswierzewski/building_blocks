@@ -6,6 +6,11 @@ namespace BuildingBlocks.Tests.EndToEnd.Auth;
 public enum AuthProvider
 {
     /// <summary>
+    /// No authentication provider - tests will run without authentication.
+    /// </summary>
+    None = 0,
+
+    /// <summary>
     /// Supabase authentication provider.
     /// </summary>
     Supabase,
