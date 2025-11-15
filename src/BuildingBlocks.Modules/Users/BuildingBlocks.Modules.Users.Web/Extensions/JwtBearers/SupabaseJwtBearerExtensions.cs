@@ -2,7 +2,7 @@ using System.Security.Claims;
 using System.Text;
 using BuildingBlocks.Modules.Users.Application.Abstractions;
 using BuildingBlocks.Modules.Users.Domain.Enums;
-using BuildingBlocks.Modules.Users.Web.Options;
+using BuildingBlocks.Shared.Options;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
@@ -104,7 +104,7 @@ public static class SupabaseJwtBearerExtensions
 
                 // Set issuer validation
                 jwtOptions.TokenValidationParameters.ValidIssuer =
-                    $"{supabaseOptions.Value.ProjectUrl}/auth/v1";
+                    $"{supabaseOptions.Value.Authority}/auth/v1";
 
                 // Set audience if provided
                 if (!string.IsNullOrWhiteSpace(supabaseOptions.Value.Audience))

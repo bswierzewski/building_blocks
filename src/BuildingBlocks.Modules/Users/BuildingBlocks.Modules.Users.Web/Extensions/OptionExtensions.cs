@@ -1,4 +1,4 @@
-using BuildingBlocks.Modules.Users.Web.Options;
+using BuildingBlocks.Shared.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,9 +17,6 @@ public static class OptionExtensions
     /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddClerkOptions(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<ClerkOptions>(configuration.GetSection(ClerkOptions.SectionName));
-
-        // Add validation
         services.AddOptions<ClerkOptions>()
             .Bind(configuration.GetSection(ClerkOptions.SectionName))
             .ValidateDataAnnotations()
@@ -36,9 +33,6 @@ public static class OptionExtensions
     /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddAuth0Options(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<Auth0Options>(configuration.GetSection(Auth0Options.SectionName));
-
-        // Add validation
         services.AddOptions<Auth0Options>()
             .Bind(configuration.GetSection(Auth0Options.SectionName))
             .ValidateDataAnnotations()
@@ -55,9 +49,6 @@ public static class OptionExtensions
     /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddSupabaseOptions(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<SupabaseOptions>(configuration.GetSection(SupabaseOptions.SectionName));
-
-        // Add validation
         services.AddOptions<SupabaseOptions>()
             .Bind(configuration.GetSection(SupabaseOptions.SectionName))
             .ValidateDataAnnotations()
