@@ -15,6 +15,7 @@ public class AuthProviderOptions
     /// <summary>
     /// Gets or sets the authentication provider type.
     /// Default is None (no authentication).
+    /// Valid values: None, Supabase, Auth0, Clerk
     /// </summary>
     public AuthProvider Provider { get; set; } = AuthProvider.None;
 }

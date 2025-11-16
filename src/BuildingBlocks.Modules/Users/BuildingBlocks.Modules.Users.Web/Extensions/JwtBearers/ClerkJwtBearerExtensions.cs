@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using BuildingBlocks.Modules.Users.Application.Abstractions;
+using BuildingBlocks.Modules.Users.Application.Options;
 using BuildingBlocks.Modules.Users.Domain.Enums;
-using BuildingBlocks.Shared.Options;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;

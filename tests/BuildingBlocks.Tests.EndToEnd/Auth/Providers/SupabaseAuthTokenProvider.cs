@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using BuildingBlocks.Tests.EndToEnd.Options;
 using Microsoft.Extensions.Configuration;
-using Supabase;
 
 namespace BuildingBlocks.Tests.EndToEnd.Auth.Providers;
 
@@ -12,7 +11,7 @@ namespace BuildingBlocks.Tests.EndToEnd.Auth.Providers;
 /// </summary>
 public class SupabaseAuthTokenProvider : IAuthTokenProvider
 {
-    private readonly SupabaseAuthOptions _options;
+    private readonly SupabaseOptions _options;
     private string? _cachedToken;
     private readonly SemaphoreSlim _lock = new(1, 1);
 
@@ -24,8 +23,8 @@ public class SupabaseAuthTokenProvider : IAuthTokenProvider
     /// <exception cref="ValidationException">Thrown when required configuration is missing.</exception>
     public SupabaseAuthTokenProvider(IConfiguration configuration)
     {
-        _options = new SupabaseAuthOptions();
-        configuration.GetSection(SupabaseAuthOptions.SectionName).Bind(_options);
+        _options = new SupabaseOptions();
+        configuration.GetSection(SupabaseOptions.SectionName).Bind(_options);
 
         // Validate configuration using DataAnnotations
         var validationContext = new ValidationContext(_options);
@@ -52,13 +51,13 @@ public class SupabaseAuthTokenProvider : IAuthTokenProvider
             if (_cachedToken != null)
                 return _cachedToken;
 
-            var supabaseOptions = new SupabaseOptions
+            var supabaseOptions = new Supabase.SupabaseOptions
             {
                 AutoRefreshToken = false,
                 AutoConnectRealtime = false
             };
 
-            var client = new Client(_options.Url, _options.Key, supabaseOptions);
+            var client = new Supabase.Client(_options.Url, _options.Key, supabaseOptions);
             await client.InitializeAsync();
 
             var session = await client.Auth.SignIn(_options.TestEmail, _options.TestPassword);

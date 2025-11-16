@@ -23,8 +23,8 @@ public class ClerkAuthTokenProvider : IAuthTokenProvider
     /// <exception cref="ValidationException">Thrown when required configuration is missing.</exception>
     public ClerkAuthTokenProvider(IConfiguration configuration)
     {
-        var options = new ClerkAuthOptions();
-        configuration.GetSection(ClerkAuthOptions.SectionName)
+        var options = new ClerkOptions();
+        configuration.GetSection(ClerkOptions.SectionName)
             .Bind(options);
 
         // Validate configuration using DataAnnotations

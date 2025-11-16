@@ -1,4 +1,4 @@
-using BuildingBlocks.Shared.Options;
+using BuildingBlocks.Modules.Users.Application.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

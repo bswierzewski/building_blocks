@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace BuildingBlocks.Shared.Options;
+namespace BuildingBlocks.Modules.Users.Application.Options;
 
 /// <summary>
 /// Configuration options for Auth0 authentication provider.

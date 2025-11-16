@@ -3,18 +3,18 @@ using System.ComponentModel.DataAnnotations;
 namespace BuildingBlocks.Tests.EndToEnd.Options;
 
 /// <summary>
-/// Clerk authentication configuration.
+/// Clerk authentication configuration for E2E tests.
 /// </summary>
-public class ClerkAuthOptions
+public class ClerkOptions
 {
     /// <summary>
     /// Configuration section name for binding.
     /// </summary>
-    public const string SectionName = "Authentication:Clerk";
+    public const string SectionName = "Clerk";
 
     /// <summary>
     /// Gets or sets the Clerk test token.
     /// </summary>
-    [Required(ErrorMessage = "Clerk TestToken configuration is required")]
+    [Required(ErrorMessage = "TestToken is required")]
     public string TestToken { get; set; } = null!;
 }
