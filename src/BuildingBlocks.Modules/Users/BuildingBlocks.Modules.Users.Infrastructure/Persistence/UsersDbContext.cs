@@ -46,6 +46,7 @@ public class UsersDbContext : DbContext, IUsersWriteDbContext, IUsersReadDbConte
     /// <summary>
     /// Initializes a new instance of the UsersDbContext.
     /// </summary>
+    /// <param name="options">The DbContext options.</param>
     public UsersDbContext(DbContextOptions<UsersDbContext> options) : base(options)
     {
     }

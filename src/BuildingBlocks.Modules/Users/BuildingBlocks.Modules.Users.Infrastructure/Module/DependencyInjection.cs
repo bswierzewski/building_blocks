@@ -1,5 +1,6 @@
 using System.Reflection;
 using BuildingBlocks.Modules.Users.Application.Abstractions;
+using BuildingBlocks.Modules.Users.Infrastructure.Options;
 using BuildingBlocks.Modules.Users.Infrastructure.Persistence;
 using BuildingBlocks.Modules.Users.Infrastructure.Services;
 using BuildingBlocks.Modules.Users.Infrastructure.HostedServices;
@@ -8,6 +9,7 @@ using BuildingBlocks.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace BuildingBlocks.Modules.Users.Infrastructure.Module;
 
@@ -23,6 +25,10 @@ public static class DependencyInjection
     {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
+        // Register database options from configuration
+        services.Configure<UsersDatabaseOptions>(
+            configuration.GetSection(UsersDatabaseOptions.SectionName));
+
         // Register EF Core interceptors
         services
             .AddMigrationService<UsersDbContext>()
@@ -32,7 +38,9 @@ public static class DependencyInjection
         // Register DbContext with PostgreSQL
         services.AddDbContext<UsersDbContext>((sp, options) =>
         {
-            options.UseNpgsql(configuration.GetConnectionString("UsersConnection"))
+            var dbOptions = sp.GetRequiredService<IOptions<UsersDatabaseOptions>>().Value;
+
+            options.UseNpgsql(dbOptions.ConnectionString)
                    .AddInterceptors(sp.GetServices<Microsoft.EntityFrameworkCore.Diagnostics.ISaveChangesInterceptor>());
         });
 

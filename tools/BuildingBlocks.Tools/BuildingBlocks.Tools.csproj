@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>BuildingBlocks.Tools</RootNamespace>
+    <AssemblyName>BuildingBlocks.Tools</AssemblyName>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>bb-tools</ToolCommandName>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\BuildingBlocks.Core\BuildingBlocks.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" />
+  </ItemGroup>
+
+</Project>

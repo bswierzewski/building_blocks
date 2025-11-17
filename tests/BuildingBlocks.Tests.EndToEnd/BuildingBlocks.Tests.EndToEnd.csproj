@@ -36,6 +36,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\BuildingBlocks.Infrastructure\BuildingBlocks.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks.Extensions\BuildingBlocks.Extensions.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks.Core\BuildingBlocks.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
