@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\BuildingBlocks.Tools\BuildingBlocks.Tools.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks.Abstractions\BuildingBlocks.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks.Tools\BuildingBlocks.Tools.csproj" />
   </ItemGroup>
 
   <ItemGroup>
