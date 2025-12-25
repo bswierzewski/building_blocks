@@ -84,6 +84,6 @@ public static class OpenApiExtensions
             });
 
             return options;
-        }
+        }        
     }
 }

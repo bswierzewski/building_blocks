@@ -25,6 +25,7 @@ public static class ZitadelJwtBearerExtensions
 
                     jwt.Authority = options.Authority;
                     jwt.Audience = options.Audience;
+                    jwt.RequireHttpsMetadata = false;
                     jwt.TokenValidationParameters.NameClaimType = ClaimTypes.Name;
                     jwt.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
 

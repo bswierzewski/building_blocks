@@ -8,6 +8,5 @@ namespace BuildingBlocks.Infrastructure.Options
 
         public required string Authority { get; init; }
         public required string Audience { get; init; }
-
     }
 }
