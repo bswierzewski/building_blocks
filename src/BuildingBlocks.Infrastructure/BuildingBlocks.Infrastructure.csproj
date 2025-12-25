@@ -8,6 +8,8 @@
 		<PackageReference Include="ErrorOr" />
 		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" />
 		<PackageReference Include="Serilog.AspNetCore" />
 	</ItemGroup>
 
