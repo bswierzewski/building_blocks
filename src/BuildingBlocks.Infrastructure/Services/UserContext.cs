@@ -12,18 +12,13 @@ public class UserContext(IHttpContextAccessor httpContextAccessor) : IUserContex
     {
         get
         {
-            var subClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                ?? User?.FindFirst("sub")?.Value;
+            var idClaim = User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            return subClaim != null && Guid.TryParse(subClaim, out var id)
+            return idClaim != null && Guid.TryParse(idClaim, out var id)
                 ? id
                 : Guid.Empty;
         }
     }
-
-    public string Email => User?.FindFirst(ClaimTypes.Email)?.Value
-        ?? User?.FindFirst("email")?.Value
-        ?? string.Empty;
 
     public IEnumerable<string> Roles => User?.Claims
         .Where(c => c.Type == ClaimTypes.Role)

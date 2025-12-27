@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text.Json;
 
 namespace BuildingBlocks.Infrastructure.Extensions.JwtBearer;
@@ -43,6 +44,18 @@ public static class ZitadelJwtBearerExtensions
     {
         if (context.Principal?.Identity is not ClaimsIdentity identity)
             return Task.CompletedTask;
+
+        var subClaim = identity.FindFirst(ClaimTypes.NameIdentifier) ?? identity.FindFirst("sub");
+
+        if (subClaim != null)
+        {
+            var hash = MD5.HashData(System.Text.Encoding.Default.GetBytes(subClaim.Value));
+            var generatedGuid = new Guid(hash);
+
+            // Podmieniamy claim na wygenerowany GUID
+            identity.RemoveClaim(subClaim);
+            identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, generatedGuid.ToString()));
+        }
 
         var roleClaim = identity.FindFirst("urn:zitadel:iam:org:project:roles");
 

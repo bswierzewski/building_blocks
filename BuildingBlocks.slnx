@@ -4,16 +4,10 @@
         <File Path="Directory.Build.props" />
         <File Path="Directory.Packages.props" />
         <File Path="docker-compose.yml" />
-        <File Path="nuget.config" />
     </Folder>
     <Folder Name="/src/">
         <Project Path="src/BuildingBlocks.Abstractions/BuildingBlocks.Abstractions.csproj" />
-        <Project Path="src/BuildingBlocks.Host/BuildingBlocks.Host.csproj" />
         <Project Path="src/BuildingBlocks.Infrastructure/BuildingBlocks.Infrastructure.csproj" />
         <Project Path="src/BuildingBlocks.Tests/BuildingBlocks.Tests.csproj" />
-        <Project Path="src/BuildingBlocks.Tools/BuildingBlocks.Tools.csproj" />
-    </Folder>
-    <Folder Name="/tests/">
-        <Project Path="tests/BuildingBlocks.Tools.Tests.Unit/BuildingBlocks.Tools.Tests.Unit.csproj" />
     </Folder>
 </Solution>

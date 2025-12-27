@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
@@ -14,16 +13,7 @@ public static class OpenApiExtensions
         {
             options.CustomizeProblemDetails = context =>
             {
-                // Add timestamp to all Problem Details
                 context.ProblemDetails.Extensions["timestamp"] = DateTime.UtcNow;
-
-                // In Development: Add exception details for debugging
-                if (environment.IsDevelopment() && context.Exception is not null)
-                {
-                    context.ProblemDetails.Extensions["exceptionType"] = context.Exception.GetType().Name;
-                    context.ProblemDetails.Extensions["exceptionMessage"] = context.Exception.Message;
-                    context.ProblemDetails.Extensions["stackTrace"] = context.Exception.StackTrace;
-                }
             };
 
             return options;
@@ -34,56 +24,85 @@ public static class OpenApiExtensions
     {
         public OpenApiOptions AddProblemDetailsSchemas()
         {
-            options.AddSchemaTransformer((schema, context, cancellationToken) =>
+            options.AddDocumentTransformer((document, context, cancellationToken) =>
             {
-                if (context.JsonTypeInfo.Type != typeof(ProblemDetails) &&
-                    !context.JsonTypeInfo.Type.IsSubclassOf(typeof(ProblemDetails)))
-                {
-                    return Task.CompletedTask;
-                }
+                // Ensure components exist
+                document.Components ??= new OpenApiComponents();
+                document.Components.Schemas ??= new Dictionary<string, OpenApiSchema>();
 
-                schema.Properties ??= new Dictionary<string, OpenApiSchema>();
+                // Add ProblemDetails schema
+                document.Components.Schemas["ProblemDetails"] = CreateProblemDetailsSchema();
 
-                if (!schema.Properties.ContainsKey("traceId"))
-                {
-                    schema.Properties["traceId"] = new OpenApiSchema
-                    {
-                        Type = "string",
-                        Description = "The trace identifier for request tracking and debugging.",
-                        ReadOnly = true
-                    };
-                }
-
-                if (!schema.Properties.ContainsKey("timestamp"))
-                {
-                    schema.Properties["timestamp"] = new OpenApiSchema
-                    {
-                        Type = "string",
-                        Format = "date-time", // Format ISO 8601
-                        Description = "The timestamp when the error occurred (UTC).",
-                        ReadOnly = true
-                    };
-                }
-
-                if (!schema.Properties.ContainsKey("errors"))
-                {
-                    schema.Properties["errors"] = new OpenApiSchema
-                    {
-                        Type = "object",
-                        Description = "Validation errors grouped by field name.",
-                        // Definicja Dictionary<string, string[]> w OpenAPI:
-                        AdditionalProperties = new OpenApiSchema
-                        {
-                            Type = "array",
-                            Items = new OpenApiSchema { Type = "string" }
-                        }
-                    };
-                }
+                // Add default error response to all operations for client generators (Orval, etc.)
+                AddDefaultErrorResponse(document);
 
                 return Task.CompletedTask;
             });
 
             return options;
-        }        
+        }
+    }
+
+    private static OpenApiSchema CreateProblemDetailsSchema() => new()
+    {
+        Type = "object",
+        Description = "RFC 7807 Problem Details for HTTP APIs",
+        Properties = new Dictionary<string, OpenApiSchema>
+        {
+            ["type"] = new() { Type = "string", Description = "A URI reference that identifies the problem type." },
+            ["title"] = new() { Type = "string", Description = "A short, human-readable summary of the problem type." },
+            ["status"] = new() { Type = "integer", Format = "int32", Description = "The HTTP status code." },
+            ["detail"] = new() { Type = "string", Description = "A human-readable explanation specific to this occurrence." },
+            ["instance"] = new() { Type = "string", Description = "A URI reference that identifies the specific occurrence." },
+            ["traceId"] = new() { Type = "string", Description = "The trace identifier for request tracking." },
+            ["timestamp"] = new() { Type = "string", Format = "date-time", Description = "The timestamp when the error occurred (UTC)." },
+            ["errors"] = new()
+            {
+                Type = "object",
+                Description = "Validation errors grouped by field name.",
+                AdditionalProperties = new OpenApiSchema
+                {
+                    Type = "array",
+                    Items = new OpenApiSchema { Type = "string" }
+                }
+            }
+        }
+    };
+
+    private static void AddDefaultErrorResponse(OpenApiDocument document)
+    {
+        if (document.Paths == null) return;
+
+        foreach (var path in document.Paths.Values)
+        {
+            foreach (var operation in path.Operations.Values)
+            {
+                operation.Responses ??= [];
+
+                // Add only "default" response (represents any undefined error code)
+                // This is minimal and tells client generators (like Orval) that errors are ProblemDetails
+                if (operation.Responses.ContainsKey("default"))
+                    continue;
+
+                operation.Responses["default"] = new OpenApiResponse
+                {
+                    Description = "Error response",
+                    Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        ["application/problem+json"] = new OpenApiMediaType
+                        {
+                            Schema = new OpenApiSchema
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.Schema,
+                                    Id = "ProblemDetails"
+                                }
+                            }
+                        }
+                    }
+                };
+            }
+        }
     }
 }
