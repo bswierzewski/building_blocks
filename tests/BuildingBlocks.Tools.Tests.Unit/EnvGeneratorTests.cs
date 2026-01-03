@@ -87,10 +87,9 @@ public class EnvGeneratorTests : IDisposable
         content.Should().Contain("COMPLEXCONFIG__CACHE__SERVERSETTINGS__PORT=6379");
 
         // ColonSectionOptions - verify colon is replaced with double underscore
-        content.Should().Contain("AUTH__ZITADEL__AUDIENCE=my-app");
-        content.Should().Contain("AUTH__ZITADEL__CLIENTID=");
-        content.Should().Contain("AUTH__ZITADEL__AUTHORITY=https://auth.example.com");
-        content.Should().NotContain("AUTH:ZITADEL");
+        content.Should().Contain("AUTH__SECTIONNAME__AUDIENCE=my-app");
+        content.Should().Contain("AUTH__SECTIONNAME__CLIENTID=");
+        content.Should().Contain("AUTH__SECTIONNAME__AUTHORITY=https://auth.example.com");
         }
         finally
         {

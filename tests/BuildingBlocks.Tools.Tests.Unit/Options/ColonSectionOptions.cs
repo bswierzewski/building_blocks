@@ -11,7 +11,7 @@ public class ColonSectionOptions : IOptions
     /// <summary>
     /// The configuration section name with colon.
     /// </summary>
-    public static string SectionName => "Auth:Zitadel";
+    public static string SectionName => "Auth:SectionName";
 
     public string Audience { get; set; } = "my-app";
     public string ClientId { get; set; } = string.Empty;
