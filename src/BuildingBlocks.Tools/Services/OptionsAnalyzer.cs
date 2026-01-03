@@ -60,7 +60,7 @@ internal class OptionsAnalyzer
                     // Check if implements IOptions (directly or through inheritance)
                     if (ImplementsInterface(classSymbol, iOptionsSymbol))
                     {
-                        var sectionName = GetSectionName(classSymbol);
+                        var sectionName = GetSectionName(classSymbol, compilation);
                         if (sectionName == null)
                         {
                             Console.WriteLine($"  Warning: Class {classSymbol.Name} implements IOptions but has no SectionName property");
@@ -89,7 +89,7 @@ internal class OptionsAnalyzer
         return classSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, interfaceSymbol));
     }
 
-    private static string? GetSectionName(INamedTypeSymbol classSymbol)
+    private static string? GetSectionName(INamedTypeSymbol classSymbol, Compilation compilation)
     {
         var sectionNameProperty = classSymbol.GetMembers(SectionNameProperty)
             .OfType<IPropertySymbol>()
@@ -98,32 +98,90 @@ internal class OptionsAnalyzer
         if (sectionNameProperty == null)
             return null;
 
-        // Try to get the constant value from syntax
+        // Try to get the value from syntax using semantic model
         foreach (var syntaxRef in classSymbol.DeclaringSyntaxReferences)
         {
             var syntax = syntaxRef.GetSyntax();
-            if (syntax is ClassDeclarationSyntax classDecl)
+            if (syntax is not ClassDeclarationSyntax classDecl)
+                continue;
+
+            var propDecl = classDecl.Members
+                .OfType<PropertyDeclarationSyntax>()
+                .FirstOrDefault(p => p.Identifier.Text == SectionNameProperty);
+
+            if (propDecl == null)
+                continue;
+
+            // Get the semantic model for this syntax tree
+            var semanticModel = compilation.GetSemanticModel(syntaxRef.SyntaxTree);
+
+            // Try expression body: public static string SectionName => "value";
+            if (propDecl.ExpressionBody?.Expression != null)
             {
-                var propDecl = classDecl.Members
-                    .OfType<PropertyDeclarationSyntax>()
-                    .FirstOrDefault(p => p.Identifier.Text == SectionNameProperty);
+                var value = EvaluateExpressionAsString(propDecl.ExpressionBody.Expression, semanticModel);
+                if (value != null)
+                    return value;
+            }
 
-                if (propDecl?.ExpressionBody?.Expression is LiteralExpressionSyntax literal)
+            // Try accessor get expression: public static string SectionName { get => "value"; }
+            if (propDecl.AccessorList != null)
+            {
+                var getter = propDecl.AccessorList.Accessors
+                    .FirstOrDefault(a => a.Kind() == SyntaxKind.GetAccessorDeclaration);
+
+                if (getter?.ExpressionBody?.Expression != null)
                 {
-                    return literal.Token.ValueText;
+                    var value = EvaluateExpressionAsString(getter.ExpressionBody.Expression, semanticModel);
+                    if (value != null)
+                        return value;
                 }
+            }
+        }
 
-                if (propDecl?.AccessorList != null)
+        return null;
+    }
+
+    private static string? EvaluateExpressionAsString(ExpressionSyntax expression, SemanticModel semanticModel)
+    {
+        // Handle literal strings: "value"
+        if (expression is LiteralExpressionSyntax literal && literal.Token.Value is string strValue)
+        {
+            return strValue;
+        }
+
+        // Handle interpolated strings: $"Prefix:{Constant}"
+        if (expression is InterpolatedStringExpressionSyntax interpolated)
+        {
+            var result = new System.Text.StringBuilder();
+            foreach (var content in interpolated.Contents)
+            {
+                if (content is InterpolatedStringTextSyntax text)
                 {
-                    var getter = propDecl.AccessorList.Accessors
-                        .FirstOrDefault(a => a.Kind() == SyntaxKind.GetAccessorDeclaration);
-
-                    if (getter?.ExpressionBody?.Expression is LiteralExpressionSyntax getterLiteral)
+                    result.Append(text.TextToken.ValueText);
+                }
+                else if (content is InterpolationSyntax interpolation)
+                {
+                    // Try to evaluate the interpolation expression
+                    var constantValue = semanticModel.GetConstantValue(interpolation.Expression);
+                    if (constantValue.HasValue && constantValue.Value != null)
                     {
-                        return getterLiteral.Token.ValueText;
+                        result.Append(constantValue.Value.ToString());
+                    }
+                    else
+                    {
+                        // Can't evaluate at compile time
+                        return null;
                     }
                 }
             }
+            return result.ToString();
+        }
+
+        // Try to get constant value from semantic model (for const fields, etc.)
+        var constantValueResult = semanticModel.GetConstantValue(expression);
+        if (constantValueResult.HasValue && constantValueResult.Value is string constStr)
+        {
+            return constStr;
         }
 
         return null;

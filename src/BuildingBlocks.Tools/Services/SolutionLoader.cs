@@ -67,17 +67,29 @@ internal class SolutionLoader
         var firstProject = await _workspace.OpenProjectAsync(projectPaths[0]);
         var solution = firstProject.Solution;
 
-        // Add remaining projects
+        // Add remaining projects (skip those already loaded as dependencies)
         foreach (var projectPath in projectPaths.Skip(1))
         {
+            // Check if project is already in the solution (loaded as a dependency)
+            var normalizedPath = Path.GetFullPath(projectPath);
+            var alreadyLoaded = solution.Projects.Any(p =>
+                Path.GetFullPath(p.FilePath ?? "") == normalizedPath);
+
+            if (alreadyLoaded)
+            {
+                Console.WriteLine($"  Skipping {Path.GetFileName(projectPath)} (already loaded as dependency)");
+                continue;
+            }
+
             try
             {
                 var project = await _workspace.OpenProjectAsync(projectPath);
                 solution = project.Solution;
+                Console.WriteLine($"  Loaded {Path.GetFileName(projectPath)}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Warning: Could not load project {Path.GetFileName(projectPath)}: {ex.Message}");
+                Console.WriteLine($"  Warning: Could not load project {Path.GetFileName(projectPath)}: {ex.Message}");
             }
         }
 
