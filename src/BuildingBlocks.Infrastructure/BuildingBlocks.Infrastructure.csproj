@@ -11,6 +11,11 @@
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" />
 		<PackageReference Include="Serilog.AspNetCore" />
+		<PackageReference Include="Serilog.Sinks.Async" />
+		<PackageReference Include="Serilog.Formatting.Compact" />
+		<PackageReference Include="Serilog.Enrichers.Span" />
+		<PackageReference Include="Serilog.Sinks.Console" />
+		<PackageReference Include="Serilog.Sinks.File" />
 	</ItemGroup>
 
 </Project>
