@@ -7,14 +7,8 @@ namespace BuildingBlocks.Tools.Services;
 /// <summary>
 /// Loads solutions and projects using MSBuild workspace.
 /// </summary>
-internal class SolutionLoader
+internal class SolutionLoader(MSBuildWorkspace workspace)
 {
-    private readonly MSBuildWorkspace _workspace;
-
-    public SolutionLoader(MSBuildWorkspace workspace)
-    {
-        _workspace = workspace;
-    }
 
     /// <summary>
     /// Loads a solution or project file.
@@ -33,12 +27,12 @@ internal class SolutionLoader
         else if (extension == ".sln")
         {
             Console.WriteLine("Loading solution...");
-            return await _workspace.OpenSolutionAsync(inputFile.FullName);
+            return await workspace.OpenSolutionAsync(inputFile.FullName);
         }
         else // .csproj (already validated)
         {
             Console.WriteLine("Loading project...");
-            var project = await _workspace.OpenProjectAsync(inputFile.FullName);
+            var project = await workspace.OpenProjectAsync(inputFile.FullName);
             return project.Solution;
         }
     }
@@ -64,7 +58,7 @@ internal class SolutionLoader
         Console.WriteLine($"Found {projectPaths.Count} project(s) in .slnx");
 
         // Load first project to get a solution
-        var firstProject = await _workspace.OpenProjectAsync(projectPaths[0]);
+        var firstProject = await workspace.OpenProjectAsync(projectPaths[0]);
         var solution = firstProject.Solution;
 
         // Add remaining projects (skip those already loaded as dependencies)
@@ -83,7 +77,7 @@ internal class SolutionLoader
 
             try
             {
-                var project = await _workspace.OpenProjectAsync(projectPath);
+                var project = await workspace.OpenProjectAsync(projectPath);
                 solution = project.Solution;
                 Console.WriteLine($"  Loaded {Path.GetFileName(projectPath)}");
             }

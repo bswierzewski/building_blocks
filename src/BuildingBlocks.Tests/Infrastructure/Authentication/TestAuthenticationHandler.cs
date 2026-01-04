@@ -10,17 +10,12 @@ namespace BuildingBlocks.Tests.Infrastructure.Authentication;
 /// Authentication handler for end-to-end tests that bypasses actual authentication.
 /// Automatically authenticates requests with a test user identity.
 /// </summary>
-public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+public class TestAuthenticationHandler(
+    IOptionsMonitor<AuthenticationSchemeOptions> options,
+    ILoggerFactory logger,
+    UrlEncoder encoder) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     public const string AuthenticationScheme = "Test";
-
-    public TestAuthenticationHandler(
-        IOptionsMonitor<AuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder)
-        : base(options, logger, encoder)
-    {
-    }
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
