@@ -1,7 +1,10 @@
+using BuildingBlocks.Abstractions.Abstractions;
 using BuildingBlocks.Infrastructure.Modules;
 using BuildingBlocks.Tests.Core;
+using BuildingBlocks.Tests.Infrastructure.Authentication;
 using BuildingBlocks.Tests.Infrastructure.Containers;
 using BuildingBlocks.Tests.Infrastructure.Database;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -56,6 +59,20 @@ public sealed class TestContextBuilder<TProgram> where TProgram : class
     {
         _autoInitializeModules = false;
         return this;
+    }
+
+    public TestContextBuilder<TProgram> WithTestAuthentication()
+    {
+        return WithServices((services, _) =>
+        {
+            // Register test authentication handler for bypassing authorization in tests
+            services.AddAuthentication(TestAuthenticationHandler.AuthenticationScheme)
+                .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>(
+                    TestAuthenticationHandler.AuthenticationScheme, null);
+
+            // Replace IUserContext with test implementation
+            services.AddScoped<IUserContext, TestUserContext>();
+        });
     }
 
     public async Task<TestContext> BuildAsync()
