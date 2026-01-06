@@ -1,38 +1,16 @@
-﻿using BuildingBlocks.Infrastructure.Extensions;
-using ErrorOr;
+﻿using ErrorOr;
 using Microsoft.AspNetCore.Http;
 
 namespace BuildingBlocks.Infrastructure.Extensions;
 
 public static class ErrorOrExtensions
 {
-    extension<T>(ErrorOr<T> errorOr)
+    public static IResult Problem(this List<Error> errors)
     {
-        public IResult ToNoContentResult()
-        {
-            return errorOr.Match(
-                value => Results.NoContent(),
-                errors => CreateProblemResult(errors));
-        }
+        if (errors is null or { Count: 0 })
+            return Results.Problem("An unexpected error occurred.");
 
-        public IResult ToHttpResult()
-        {
-            return errorOr.Match(
-                value => Results.Ok(value),
-                errors => CreateProblemResult(errors));
-        }
-
-        public IResult ToCreatedResult(string uri)
-        {
-            return errorOr.Match(
-                value => Results.Created(uri, value),
-                errors => CreateProblemResult(errors));
-        }
-    }
-
-    private static IResult CreateProblemResult(List<Error> errors)
-    {
-        var firstError = errors.FirstOrDefault();
+        var firstError = errors[0];
         var statusCode = GetStatusCodeForErrorType(firstError.Type);
 
         if (firstError.Type == ErrorType.Validation)
@@ -88,7 +66,7 @@ public static class ErrorOrExtensions
         _ => "https://tools.ietf.org/html/rfc7231#section-6.6.1"
     };
 
-    private static IDictionary<string, string[]> ToDictionary(this List<Error> errors)
+    private static Dictionary<string, string[]> ToDictionary(this List<Error> errors)
     {
         return errors
             .GroupBy(e => e.Code)
