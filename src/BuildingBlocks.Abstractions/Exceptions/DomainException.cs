@@ -1,4 +1,4 @@
-namespace BuildingBlocks.Abstractions.Exceptions;
+namespace BuildingBlocks.Kernel.Exceptions;
 
 public class DomainException : Exception
 {

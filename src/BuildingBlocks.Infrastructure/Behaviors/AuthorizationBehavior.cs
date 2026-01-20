@@ -1,5 +1,5 @@
-﻿using BuildingBlocks.Abstractions.Abstractions;
-using BuildingBlocks.Abstractions.Attributes;
+﻿using BuildingBlocks.Kernel.Abstractions;
+using BuildingBlocks.Kernel.Attributes;
 using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;

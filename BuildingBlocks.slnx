@@ -5,12 +5,8 @@
         <File Path="Directory.Packages.props" />
     </Folder>
     <Folder Name="/src/">
-        <Project Path="src/BuildingBlocks.Abstractions/BuildingBlocks.Abstractions.csproj" />
+        <Project Path="src/BuildingBlocks.Abstractions/BuildingBlocks.Kernel.csproj" />
         <Project Path="src/BuildingBlocks.Infrastructure/BuildingBlocks.Infrastructure.csproj" />
         <Project Path="src/BuildingBlocks.Tests/BuildingBlocks.Tests.csproj" />
-        <Project Path="src/BuildingBlocks.Tools/BuildingBlocks.Tools.csproj" />
-    </Folder>
-    <Folder Name="/tests/">
-        <Project Path="tests/BuildingBlocks.Tools.Tests.Unit/BuildingBlocks.Tools.Tests.Unit.csproj" />
     </Folder>
 </Solution>

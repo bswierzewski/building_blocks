@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\BuildingBlocks.Abstractions\BuildingBlocks.Abstractions.csproj" />
+		<ProjectReference Include="..\BuildingBlocks.Abstractions\BuildingBlocks.Kernel.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

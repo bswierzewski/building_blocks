@@ -2,7 +2,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using System.Text;
 
-namespace BuildingBlocks.Abstractions.Extensions;
+namespace BuildingBlocks.Kernel.Extensions;
 
 public static class XmlExtensions
 {

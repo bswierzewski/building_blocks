@@ -1,4 +1,4 @@
-using BuildingBlocks.Abstractions.Abstractions;
+using BuildingBlocks.Kernel.Abstractions;
 
 namespace BuildingBlocks.Tests.Infrastructure.Authentication;
 

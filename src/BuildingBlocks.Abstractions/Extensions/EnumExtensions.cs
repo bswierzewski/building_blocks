@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Reflection;
 
-namespace BuildingBlocks.Abstractions.Extensions;
+namespace BuildingBlocks.Kernel.Extensions;
 
 public static class EnumExtensions
 {

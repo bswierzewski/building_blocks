@@ -1,5 +1,5 @@
-using BuildingBlocks.Abstractions.Abstractions;
 using BuildingBlocks.Infrastructure.Extensions;
+using BuildingBlocks.Kernel.Abstractions;
 using BuildingBlocks.Tests.Extensions.Npgsql;
 using BuildingBlocks.Tests.Infrastructure.Authentication;
 using BuildingBlocks.Tests.Infrastructure.Containers;

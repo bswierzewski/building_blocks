@@ -1,4 +1,4 @@
-using BuildingBlocks.Abstractions.Abstractions;
+using BuildingBlocks.Kernel.Abstractions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;

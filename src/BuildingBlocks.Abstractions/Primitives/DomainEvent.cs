@@ -1,6 +1,6 @@
-using BuildingBlocks.Abstractions.Abstractions;
+using BuildingBlocks.Kernel.Abstractions;
 
-namespace BuildingBlocks.Abstractions.Primitives;
+namespace BuildingBlocks.Kernel.Primitives;
 
 public abstract class DomainEvent : IDomainEvent
 {

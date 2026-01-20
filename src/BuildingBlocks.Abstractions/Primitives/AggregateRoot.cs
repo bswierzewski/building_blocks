@@ -1,7 +1,7 @@
-using BuildingBlocks.Abstractions.Abstractions;
+using BuildingBlocks.Kernel.Abstractions;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace BuildingBlocks.Abstractions.Primitives;
+namespace BuildingBlocks.Kernel.Primitives;
 
 public abstract class AggregateRoot<TId> : AuditableEntity<TId>, IAggregateRoot
     where TId : notnull

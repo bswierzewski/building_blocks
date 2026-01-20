@@ -1,5 +1,5 @@
-using BuildingBlocks.Abstractions.Abstractions;
 using BuildingBlocks.Infrastructure.Services;
+using BuildingBlocks.Kernel.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BuildingBlocks.Infrastructure.Extensions;

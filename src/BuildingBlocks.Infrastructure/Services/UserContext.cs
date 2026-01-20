@@ -1,4 +1,4 @@
-using BuildingBlocks.Abstractions.Abstractions;
+using BuildingBlocks.Kernel.Abstractions;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 

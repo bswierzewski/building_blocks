@@ -1,4 +1,4 @@
-namespace BuildingBlocks.Abstractions.Attributes;
+namespace BuildingBlocks.Kernel.Attributes;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
 public class AuthorizeAttribute : Attribute

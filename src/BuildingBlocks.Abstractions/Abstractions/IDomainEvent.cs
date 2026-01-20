@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace BuildingBlocks.Abstractions.Abstractions;
+namespace BuildingBlocks.Kernel.Abstractions;
 
 public interface IDomainEvent : INotification
 {

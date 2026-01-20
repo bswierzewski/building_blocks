@@ -1,4 +1,4 @@
-namespace BuildingBlocks.Abstractions.Primitives;
+namespace BuildingBlocks.Kernel.Primitives;
 
 public abstract class Entity<TId> where TId : notnull
 {
