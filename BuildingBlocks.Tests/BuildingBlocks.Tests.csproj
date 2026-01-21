@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\BuildingBlocks.Abstractions\BuildingBlocks.Kernel.csproj" />
-    <ProjectReference Include="..\BuildingBlocks.Infrastructure\BuildingBlocks.Infrastructure.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\BuildingBlocks.Kernel\BuildingBlocks.Kernel.csproj" />
+		<ProjectReference Include="..\BuildingBlocks.Infrastructure\BuildingBlocks.Infrastructure.csproj" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="FluentAssertions" />
