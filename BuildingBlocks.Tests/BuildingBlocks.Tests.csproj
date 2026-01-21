@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\BuildingBlocks.Abstractions\BuildingBlocks.Kernel.csproj" />
+    <ProjectReference Include="..\BuildingBlocks.Infrastructure\BuildingBlocks.Infrastructure.csproj" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="FluentAssertions" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+		<PackageReference Include="Moq" />
+		<PackageReference Include="xunit" />
+
+		<!-- Internal dependencies (not exported) -->
+		<PackageReference Include="Microsoft.NET.Test.Sdk" PrivateAssets="All" />
+		<PackageReference Include="Respawn" PrivateAssets="All" />
+		<PackageReference Include="Testcontainers.PostgreSql" PrivateAssets="All" />
+		<PackageReference Include="xunit.runner.visualstudio" PrivateAssets="All" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="Xunit" />
+		<Using Include="FluentAssertions" />
+	</ItemGroup>
+
+</Project>
