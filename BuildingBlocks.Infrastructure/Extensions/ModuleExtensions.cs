@@ -49,27 +49,6 @@ public sealed class ModuleBuilder(IServiceCollection services, IConfiguration co
         return this;
     }
 
-    public ModuleBuilder AddSqlite<TDbContext>()
-        where TDbContext : DbContext
-    {
-        Services.TryAddScoped<AuditableEntityInterceptor>();
-
-        Services.AddDbContext<TDbContext>((sp, options) =>
-        {
-            var connectionString = Configuration.GetConnectionString(ModuleName);
-
-            if (string.IsNullOrWhiteSpace(connectionString))
-                throw new InvalidOperationException($"Connection string '{ModuleName}' not found in configuration.");
-
-            var auditableInterceptor = sp.GetRequiredService<AuditableEntityInterceptor>();
-
-            options.AddInterceptors(auditableInterceptor);
-            options.UseSqlite(connectionString);
-        });
-
-        return this;
-    }
-
     public ModuleBuilder AddOptions(Action<ModuleBuilder> configure)
     {
         configure(this);
