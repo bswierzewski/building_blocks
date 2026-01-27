@@ -43,6 +43,7 @@ public sealed class ModuleBuilder(IServiceCollection services, IConfiguration co
             var dataSource = sp.GetRequiredKeyedService<NpgsqlDataSource>(ModuleName);
             var auditableInterceptor = sp.GetRequiredService<AuditableEntityInterceptor>();
 
+            options.UseNpgsql(dataSource);
             options.AddInterceptors(auditableInterceptor);
         });
 

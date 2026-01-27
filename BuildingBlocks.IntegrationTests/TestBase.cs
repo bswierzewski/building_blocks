@@ -48,6 +48,9 @@ public abstract class TestBase<TProgram> : IAsyncLifetime
                 // Replace all NpgsqlDataSource instances with test database connection
                 services.ReplaceNpgsqlDataSources(_databaseFixture.ConnectionString);
 
+                // Add TimeProvider for tests
+                services.AddSingleton(TimeProvider.System);
+
                 // Allow test-specific service overrides
                 ConfigureServices(services);
             });
