@@ -63,7 +63,6 @@ public abstract class TestBase<TProgram> : IAsyncLifetime
         _respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
         {
             DbAdapter = DbAdapter.Postgres,
-            SchemasToInclude = ["public"],
             TablesToIgnore = [new Respawn.Graph.Table("__EFMigrationsHistory")],
             WithReseed = true
         });

@@ -24,26 +24,19 @@ public sealed class ModuleBuilder(IServiceCollection services, IConfiguration co
     public ModuleBuilder AddPostgres<TDbContext>()
         where TDbContext : DbContext
     {
-        Services.AddKeyedSingleton(ModuleName, (sp, key) =>
-        {
-            var connectionString = Configuration.GetConnectionString(ModuleName);
-
-            if (string.IsNullOrWhiteSpace(connectionString))
-                throw new InvalidOperationException($"Connection string '{ModuleName}' not found in configuration.");
-
-            return new NpgsqlDataSourceBuilder(connectionString)
-                .EnableDynamicJson()
-                .Build();
-        });
+        var schema = ModuleName.ToLowerInvariant();
 
         Services.TryAddScoped<AuditableEntityInterceptor>();
 
         Services.AddDbContext<TDbContext>((sp, options) =>
         {
-            var dataSource = sp.GetRequiredKeyedService<NpgsqlDataSource>(ModuleName);
+            var dataSource = sp.GetRequiredService<NpgsqlDataSource>();
             var auditableInterceptor = sp.GetRequiredService<AuditableEntityInterceptor>();
 
-            options.UseNpgsql(dataSource);
+            options.UseNpgsql(dataSource, npgsqlOptions =>
+            {
+                npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", schema);
+            });
             options.AddInterceptors(auditableInterceptor);
         });
 
