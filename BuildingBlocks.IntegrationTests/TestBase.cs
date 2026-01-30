@@ -1,5 +1,4 @@
 using Alba;
-using BuildingBlocks.IntegrationTests.Extensions;
 using BuildingBlocks.IntegrationTests.Fixtures;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +30,11 @@ public abstract class TestBase<TProgram> : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
+        // Set connection string via environment variable BEFORE Program.cs executes
+        // This is the only way to override configuration in minimal hosting
+        // because ConfigureAppConfiguration runs AFTER Program.cs reads builder.Configuration
+        Environment.SetEnvironmentVariable("ConnectionStrings__Default", _databaseFixture.ConnectionString);
+
         // Create Alba host with Program.cs configuration
         AlbaHost = await Alba.AlbaHost.For<TProgram>(builder =>
         {
@@ -45,9 +49,6 @@ public abstract class TestBase<TProgram> : IAsyncLifetime
 
             builder.ConfigureServices((context, services) =>
             {
-                // Replace all NpgsqlDataSource instances with test database connection
-                services.ReplaceNpgsqlDataSources(_databaseFixture.ConnectionString);
-
                 // Add TimeProvider for tests
                 services.AddSingleton(TimeProvider.System);
 

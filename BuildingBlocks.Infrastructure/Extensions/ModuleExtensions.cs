@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Npgsql;
+using Wolverine.EntityFrameworkCore;
 
 namespace BuildingBlocks.Infrastructure.Extensions;
 
@@ -28,7 +29,7 @@ public sealed class ModuleBuilder(IServiceCollection services, IConfiguration co
 
         Services.TryAddScoped<AuditableEntityInterceptor>();
 
-        Services.AddDbContext<TDbContext>((sp, options) =>
+        Services.AddDbContextWithWolverineIntegration<TDbContext>((sp, options) =>
         {
             var dataSource = sp.GetRequiredService<NpgsqlDataSource>();
             var auditableInterceptor = sp.GetRequiredService<AuditableEntityInterceptor>();

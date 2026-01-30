@@ -19,6 +19,9 @@
 		<PackageReference Include="Serilog.Sinks.Async" />
 		<PackageReference Include="Serilog.Sinks.OpenTelemetry" />
 		<PackageReference Include="WolverineFx" />
+		<PackageReference Include="WolverineFx.EntityFrameworkCore" />
+		<PackageReference Include="WolverineFx.FluentValidation" />
+		<PackageReference Include="WolverineFx.Postgresql" />
 	</ItemGroup>
 
 </Project>
