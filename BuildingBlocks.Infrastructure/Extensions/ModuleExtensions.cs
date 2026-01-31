@@ -29,7 +29,7 @@ public sealed class ModuleBuilder(IServiceCollection services, IConfiguration co
 
         Services.TryAddScoped<AuditableEntityInterceptor>();
 
-        Services.AddDbContextWithWolverineIntegration<TDbContext>((sp, options) =>
+        Services.AddDbContext<TDbContext>((sp, options) =>
         {
             var dataSource = sp.GetRequiredService<NpgsqlDataSource>();
             var auditableInterceptor = sp.GetRequiredService<AuditableEntityInterceptor>();
