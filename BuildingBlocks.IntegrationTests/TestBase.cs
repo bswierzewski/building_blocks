@@ -14,26 +14,20 @@ namespace BuildingBlocks.IntegrationTests;
 /// Uses a shared PostgreSQL container from DatabaseFixture and Respawn for database reset between tests.
 /// </summary>
 /// <typeparam name="TProgram">The Program class of the web application to test.</typeparam>
-public abstract class TestBase<TProgram> : IAsyncLifetime
+public abstract class TestBase<TProgram>(DatabaseFixture databaseFixture) : IAsyncLifetime
     where TProgram : class
 {
-    private readonly DatabaseFixture _databaseFixture;
     private Respawner _respawner = default!;
     private NpgsqlConnection _connection = default!;
 
     protected IAlbaHost AlbaHost { get; private set; } = default!;
-
-    protected TestBase(DatabaseFixture databaseFixture)
-    {
-        _databaseFixture = databaseFixture;
-    }
 
     public async Task InitializeAsync()
     {
         // Set connection string via environment variable BEFORE Program.cs executes
         // This is the only way to override configuration in minimal hosting
         // because ConfigureAppConfiguration runs AFTER Program.cs reads builder.Configuration
-        Environment.SetEnvironmentVariable("ConnectionStrings__Default", _databaseFixture.ConnectionString);
+        Environment.SetEnvironmentVariable("ConnectionStrings__Default", databaseFixture.ConnectionString);
 
         // Create Alba host with Program.cs configuration
         AlbaHost = await Alba.AlbaHost.For<TProgram>(builder =>
@@ -58,7 +52,7 @@ public abstract class TestBase<TProgram> : IAsyncLifetime
         });
 
         // Initialize Respawner after migrations (which run in Program.cs)
-        _connection = new NpgsqlConnection(_databaseFixture.ConnectionString);
+        _connection = new NpgsqlConnection(databaseFixture.ConnectionString);
         await _connection.OpenAsync();
 
         _respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
