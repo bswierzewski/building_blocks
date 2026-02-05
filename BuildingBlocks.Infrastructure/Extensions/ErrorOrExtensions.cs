@@ -30,6 +30,14 @@ public static class ErrorOrExtensions
             type: GetTypeForStatusCode(statusCode));
     }
 
+    public static IResult Problem<TValue>(this ErrorOr<TValue> result)
+    {
+        if (result.IsError)
+            return result.Errors.Problem();
+
+        return Results.Problem("An unexpected error occurred.");
+    }
+
     private static int GetStatusCodeForErrorType(ErrorType errorType) => errorType switch
     {
         ErrorType.Validation => StatusCodes.Status400BadRequest,
