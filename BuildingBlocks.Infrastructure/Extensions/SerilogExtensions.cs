@@ -35,7 +35,7 @@ public static class SerilogExtensions
             if (context.HostingEnvironment.IsDevelopment())
             {
                 loggerConfig
-                    .MinimumLevel.Debug()
+                    .MinimumLevel.Information()
                     .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                     .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
                     .MinimumLevel.Override("System", LogEventLevel.Information);
