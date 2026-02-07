@@ -30,6 +30,27 @@ public static class ErrorOrExtensions
             type: GetTypeForStatusCode(statusCode));
     }
 
+    public static IResult Problem(this Error error)
+    {
+        var statusCode = GetStatusCodeForErrorType(error.Type);
+
+        if (error.Type == ErrorType.Validation)
+        {
+            return Results.ValidationProblem(
+                new Dictionary<string, string[]> { [error.Code] = [error.Description] },
+                detail: "One or more validation failures have occurred.",
+                title: GetTitleForStatusCode(statusCode),
+                type: GetTypeForStatusCode(statusCode),
+                statusCode: statusCode);
+        }
+
+        return Results.Problem(
+            detail: error.Description,
+            statusCode: statusCode,
+            title: GetTitleForStatusCode(statusCode),
+            type: GetTypeForStatusCode(statusCode));
+    }
+
     public static IResult Problem<TValue>(this ErrorOr<TValue> result)
     {
         if (result.IsError)
