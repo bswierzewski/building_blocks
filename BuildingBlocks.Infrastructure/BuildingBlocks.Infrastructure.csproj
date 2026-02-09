@@ -12,12 +12,14 @@
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
 		<PackageReference Include="Microsoft.Extensions.Options" />
 		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+		<PackageReference Include="Microsoft.Extensions.Resilience" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
 		<PackageReference Include="Serilog.AspNetCore" />
 		<PackageReference Include="Serilog.Enrichers.Span" />
 		<PackageReference Include="Serilog.Formatting.Compact" />
 		<PackageReference Include="Serilog.Sinks.Async" />
 		<PackageReference Include="Serilog.Sinks.OpenTelemetry" />
+		<PackageReference Include="System.ServiceModel.Http" />
 		<PackageReference Include="WolverineFx" />
 		<PackageReference Include="WolverineFx.EntityFrameworkCore" />
 		<PackageReference Include="WolverineFx.FluentValidation" />
