@@ -7,6 +7,11 @@ using Microsoft.Extensions.DependencyInjection;
 namespace BuildingBlocks.Infrastructure.Soap.Builders;
 
 /// <summary>
+/// Configuration holder for cache duration per client type.
+/// </summary>
+public record CacheDurationConfig<TClient>(TimeSpan Duration) where TClient : ICommunicationObject;
+
+/// <summary>
 /// Builder for configuring SOAP invoker decorator chain.
 /// Ensures decorators are applied in the correct order.
 /// </summary>
@@ -41,6 +46,19 @@ public class SoapInvokerBuilder<TClient> where TClient : ICommunicationObject
     {
         EnsureNotBuilt();
         _decoratorTypes.Add(typeof(LoggingSoapInvoker<TClient>));
+        return this;
+    }
+
+    /// <summary>
+    /// Adds caching decorator to the invoker chain.
+    /// </summary>
+    /// <param name="cacheDuration">Time-to-live for cached entries.</param>
+    /// <returns>The builder for chaining.</returns>
+    public SoapInvokerBuilder<TClient> AddCache(TimeSpan cacheDuration)
+    {
+        EnsureNotBuilt();
+        _services.AddSingleton(new CacheDurationConfig<TClient>(cacheDuration));
+        _decoratorTypes.Add(typeof(CachingSoapInvoker<TClient>));
         return this;
     }
 
