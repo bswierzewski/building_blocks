@@ -2,7 +2,6 @@ using System.ServiceModel;
 using BuildingBlocks.Infrastructure.Soap.Abstractions;
 using Polly;
 using Polly.Retry;
-using Polly.Timeout;
 
 namespace BuildingBlocks.Infrastructure.Soap.Invokers;
 

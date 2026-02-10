@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Npgsql;
-using Wolverine.EntityFrameworkCore;
 
 namespace BuildingBlocks.Infrastructure.Extensions;
 
