@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
-namespace BuildingBlocks.Infrastructure.Soap.Abstractions;
+namespace BuildingBlocks.Soap.Abstractions;
 
 /// <summary>
 /// Carries operation metadata through the SOAP pipeline.

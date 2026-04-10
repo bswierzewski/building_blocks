@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using System.ServiceModel;
-using BuildingBlocks.Infrastructure.Soap.Abstractions;
+using BuildingBlocks.Soap.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace BuildingBlocks.Infrastructure.Soap;
+namespace BuildingBlocks.Soap;
 
 /// <summary>
 /// Logging SOAP middleware that logs operation start, completion, and failures.

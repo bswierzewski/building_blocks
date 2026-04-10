@@ -1,7 +1,7 @@
 using System.ServiceModel;
-using BuildingBlocks.Infrastructure.Soap.Abstractions;
+using BuildingBlocks.Soap.Abstractions;
 
-namespace BuildingBlocks.Infrastructure.Soap;
+namespace BuildingBlocks.Soap;
 
 /// <summary>
 /// SOAP pipeline responsible for WCF client lifecycle management and middleware pipeline execution.
@@ -60,10 +60,9 @@ public sealed class SoapPipeline<TClient>(
         var client = clientFactory();
         try
         {
-            if (client.State == CommunicationState.Created)            
-                await Task.Factory.FromAsync(client.BeginOpen, client.EndOpen, null);            
+            if (client.State == CommunicationState.Created)
+                await Task.Factory.FromAsync(client.BeginOpen, client.EndOpen, null);
 
-            // The operation itself is the innermost step. Middleware wrap it from outermost to innermost.
             Func<CancellationToken, Task<TResult>> pipeline = token => operation(client, token);
 
             foreach (var middleware in _middlewares)
@@ -76,9 +75,8 @@ public sealed class SoapPipeline<TClient>(
         }
         catch
         {
-            // Faulted WCF clients are no longer usable and must be aborted.
-            if (client.State == CommunicationState.Faulted)            
-                client.Abort();            
+            if (client.State == CommunicationState.Faulted)
+                client.Abort();
 
             throw;
         }
@@ -92,7 +90,6 @@ public sealed class SoapPipeline<TClient>(
                 }
                 catch
                 {
-                    // A failed close should not leak the channel.
                     client.Abort();
                 }
             }

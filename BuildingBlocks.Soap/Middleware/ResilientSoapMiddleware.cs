@@ -1,10 +1,10 @@
 using System.ServiceModel;
-using BuildingBlocks.Infrastructure.Soap.Abstractions;
+using BuildingBlocks.Soap.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Retry;
 
-namespace BuildingBlocks.Infrastructure.Soap;
+namespace BuildingBlocks.Soap;
 
 /// <summary>
 /// Resilient SOAP middleware that wraps operations with retry and timeout.
@@ -16,7 +16,6 @@ namespace BuildingBlocks.Infrastructure.Soap;
 public sealed class ResilientSoapMiddleware<TClient>
     : SoapMiddleware<TClient> where TClient : ICommunicationObject
 {
-    // Retry/timeout policy is static for the client type and does not depend on request data.
     private readonly ResiliencePipeline _pipeline = new ResiliencePipelineBuilder()
         .AddRetry(new RetryStrategyOptions
         {

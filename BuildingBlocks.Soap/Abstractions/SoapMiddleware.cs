@@ -1,6 +1,6 @@
 using System.ServiceModel;
 
-namespace BuildingBlocks.Infrastructure.Soap.Abstractions;
+namespace BuildingBlocks.Soap.Abstractions;
 
 /// <summary>
 /// Base class for SOAP pipeline middleware.

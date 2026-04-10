@@ -1,10 +1,10 @@
 using System.ServiceModel;
-using BuildingBlocks.Infrastructure.Soap.Abstractions;
+using BuildingBlocks.Soap.Abstractions;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace BuildingBlocks.Infrastructure.Soap;
+namespace BuildingBlocks.Soap;
 
 /// <summary>
 /// Caching SOAP middleware that caches operation results.
@@ -33,8 +33,8 @@ public sealed class CachingSoapMiddleware<TClient>(
         Func<CancellationToken, Task<TResult>> next,
         CancellationToken ct = default)
     {
-        if (string.IsNullOrWhiteSpace(context.CacheKey))        
-            return await next(ct);        
+        if (string.IsNullOrWhiteSpace(context.CacheKey))
+            return await next(ct);
 
         var cacheKey = $"soap_cache:{typeof(TClient).Name}:{context.CacheKey}";
 

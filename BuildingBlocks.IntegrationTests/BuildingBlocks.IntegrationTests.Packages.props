@@ -1,0 +1,10 @@
+<Project>
+  <ItemGroup>
+    <PackageVersion Include="Alba" Version="8.4.0" Condition="'$(AutodorRootPackageCatalogImported)' != 'true'" />
+    <PackageVersion Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.3.9" Condition="'$(AutodorRootPackageCatalogImported)' != 'true'" />
+    <PackageVersion Include="Npgsql" Version="10.0.0" Condition="'$(AutodorRootPackageCatalogImported)' != 'true'" />
+    <PackageVersion Include="Respawn" Version="7.0.0" Condition="'$(AutodorRootPackageCatalogImported)' != 'true'" />
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="3.9.0" Condition="'$(AutodorRootPackageCatalogImported)' != 'true'" />
+    <PackageVersion Include="xunit" Version="2.9.0" Condition="'$(AutodorRootPackageCatalogImported)' != 'true'" />
+  </ItemGroup>
+</Project>

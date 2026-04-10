@@ -1,8 +1,8 @@
 using System.ServiceModel;
-using BuildingBlocks.Infrastructure.Soap.Abstractions;
+using BuildingBlocks.Soap.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BuildingBlocks.Infrastructure.Soap.Builders;
+namespace BuildingBlocks.Soap.Builders;
 
 /// <summary>
 /// Extension methods for registering SOAP pipelines on the service collection.
@@ -72,4 +72,3 @@ public sealed class SoapPipelineBuilder<TClient>(IServiceCollection services)
         return this;
     }
 }
-
