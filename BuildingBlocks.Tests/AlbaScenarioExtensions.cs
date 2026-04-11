@@ -19,14 +19,12 @@ public static class AlbaScenarioExtensions
     /// <returns>The same IScenarioResult for fluent chaining.</returns>
     /// <example>
     /// <code>
-    /// // Print error response
     /// await AlbaHost.Scenario(s =>
     /// {
     ///     s.Get.Url("/orders/invalid");
     ///     s.StatusCodeShouldBe(HttpStatusCode.BadRequest);
     /// }).PrintBody(output);
     ///
-    /// // Print success response
     /// await AlbaHost.Scenario(s =>
     /// {
     ///     s.Get.Url("/orders");
