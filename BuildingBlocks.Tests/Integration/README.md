@@ -2,65 +2,45 @@
 
 This folder contains the shared infrastructure for application-level integration tests built on Alba, xUnit, Testcontainers, and Respawn.
 
-The design has three main concepts:
+The design has two main concepts:
 
-1. `IntegrationTestEnvironment<TProgram>`
-   Owns the shared test environment for one xUnit collection. It starts the PostgreSQL container, exposes the connection string, applies environment variables during host creation, and creates Alba hosts for tests.
+1. `IntegrationTestCollection<TProgram>`
+   The xUnit fixture for one shared test stack. Starts the PostgreSQL container and handles database resets. Override `ConfigureServices` to register collection-wide service replacements (e.g. a fake HTTP client used by every test in the collection).
 
-2. `IntegrationTestCollection<TEnvironment>`
-   Connects an xUnit collection to a single shared test environment. One collection should represent one shared application stack.
-
-3. `IntegrationTestBase<TProgram>`
-   Provides the base lifecycle for individual test classes. For every test it automatically:
-   - resets the database before the host is created
-   - creates the Alba host
-   - applies class-level service overrides
-   - runs class-level seed logic
+2. `IntegrationTestBase<TProgram>`
+   Base class for individual test classes. For every test it automatically:
+   - resets the database
+   - creates the Alba host (applying collection-wide and per-class service overrides)
+   - runs per-class seed logic
    - disposes the host after the test
-   - resets the database again after the test
 
 ## Recommended Usage Model
 
-- Use one collection for one shared stack.
+- Use one collection for one shared application stack.
 - Mark the collection with `DisableParallelization = true`.
-- If you need different environment variables or a different connection string, create a new environment class and a new collection.
-- Class-specific overrides belong in `ConfigureServices`.
-- Class-specific seed data belongs in `SeedDataAsync`.
+- Collection-wide service overrides go in `IntegrationTestCollection.ConfigureServices`.
+- Per-class overrides go in `IntegrationTestBase.ConfigureServices`.
+- Per-class seed data goes in `SeedDataAsync`.
 
-## Create A Shared Environment
-
-```csharp
-using BuildingBlocks.Tests.Integration;
-
-namespace MyApp.IntegrationTests.Shared;
-
-public sealed class SharedEnvironment : IntegrationTestEnvironment<Program>
-{
-    protected override string EnvironmentName => "Testing";
-
-    protected override IReadOnlyDictionary<string, string?> GetEnvironmentVariables()
-    {
-        return new Dictionary<string, string?>
-        {
-            ["ConnectionStrings__Default"] = ConnectionString,
-            ["FeatureFlags__UseSandbox"] = "true"
-        };
-    }
-}
-```
-
-## Create A Shared Collection
+## Create A Collection
 
 ```csharp
 using BuildingBlocks.Tests.Integration;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace MyApp.IntegrationTests.Shared;
 
 [CollectionDefinition(Name, DisableParallelization = true)]
-public sealed class SharedCollection : IntegrationTestCollection<SharedEnvironment>
+public sealed class SharedCollection : IntegrationTestCollection<Program>, ICollectionFixture<SharedCollection>
 {
     public const string Name = "Shared";
+
+    // Optional: collection-wide service replacements
+    public override void ConfigureServices(IServiceCollection services)
+    {
+        services.AddSingleton<IEmailSender, FakeEmailSender>();
+    }
 }
 ```
 
@@ -79,9 +59,9 @@ namespace MyApp.IntegrationTests.Features.Orders;
 
 [Collection(SharedCollection.Name)]
 public sealed class GenerateDeliveryNoteTests(
-    SharedEnvironment testEnvironment,
+    SharedCollection collection,
     ITestOutputHelper output)
-    : IntegrationTestBase<Program>(testEnvironment)
+    : IntegrationTestBase<Program>(collection)
 {
     private readonly Mock<IProductsClient> _productsClientMock = new();
 
@@ -120,12 +100,10 @@ public sealed class GenerateDeliveryNoteTests(
 
 ## What Changes Per Collection
 
-Create a separate environment and a separate collection when you need a different shared stack, for example:
+Create a separate collection when you need a different shared stack, for example:
 
-- a different connection string variable name
-- additional environment variables
-- a different ASP.NET Core environment name
-- different environment-level service registration in `ConfigureEnvironmentServices`
-- different web host customization in `ConfigureHost`
+- different collection-wide service registrations
+- a different connection string configuration key
+- additional in-memory configuration entries
 
-Each collection gets its own `IntegrationTestEnvironment`, and that means its own PostgreSQL container.
+Each collection gets its own PostgreSQL container.

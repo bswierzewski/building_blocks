@@ -1,25 +1,25 @@
 using Alba;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace BuildingBlocks.Tests.Integration;
 
 /// <summary>
 /// Base class for integration tests.
-/// A single IntegrationTestEnvironment should be shared through one xUnit collection.
-/// The test host is created, seeded, and cleaned automatically for each test.
+/// For every test: resets the database, creates the Alba host, seeds data, and disposes after the test.
+/// Collection-wide service overrides go in IntegrationTestCollection.ConfigureServices.
+/// Per-class overrides go in ConfigureServices and SeedDataAsync here.
 /// </summary>
-public abstract class IntegrationTestBase<TProgram>(IntegrationTestEnvironment<TProgram> testEnvironment) : IAsyncLifetime
+public abstract class IntegrationTestBase<TProgram>(IntegrationTestCollection<TProgram> collection) : IAsyncLifetime
     where TProgram : class
 {
-    protected IntegrationTestEnvironment<TProgram> TestEnvironment { get; } = testEnvironment;
-
     protected IAlbaHost AlbaHost { get; private set; } = default!;
 
-    protected Task ResetDatabaseAsync()
-    {
-        return TestEnvironment.ResetDatabaseAsync();
-    }
+    protected Task ResetDatabaseAsync() => collection.ResetDatabaseAsync();
 
     /// <summary>
     /// Override to configure service replacements used by all tests in this class.
@@ -31,16 +31,36 @@ public abstract class IntegrationTestBase<TProgram>(IntegrationTestEnvironment<T
     /// <summary>
     /// Override to seed data after the host is created and before each test runs.
     /// </summary>
-    protected virtual Task SeedDataAsync()
-    {
-        return Task.CompletedTask;
-    }
+    protected virtual Task SeedDataAsync() => Task.CompletedTask;
 
     public async Task InitializeAsync()
     {
-        await TestEnvironment.ResetDatabaseAsync();
+        await collection.ResetDatabaseAsync();
 
-        AlbaHost = await TestEnvironment.CreateHostAsync(ConfigureServices);
+        AlbaHost = await Alba.AlbaHost.For<TProgram>(builder =>
+        {
+            builder.UseEnvironment("Testing");
+
+            builder.ConfigureLogging(logging =>
+            {
+                logging.ClearProviders();
+                logging.AddConsole();
+                logging.SetMinimumLevel(LogLevel.Warning);
+            });
+
+            builder.ConfigureAppConfiguration((_, config) =>
+                config.AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["ConnectionStrings:Default"] = collection.ConnectionString
+                }));
+
+            builder.ConfigureServices((_, services) =>
+            {
+                services.AddSingleton(TimeProvider.System);
+                collection.ConfigureServices(services);
+                ConfigureServices(services);
+            });
+        });
 
         try
         {
@@ -49,7 +69,7 @@ public abstract class IntegrationTestBase<TProgram>(IntegrationTestEnvironment<T
         catch
         {
             await AlbaHost.DisposeAsync();
-            await TestEnvironment.ResetDatabaseAsync();
+            await collection.ResetDatabaseAsync();
             throw;
         }
     }
@@ -60,23 +80,9 @@ public abstract class IntegrationTestBase<TProgram>(IntegrationTestEnvironment<T
         {
             await AlbaHost.DisposeAsync();
         }
-
-        await TestEnvironment.ResetDatabaseAsync();
     }
 
-    /// <summary>
-    /// Gets a required service from the current test host.
-    /// </summary>
-    protected T GetRequiredService<T>() where T : notnull
-    {
-        return AlbaHost.Services.GetRequiredService<T>();
-    }
+    protected T GetRequiredService<T>() where T : notnull => AlbaHost.Services.GetRequiredService<T>();
 
-    /// <summary>
-    /// Gets a service from the current test host, or null if not found.
-    /// </summary>
-    protected T? GetService<T>() where T : class
-    {
-        return AlbaHost.Services.GetService<T>();
-    }
+    protected T? GetService<T>() where T : class => AlbaHost.Services.GetService<T>();
 }
