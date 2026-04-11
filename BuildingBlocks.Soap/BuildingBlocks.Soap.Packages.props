@@ -1,8 +1,11 @@
 <Project>
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.2" />
-    <PackageVersion Include="Microsoft.Extensions.Resilience" Version="10.1.0" />
-    <PackageVersion Include="System.ServiceModel.Http" Version="8.0.0" />
-    <PackageVersion Include="System.ServiceModel.Primitives" Version="8.0.0" />
+    <!-- Microsoft Extensions -->
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.Resilience" Version="10.4.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
+
+    <!-- System Service Model -->
+    <PackageVersion Include="System.ServiceModel.Http" Version="10.0.652802" />
   </ItemGroup>
 </Project>

@@ -1,11 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<ItemGroup>
+		<!-- Microsoft Extensions -->
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
 		<PackageReference Include="Microsoft.Extensions.Resilience" />
+
+		<!-- System Service Model -->
 		<PackageReference Include="System.ServiceModel.Http" />
-		<PackageReference Include="System.ServiceModel.Primitives" />
 	</ItemGroup>
 
 </Project>
