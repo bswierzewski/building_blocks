@@ -1,4 +1,4 @@
-namespace BuildingBlocks.Kernel.Primitives;
+namespace BuildingBlocks.Core.Primitives;
 
 /// <summary>
 /// Base class for all domain entities with identity

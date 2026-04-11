@@ -1,4 +1,4 @@
-namespace BuildingBlocks.Kernel.Abstractions;
+namespace BuildingBlocks.Core.Abstractions;
 
 /// <summary>
 /// Provides audit trail information for entities that track creation and modification history

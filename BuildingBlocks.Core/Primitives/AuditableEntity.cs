@@ -1,6 +1,6 @@
-using BuildingBlocks.Kernel.Abstractions;
+using BuildingBlocks.Core.Abstractions;
 
-namespace BuildingBlocks.Kernel.Primitives;
+namespace BuildingBlocks.Core.Primitives;
 
 /// <summary>
 /// Base class for entities that track creation and modification audit information

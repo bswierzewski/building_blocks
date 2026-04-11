@@ -1,4 +1,4 @@
-namespace BuildingBlocks.Kernel.Abstractions;
+namespace BuildingBlocks.Core.Abstractions;
 
 /// <summary>
 /// Marker interface for aggregate root entities in the domain model.

@@ -1,4 +1,4 @@
-namespace BuildingBlocks.Kernel.Primitives;
+namespace BuildingBlocks.Core.Primitives;
 
 /// <summary>
 /// Base class for value objects which are compared by their content rather than identity.

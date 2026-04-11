@@ -1,4 +1,4 @@
-namespace BuildingBlocks.Kernel.Attributes;
+namespace BuildingBlocks.Core.Attributes;
 
 /// <summary>
 /// Attribute to enable detailed payload logging for specific message handlers.

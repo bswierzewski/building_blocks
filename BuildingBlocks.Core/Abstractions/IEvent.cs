@@ -1,4 +1,4 @@
-namespace BuildingBlocks.Kernel.Abstractions;
+namespace BuildingBlocks.Core.Abstractions;
 
 /// <summary>
 /// Represents a domain event that occurred in the system
