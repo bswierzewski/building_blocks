@@ -1,5 +1,5 @@
-using BuildingBlocks.Kernel.Attributes;
 using Microsoft.Extensions.Logging;
+using BuildingBlocks.Core.Attributes;
 using Wolverine;
 
 namespace BuildingBlocks.Infrastructure.Middleware;

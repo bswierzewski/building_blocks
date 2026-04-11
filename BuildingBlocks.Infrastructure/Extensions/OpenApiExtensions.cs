@@ -1,76 +1,107 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OpenApi;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 namespace BuildingBlocks.Infrastructure.Extensions;
 
-public static class OpenApiProblemDetailsExtensions
+/// <summary>
+/// Provides extension methods for configuring OpenAPI options to include standardized RFC 7807 Problem Details error
+/// responses and schema enhancements.
+/// </summary>
+public static class OpenApiExtensions
 {
+    private const string ProblemDetailsSchemaName = "ProblemDetails";
+    private const string ProblemJsonContentType = "application/problem+json";
+    private const string DefaultErrorResponseDescription = "An error occurred";
+
     public static OpenApiOptions AddProblemDetailsResponses(this OpenApiOptions options)
     {
-        options.AddDocumentTransformer((document, context, cancellationToken) =>
-        {
-            document.Components ??= new OpenApiComponents();
-            document.Components.Schemas ??= new Dictionary<string, OpenApiSchema>();
+        ArgumentNullException.ThrowIfNull(options);
 
-            if (!document.Components.Schemas.ContainsKey("ProblemDetails"))            
-                document.Components.Schemas["ProblemDetails"] = CreateProblemDetailsSchema();            
+        options.AddSchemaTransformer((schema, context, _) =>
+        {
+            // Only enrich the framework-generated ProblemDetails schema.
+            if (context.JsonTypeInfo.Type != typeof(ProblemDetails))
+                return Task.CompletedTask;
+
+            // Keep the default schema produced by ASP.NET Core and only append custom fields.
+            schema.Description ??= "RFC 7807 Problem Details for HTTP APIs";
+            schema.Properties ??= new Dictionary<string, IOpenApiSchema>();
+
+            schema.Properties.TryAdd("traceId", new OpenApiSchema
+            {
+                Type = JsonSchemaType.String,
+                Description = "The trace identifier for request tracking."
+            });
+
+            schema.Properties.TryAdd("timestamp", new OpenApiSchema
+            {
+                Type = JsonSchemaType.String,
+                Format = "date-time",
+                Description = "Timestamp when the error occurred (UTC)."
+            });
+
+            schema.Properties.TryAdd("errors", new OpenApiSchema
+            {
+                Type = JsonSchemaType.Object,
+                Description = "Validation errors grouped by field name.",
+                AdditionalProperties = new OpenApiSchema
+                {
+                    Type = JsonSchemaType.Array,
+                    Items = new OpenApiSchema
+                    {
+                        Type = JsonSchemaType.String
+                    }
+                }
+            });
 
             return Task.CompletedTask;
         });
 
-        options.AddOperationTransformer((operation, context, cancellationToken) =>
+        options.AddOperationTransformer(async (operation, context, cancellationToken) =>
         {
-            if (!operation.Responses.ContainsKey("default"))
-            {
-                operation.Responses.Add("default", new OpenApiResponse
-                {
-                    Description = "An error occurred",
-                    Content = new Dictionary<string, OpenApiMediaType>
-                    {
-                        ["application/problem+json"] = new OpenApiMediaType
-                        {
-                            Schema = new OpenApiSchema
-                            {
-                                Reference = new OpenApiReference
-                                {
-                                    Type = ReferenceType.Schema,
-                                    Id = "ProblemDetails"
-                                }
-                            }
-                        }
-                    }
-                });
-            }
+            // Ensure every operation documents a fallback RFC 7807 error response.
+            operation.Responses ??= [];
 
-            return Task.CompletedTask;
+            if (operation.Responses.ContainsKey("default"))
+                return;
+
+            var problemDetailsSchema = await GetProblemDetailsSchemaAsync(context, cancellationToken);
+
+            operation.Responses["default"] = new OpenApiResponse
+            {
+                Description = DefaultErrorResponseDescription,
+                Content = new Dictionary<string, OpenApiMediaType>
+                {
+                    [ProblemJsonContentType] = new OpenApiMediaType
+                    {
+                        Schema = problemDetailsSchema
+                    }
+                }
+            };
+
         });
 
         return options;
     }
 
-    private static OpenApiSchema CreateProblemDetailsSchema() => new()
+    private static async Task<IOpenApiSchema> GetProblemDetailsSchemaAsync(OpenApiOperationTransformerContext context, CancellationToken cancellationToken)
     {
-        Type = "object",
-        Description = "RFC 7807 Problem Details for HTTP APIs",
-        Properties = new Dictionary<string, OpenApiSchema>
+        // When a document instance is not available, fall back to the generated inline schema.
+        if (context.Document is null)
+            return await context.GetOrCreateSchemaAsync(typeof(ProblemDetails), cancellationToken: cancellationToken);
+
+        // Register the schema as a reusable component once so operations can reference it.
+        context.Document.Components ??= new OpenApiComponents();
+        context.Document.Components.Schemas ??= new Dictionary<string, IOpenApiSchema>();
+
+        if (!context.Document.Components.Schemas.ContainsKey(ProblemDetailsSchemaName))
         {
-            ["type"] = new() { Type = "string", Description = "A URI reference that identifies the problem type." },
-            ["title"] = new() { Type = "string", Description = "A short, human-readable summary of the problem type." },
-            ["status"] = new() { Type = "integer", Format = "int32", Description = "The HTTP status code." },
-            ["detail"] = new() { Type = "string", Description = "A human-readable explanation specific to this occurrence." },
-            ["instance"] = new() { Type = "string", Description = "A URI reference that identifies the specific occurrence." },
-            ["traceId"] = new() { Type = "string", Description = "The trace identifier for request tracking." },
-            ["timestamp"] = new() { Type = "string", Format = "date-time", Description = "The timestamp when the error occurred (UTC)." },
-            ["errors"] = new()
-            {
-                Type = "object",
-                Description = "Validation errors grouped by field name.",
-                AdditionalProperties = new OpenApiSchema
-                {
-                    Type = "array",
-                    Items = new OpenApiSchema { Type = "string" }
-                }
-            }
+            context.Document.AddComponent(
+              ProblemDetailsSchemaName,
+              await context.GetOrCreateSchemaAsync(typeof(ProblemDetails), cancellationToken: cancellationToken));
         }
-    };
+
+        return new OpenApiSchemaReference(ProblemDetailsSchemaName, context.Document);
+    }
 }

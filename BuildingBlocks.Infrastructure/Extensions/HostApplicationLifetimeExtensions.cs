@@ -1,24 +1,29 @@
-﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace BuildingBlocks.Infrastructure.Extensions;
 
+/// <summary>
+/// Provides helpers for coordinating background work with the host application lifetime.
+/// </summary>
 public static class HostApplicationLifetimeExtensions
 {
+    /// <summary>
+    /// Waits until the application startup sequence completes or the stopping token is cancelled.
+    /// </summary>
     public static async Task<bool> WaitForAppStartupAsync(
         this IHostApplicationLifetime lifetime,
         CancellationToken stoppingToken)
     {
-        if (lifetime.ApplicationStarted.IsCancellationRequested)        
-            return true;        
+        if (lifetime.ApplicationStarted.IsCancellationRequested)
+            return true;
 
-        var tcs = new TaskCompletionSource();
+        var taskCompletionSource = new TaskCompletionSource();
 
-        using var registration = lifetime.ApplicationStarted.Register(() => tcs.TrySetResult());
+        using var registration = lifetime.ApplicationStarted.Register(() => taskCompletionSource.TrySetResult());
 
         var cancellationTask = Task.Delay(Timeout.Infinite, stoppingToken);
+        var completedTask = await Task.WhenAny(taskCompletionSource.Task, cancellationTask);
 
-        var completedTask = await Task.WhenAny(tcs.Task, cancellationTask);
-
-        return completedTask == tcs.Task;
+        return completedTask == taskCompletionSource.Task;
     }
 }

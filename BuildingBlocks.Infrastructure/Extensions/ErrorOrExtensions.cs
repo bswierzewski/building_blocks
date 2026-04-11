@@ -1,107 +1,92 @@
-﻿using ErrorOr;
+using ErrorOr;
 using Microsoft.AspNetCore.Http;
 
 namespace BuildingBlocks.Infrastructure.Extensions;
 
+/// <summary>
+/// Maps ErrorOr results to RFC 7807-compatible minimal API responses.
+/// </summary>
 public static class ErrorOrExtensions
 {
-    public static IResult Problem(this List<Error> errors)
+    // Fallback message used when no explicit error details are available.
+    private const string UnexpectedErrorMessage = "An unexpected error occurred.";
+    private const string ValidationErrorDetail = "One or more validation failures have occurred.";
+
+    /// <summary>
+    /// Converts a list of errors into an HTTP problem response.
+    /// </summary>
+    public static IResult Problem(this List<Error> errors) => CreateProblemResult(errors);
+
+    /// <summary>
+    /// Converts a single error into an HTTP problem response.
+    /// </summary>
+    public static IResult Problem(this Error error) => CreateProblemResult([error]);
+
+    // Keep all HTTP mapping rules in one place so response creation stays simple.
+    private static IResult CreateProblemResult(List<Error> errors)
     {
         if (errors is null or { Count: 0 })
-            return Results.Problem("An unexpected error occurred.");
+            return Results.Problem(UnexpectedErrorMessage);
 
         var firstError = errors[0];
-        var statusCode = GetStatusCodeForErrorType(firstError.Type);
+        var metadata = GetProblemMetadata(firstError.Type);
 
         if (firstError.Type == ErrorType.Validation)
-        {
             return Results.ValidationProblem(
                 errors.ToDictionary(),
-                detail: "One or more validation failures have occurred.",
-                title: GetTitleForStatusCode(statusCode),
-                type: GetTypeForStatusCode(statusCode),
-                statusCode: statusCode);
-        }
+                detail: ValidationErrorDetail,
+                title: metadata.Title,
+                type: metadata.Type,
+                statusCode: metadata.StatusCode);
 
         return Results.Problem(
             detail: firstError.Description,
-            statusCode: statusCode,
-            title: GetTitleForStatusCode(statusCode),
-            type: GetTypeForStatusCode(statusCode));
+            statusCode: metadata.StatusCode,
+            title: metadata.Title,
+            type: metadata.Type);
     }
 
-    public static IResult Problem(this Error error)
+    private static (int StatusCode, string Title, string Type) GetProblemMetadata(ErrorType errorType) => errorType switch
     {
-        var statusCode = GetStatusCodeForErrorType(error.Type);
-
-        if (error.Type == ErrorType.Validation)
-        {
-            return Results.ValidationProblem(
-                new Dictionary<string, string[]> { [error.Code] = [error.Description] },
-                detail: "One or more validation failures have occurred.",
-                title: GetTitleForStatusCode(statusCode),
-                type: GetTypeForStatusCode(statusCode),
-                statusCode: statusCode);
-        }
-
-        return Results.Problem(
-            detail: error.Description,
-            statusCode: statusCode,
-            title: GetTitleForStatusCode(statusCode),
-            type: GetTypeForStatusCode(statusCode));
-    }
-
-    public static IResult Problem<TValue>(this ErrorOr<TValue> result)
-    {
-        if (result.IsError)
-            return result.Errors.Problem();
-
-        return Results.Problem("An unexpected error occurred.");
-    }
-
-    private static int GetStatusCodeForErrorType(ErrorType errorType) => errorType switch
-    {
-        ErrorType.Validation => StatusCodes.Status400BadRequest,
-        ErrorType.NotFound => StatusCodes.Status404NotFound,
-        ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
-        ErrorType.Forbidden => StatusCodes.Status403Forbidden,
-        ErrorType.Conflict => StatusCodes.Status409Conflict,
-        ErrorType.Failure => StatusCodes.Status400BadRequest,
-        ErrorType.Unexpected => StatusCodes.Status500InternalServerError,
-        _ => StatusCodes.Status500InternalServerError
+        ErrorType.Validation => (
+            StatusCodes.Status400BadRequest,
+            "Bad Request",
+            "https://tools.ietf.org/html/rfc7231#section-6.5.1"),
+        ErrorType.NotFound => (
+            StatusCodes.Status404NotFound,
+            "Not Found",
+            "https://tools.ietf.org/html/rfc7231#section-6.5.4"),
+        ErrorType.Unauthorized => (
+            StatusCodes.Status401Unauthorized,
+            "Unauthorized",
+            "https://tools.ietf.org/html/rfc7235#section-3.1"),
+        ErrorType.Forbidden => (
+            StatusCodes.Status403Forbidden,
+            "Forbidden",
+            "https://tools.ietf.org/html/rfc7231#section-6.5.3"),
+        ErrorType.Conflict => (
+            StatusCodes.Status409Conflict,
+            "Conflict",
+            "https://tools.ietf.org/html/rfc7231#section-6.5.8"),
+        ErrorType.Failure => (
+            StatusCodes.Status400BadRequest,
+            "Bad Request",
+            "https://tools.ietf.org/html/rfc7231#section-6.5.1"),
+        ErrorType.Unexpected => (
+            StatusCodes.Status500InternalServerError,
+            "Internal Server Error",
+            "https://tools.ietf.org/html/rfc7231#section-6.6.1"),
+        _ => (
+            StatusCodes.Status500InternalServerError,
+            "An error occurred",
+            "https://tools.ietf.org/html/rfc7231#section-6.6.1")
     };
 
-    private static string GetTitleForStatusCode(int statusCode) => statusCode switch
-    {
-        StatusCodes.Status400BadRequest => "Bad Request",
-        StatusCodes.Status401Unauthorized => "Unauthorized",
-        StatusCodes.Status403Forbidden => "Forbidden",
-        StatusCodes.Status404NotFound => "Not Found",
-        StatusCodes.Status409Conflict => "Conflict",
-        StatusCodes.Status422UnprocessableEntity => "Unprocessable Entity",
-        StatusCodes.Status500InternalServerError => "Internal Server Error",
-        _ => "An error occurred"
-    };
-
-    private static string GetTypeForStatusCode(int statusCode) => statusCode switch
-    {
-        StatusCodes.Status400BadRequest => "https://tools.ietf.org/html/rfc7231#section-6.5.1",
-        StatusCodes.Status401Unauthorized => "https://tools.ietf.org/html/rfc7235#section-3.1",
-        StatusCodes.Status403Forbidden => "https://tools.ietf.org/html/rfc7231#section-6.5.3",
-        StatusCodes.Status404NotFound => "https://tools.ietf.org/html/rfc7231#section-6.5.4",
-        StatusCodes.Status409Conflict => "https://tools.ietf.org/html/rfc7231#section-6.5.8",
-        StatusCodes.Status422UnprocessableEntity => "https://tools.ietf.org/html/rfc4918#section-11.2",
-        StatusCodes.Status500InternalServerError => "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-        _ => "https://tools.ietf.org/html/rfc7231#section-6.6.1"
-    };
-
-    private static Dictionary<string, string[]> ToDictionary(this List<Error> errors)
-    {
-        return errors
-            .GroupBy(e => e.Code)
+    // Validation errors are grouped by code so ASP.NET can emit a standard validation payload.
+    private static Dictionary<string, string[]> ToDictionary(this IEnumerable<Error> errors) =>
+        errors
+            .GroupBy(error => error.Code)
             .ToDictionary(
-                g => g.Key,
-                g => g.Select(e => e.Description).ToArray()
-            );
-    }
+                group => group.Key,
+                group => group.Select(error => error.Description).ToArray());
 }

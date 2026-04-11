@@ -1,14 +1,14 @@
-using BuildingBlocks.Kernel.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using BuildingBlocks.Core.Exceptions;
 
 namespace BuildingBlocks.Infrastructure.Exceptions.Handlers;
 
 /// <summary>
-/// Global exception handler that converts exceptions to ProblemDetails responses
+/// Global exception handler that converts exceptions to ProblemDetails responses.
 /// </summary>
 public sealed class GlobalExceptionHandler(IHostEnvironment env, ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {

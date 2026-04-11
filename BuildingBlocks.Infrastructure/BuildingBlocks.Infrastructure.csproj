@@ -1,27 +1,32 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
-	<ItemGroup>
-		<ProjectReference Include="..\BuildingBlocks.Kernel\BuildingBlocks.Kernel.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <!-- ErrorOr -->
+    <PackageReference Include="ErrorOr" />
 
-	<ItemGroup>
-		<PackageReference Include="ErrorOr" />
-		<PackageReference Include="FluentValidation" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" />
-		<PackageReference Include="Microsoft.Extensions.Configuration" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
-		<PackageReference Include="Microsoft.Extensions.Options" />
-		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
-		<PackageReference Include="Serilog.AspNetCore" />
-		<PackageReference Include="Serilog.Enrichers.Span" />
-		<PackageReference Include="Serilog.Formatting.Compact" />
-		<PackageReference Include="Serilog.Sinks.Async" />
-		<PackageReference Include="Serilog.Sinks.OpenTelemetry" />
-		<PackageReference Include="WolverineFx" />
-		<PackageReference Include="WolverineFx.EntityFrameworkCore" />
-		<PackageReference Include="WolverineFx.FluentValidation" />
-		<PackageReference Include="WolverineFx.Postgresql" />
-	</ItemGroup>
+    <!-- ASP.NET Core OpenAPI -->
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+
+    <!-- Entity Framework Core -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+
+    <!-- Serilog -->
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Extensions.Hosting" />
+    <PackageReference Include="Serilog.Enrichers.Environment" />
+    <PackageReference Include="Serilog.Enrichers.Span" />
+    <PackageReference Include="Serilog.Formatting.Compact" />
+    <PackageReference Include="Serilog.Sinks.Async" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+    <PackageReference Include="Serilog.Sinks.File" />
+    <PackageReference Include="Serilog.Sinks.OpenTelemetry" />
+
+    <!-- WolverineFx -->
+    <PackageReference Include="WolverineFx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BuildingBlocks.Core\BuildingBlocks.Core.csproj" />
+  </ItemGroup>
 
 </Project>
