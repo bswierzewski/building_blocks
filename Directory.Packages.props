@@ -3,6 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
+  <Import Project="BuildingBlocks.Core\BuildingBlocks.Core.Packages.props" Condition="Exists('BuildingBlocks.Core\BuildingBlocks.Core.Packages.props')" />
   <Import Project="BuildingBlocks.Hosting\BuildingBlocks.Hosting.Packages.props" Condition="Exists('BuildingBlocks.Hosting\BuildingBlocks.Hosting.Packages.props')" />
   <Import Project="BuildingBlocks.Infrastructure\BuildingBlocks.Infrastructure.Packages.props" Condition="Exists('BuildingBlocks.Infrastructure\BuildingBlocks.Infrastructure.Packages.props')" />
   <Import Project="BuildingBlocks.Tests\BuildingBlocks.Tests.Packages.props" Condition="Exists('BuildingBlocks.Tests\BuildingBlocks.Tests.Packages.props')" />

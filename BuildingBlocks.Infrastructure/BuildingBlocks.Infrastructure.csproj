@@ -10,6 +10,13 @@
     <!-- Entity Framework Core -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
 
+    <!-- Options Validation -->
+    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />
+
+    <!-- Npgsql -->
+    <PackageReference Include="Npgsql" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+
     <!-- Serilog -->
     <PackageReference Include="Serilog.AspNetCore" />
     <PackageReference Include="Serilog.Extensions.Hosting" />
