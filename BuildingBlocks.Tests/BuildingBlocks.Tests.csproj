@@ -1,18 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <!-- Project Settings -->
     <IsPackable>false</IsPackable>
     <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Testing Framework -->
+    <PackageReference Include="xunit" />
+
+    <!-- Integration Testing -->
     <PackageReference Include="Alba" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Npgsql" />
     <PackageReference Include="Respawn" />
     <PackageReference Include="Testcontainers.PostgreSql" />
-    <PackageReference Include="xunit" />
+
+    <!-- End-To-End Testing -->
+    <PackageReference Include="Aspire.Hosting.Testing" />
   </ItemGroup>
 
 </Project>

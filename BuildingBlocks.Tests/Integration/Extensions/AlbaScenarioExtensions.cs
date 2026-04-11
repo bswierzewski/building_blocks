@@ -2,7 +2,7 @@ using Alba;
 using System.Text.Json;
 using Xunit.Abstractions;
 
-namespace BuildingBlocks.IntegrationTests;
+namespace BuildingBlocks.Tests.Integration.Extensions;
 
 /// <summary>
 /// Extension methods for Alba IScenarioResult to simplify test output logging.

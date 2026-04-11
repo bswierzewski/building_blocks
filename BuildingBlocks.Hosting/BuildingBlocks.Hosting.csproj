@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+		<!-- Aspire Service Defaults -->
 		<IsAspireSharedProject>true</IsAspireSharedProject>
 	</PropertyGroup>
 
