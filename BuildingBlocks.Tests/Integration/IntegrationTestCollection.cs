@@ -28,12 +28,14 @@ public abstract class IntegrationTestCollection<TProgram> : IAsyncLifetime
 
     public string ConnectionString => _postgresContainer.GetConnectionString();
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await _postgresContainer.StartAsync();
 
         _connection = new NpgsqlConnection(ConnectionString);
         await _connection.OpenAsync();
+
+        await InitializeDatabaseAsync();
 
         _respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
         {
@@ -57,7 +59,7 @@ public abstract class IntegrationTestCollection<TProgram> : IAsyncLifetime
         }
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await _connection.DisposeAsync();
         await _postgresContainer.DisposeAsync();
@@ -67,7 +69,12 @@ public abstract class IntegrationTestCollection<TProgram> : IAsyncLifetime
     /// <summary>
     /// Override to register collection-wide service replacements applied to every test in this collection.
     /// </summary>
-    public virtual void ConfigureServices(IServiceCollection services)
-    {
-    }
+    public virtual void ConfigureServices(IServiceCollection services) { }
+
+    /// <summary>
+    /// Override to initialize the database schema before Respawn inspects tables.
+    /// This is the right place to run application startup that applies EF Core migrations.
+    /// </summary>
+    protected virtual ValueTask InitializeDatabaseAsync()
+      => ValueTask.CompletedTask;
 }

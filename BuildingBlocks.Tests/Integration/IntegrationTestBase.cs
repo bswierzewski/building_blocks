@@ -19,21 +19,7 @@ public abstract class IntegrationTestBase<TProgram>(IntegrationTestCollection<TP
 {
     protected IAlbaHost AlbaHost { get; private set; } = default!;
 
-    protected Task ResetDatabaseAsync() => collection.ResetDatabaseAsync();
-
-    /// <summary>
-    /// Override to configure service replacements used by all tests in this class.
-    /// </summary>
-    protected virtual void ConfigureServices(IServiceCollection services)
-    {
-    }
-
-    /// <summary>
-    /// Override to seed data after the host is created and before each test runs.
-    /// </summary>
-    protected virtual Task SeedDataAsync() => Task.CompletedTask;
-
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await collection.ResetDatabaseAsync();
 
@@ -74,13 +60,23 @@ public abstract class IntegrationTestBase<TProgram>(IntegrationTestCollection<TP
         }
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (AlbaHost is not null)
-        {
             await AlbaHost.DisposeAsync();
-        }
     }
+
+    /// <summary>
+    /// Override to configure service replacements used by all tests in this class.
+    /// </summary>
+    protected virtual void ConfigureServices(IServiceCollection services) { }
+
+    /// <summary>
+    /// Override to seed data after the host is created and before each test runs.
+    /// </summary>
+    protected virtual Task SeedDataAsync() => Task.CompletedTask;
+
+    protected Task ResetDatabaseAsync() => collection.ResetDatabaseAsync();
 
     protected T GetRequiredService<T>() where T : notnull => AlbaHost.Services.GetRequiredService<T>();
 

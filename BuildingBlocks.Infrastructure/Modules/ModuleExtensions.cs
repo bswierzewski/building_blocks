@@ -27,7 +27,7 @@ public static class ModuleExtensions
       options.AddInterceptors(auditableInterceptor);
 
       var dataSource = sp.GetRequiredService<NpgsqlDataSource>();
-      options.UseNpgsql(dataSource, npgsqlOptions => npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", schema));
+      options.UseNpgsql(dataSource, npgsqlOptions => npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", schema.ToLowerInvariant()));
     });
 
     return services;

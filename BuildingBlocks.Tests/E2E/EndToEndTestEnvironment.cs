@@ -8,9 +8,9 @@ namespace BuildingBlocks.Tests.E2E;
 
 public abstract class EndToEndTestEnvironment : IAsyncLifetime
 {
-  public abstract Task InitializeAsync();
+  public abstract ValueTask InitializeAsync();
 
-  public abstract Task DisposeAsync();
+  public abstract ValueTask DisposeAsync();
 }
 
 public abstract class EndToEndTestEnvironment<TAppHost> : EndToEndTestEnvironment
@@ -25,17 +25,13 @@ public abstract class EndToEndTestEnvironment<TAppHost> : EndToEndTestEnvironmen
     return [];
   }
 
-  protected virtual Task ConfigureTestingServicesAsync(IServiceCollection services)
-  {
-    return Task.CompletedTask;
-  }
+  protected virtual ValueTask ConfigureTestingServicesAsync(IServiceCollection services)
+      => ValueTask.CompletedTask;
 
-  protected virtual Task OnApplicationStartedAsync()
-  {
-    return Task.CompletedTask;
-  }
+  protected virtual ValueTask OnApplicationStartedAsync()
+      => ValueTask.CompletedTask;
 
-  public override async Task InitializeAsync()
+  public override async ValueTask InitializeAsync()
   {
     var builder = await DistributedApplicationTestingBuilder.CreateAsync<TAppHost>(GetAppHostArguments());
     await ConfigureTestingServicesAsync(builder.Services);
@@ -45,12 +41,10 @@ public abstract class EndToEndTestEnvironment<TAppHost> : EndToEndTestEnvironmen
     await OnApplicationStartedAsync();
   }
 
-  public override async Task DisposeAsync()
+  public override async ValueTask DisposeAsync()
   {
     if (App is not null)
-    {
       await App.DisposeAsync();
-    }
   }
 
   public HttpClient CreateHttpClient(string resourceName, string? endpointName = null)

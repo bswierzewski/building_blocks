@@ -1,6 +1,6 @@
 using Alba;
 using System.Text.Json;
-using Xunit.Abstractions;
+using Xunit;
 
 namespace BuildingBlocks.Tests.Integration.Extensions;
 
