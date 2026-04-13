@@ -1,9 +1,10 @@
 using BuildingBlocks.Core.Abstractions;
 using BuildingBlocks.Infrastructure.Middleware;
-using BuildingBlocks.Infrastructure.Persistence.Extensions;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Npgsql;
 using Wolverine;
 using Wolverine.EntityFrameworkCore;
 using Wolverine.FluentValidation;
@@ -33,10 +34,9 @@ public static class WebApplicationBootstrapExtensions
         foreach (var module in modules)
             module.AddServices(builder.Services, builder.Configuration);
 
-        // Build a single shared NpgsqlDataSource used by all module DbContexts and Wolverine transport.
-        // Creating it here (before UseWolverine) allows passing the instance directly to
-        // PersistMessagesWithPostgresql, which requires a concrete NpgsqlDataSource — not a delegate.
-        var dataSource = builder.Services.AddNpgsqlDataSource(builder.Configuration);
+        // Build and register one shared NpgsqlDataSource so EF Core DbContexts and Wolverine
+        // outbox/inbox persistence reuse the same underlying connection pool.
+        var dataSource = RegisterNpgsqlDataSource(builder.Services, builder.Configuration);
 
         builder.Host.UseWolverine(opts =>
         {
@@ -48,8 +48,8 @@ public static class WebApplicationBootstrapExtensions
             // rather than chaining them into a single pipeline. Prevents unintentional fan-out.
             opts.MultipleHandlerBehavior = MultipleHandlerBehavior.Separated;
 
-            // Persist Wolverine inbox/outbox and durable messaging state in PostgreSQL under
-            // the "wolverine" schema, sharing the same data source as all module DbContexts.
+            // Pass the same shared pool so Wolverine and all module DbContexts use
+            // one connection pool — no second Npgsql pool is created.
             opts.PersistMessagesWithPostgresql(dataSource, "wolverine");
 
             // Enlist Wolverine in EF Core transactions so that message dispatch and database
@@ -88,6 +88,28 @@ public static class WebApplicationBootstrapExtensions
     }
 
     /// <summary>
+    /// Builds the shared PostgreSQL data source from configuration and registers it as a singleton.
+    /// The pool is configured eagerly, but physical connections are still opened lazily by Npgsql.
+    /// </summary>
+    private static NpgsqlDataSource RegisterNpgsqlDataSource(
+        IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("Default");
+
+        if (string.IsNullOrWhiteSpace(connectionString))
+            throw new InvalidOperationException("Connection string 'Default' not found in configuration.");
+
+        var dataSource = new NpgsqlDataSourceBuilder(connectionString)
+            .EnableDynamicJson()
+            .Build();
+
+        services.AddSingleton(dataSource);
+
+        return dataSource;
+    }
+
+    /// <summary>
     /// Registers module services and Wolverine handler/endpoint discovery only — no database
     /// connection, no persistence, no hosted initialization. Suitable for OpenAPI document
     /// generation (<c>ASPNETCORE_ENVIRONMENT=Tooling</c>) where side effects must be prevented.
@@ -120,6 +142,8 @@ public static class WebApplicationBootstrapExtensions
             foreach (var module in modules)
                 opts.Discovery.IncludeAssembly(module.GetType().Assembly);
 
+            // Allow tooling callers to add endpoint conventions or discovery tweaks without
+            // reimplementing the shared OpenAPI-safe bootstrap path.
             configure?.Invoke(opts);
         });
 

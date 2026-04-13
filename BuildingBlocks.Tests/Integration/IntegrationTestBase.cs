@@ -1,4 +1,5 @@
 using Alba;
+using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,11 +18,15 @@ namespace BuildingBlocks.Tests.Integration;
 public abstract class IntegrationTestBase<TProgram>(IntegrationTestCollection<TProgram> collection) : IAsyncLifetime
     where TProgram : class
 {
+    private const string DefaultConnectionStringEnvironmentVariable = "ConnectionStrings__Default";
+
     protected IAlbaHost AlbaHost { get; private set; } = default!;
 
     public async ValueTask InitializeAsync()
     {
         await collection.ResetDatabaseAsync();
+
+        Environment.SetEnvironmentVariable(DefaultConnectionStringEnvironmentVariable, collection.ConnectionString);
 
         AlbaHost = await Alba.AlbaHost.For<TProgram>(builder =>
         {
@@ -33,12 +38,6 @@ public abstract class IntegrationTestBase<TProgram>(IntegrationTestCollection<TP
                 logging.AddConsole();
                 logging.SetMinimumLevel(LogLevel.Warning);
             });
-
-            builder.ConfigureAppConfiguration((_, config) =>
-                config.AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    ["ConnectionStrings:Default"] = collection.ConnectionString
-                }));
 
             builder.ConfigureServices((_, services) =>
             {

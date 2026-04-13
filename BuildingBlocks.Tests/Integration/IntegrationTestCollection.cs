@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Respawn;
+using Respawn.Graph;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -40,7 +41,7 @@ public abstract class IntegrationTestCollection<TProgram> : IAsyncLifetime
         _respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
         {
             DbAdapter = DbAdapter.Postgres,
-            TablesToIgnore = [new Respawn.Graph.Table("__EFMigrationsHistory")],
+            TablesToIgnore = [new Table("__EFMigrationsHistory")],
             WithReseed = true
         });
     }
