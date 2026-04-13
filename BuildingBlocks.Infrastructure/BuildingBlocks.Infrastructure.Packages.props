@@ -28,5 +28,10 @@
 
     <!-- WolverineFx -->
     <PackageVersion Include="WolverineFx" Version="5.30.0" />
+    <PackageVersion Include="WolverineFx.EntityFrameworkCore" Version="5.29.0" />
+    <PackageVersion Include="WolverineFx.FluentValidation" Version="5.29.0" />
+    <PackageVersion Include="WolverineFx.Http" Version="5.29.0" />
+    <PackageVersion Include="WolverineFx.Http.FluentValidation" Version="5.29.0" />
+    <PackageVersion Include="WolverineFx.Postgresql" Version="5.29.0" />
   </ItemGroup>
 </Project>
