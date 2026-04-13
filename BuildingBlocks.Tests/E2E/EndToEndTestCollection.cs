@@ -7,6 +7,6 @@ namespace BuildingBlocks.Tests.E2E;
 /// Apply CollectionDefinition with DisableParallelization = true on a derived non-generic class.
 /// </summary>
 public abstract class EndToEndTestCollection<TEnvironment> : ICollectionFixture<TEnvironment>
-    where TEnvironment : EndToEndTestEnvironment
+    where TEnvironment : class, IAsyncLifetime
 {
 }

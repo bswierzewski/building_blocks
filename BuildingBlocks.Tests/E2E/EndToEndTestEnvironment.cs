@@ -6,14 +6,11 @@ using Xunit;
 
 namespace BuildingBlocks.Tests.E2E;
 
-public abstract class EndToEndTestEnvironment : IAsyncLifetime
-{
-  public abstract ValueTask InitializeAsync();
-
-  public abstract ValueTask DisposeAsync();
-}
-
-public abstract class EndToEndTestEnvironment<TAppHost> : EndToEndTestEnvironment
+/// <summary>
+/// Shared runtime environment for one end-to-end test stack.
+/// Starts the distributed application once per collection and exposes helper methods for tests.
+/// </summary>
+public abstract class EndToEndTestEnvironment<TAppHost> : IAsyncLifetime
     where TAppHost : class
 {
   protected DistributedApplication App { get; private set; } = default!;
@@ -26,13 +23,10 @@ public abstract class EndToEndTestEnvironment<TAppHost> : EndToEndTestEnvironmen
   protected virtual string DefaultHttpsResourceName
       => throw new InvalidOperationException("No default HTTPS resource configured for this end-to-end environment.");
 
-  protected virtual ValueTask ConfigureTestingServicesAsync(IServiceCollection services)
-      => ValueTask.CompletedTask;
-
-  protected virtual ValueTask OnApplicationStartedAsync()
-      => ValueTask.CompletedTask;
-
-  public override async ValueTask InitializeAsync()
+  /// <summary>
+  /// Builds and starts the distributed application for the current test collection.
+  /// </summary>
+  public async ValueTask InitializeAsync()
   {
     var builder = await DistributedApplicationTestingBuilder.CreateAsync<TAppHost>();
     await ConfigureTestingServicesAsync(builder.Services);
@@ -42,19 +36,36 @@ public abstract class EndToEndTestEnvironment<TAppHost> : EndToEndTestEnvironmen
     await OnApplicationStartedAsync();
   }
 
-  public override async ValueTask DisposeAsync()
+  /// <summary>
+  /// Disposes the distributed application created for the current test collection.
+  /// </summary>
+  public async ValueTask DisposeAsync()
   {
     if (App is not null)
       await App.DisposeAsync();
   }
 
+  /// <summary>
+  /// Creates an HTTPS client for the configured front-door resource or for the specified resource.
+  /// </summary>
   public HttpClient CreateHttpsClient(string? resourceName = null)
-  {
-    return App.CreateHttpClient(resourceName ?? DefaultHttpsResourceName, "https");
-  }
+      => App.CreateHttpClient(resourceName ?? DefaultHttpsResourceName, "https");
 
+  /// <summary>
+  /// Waits until the specified resource is reported as healthy by the Aspire test host.
+  /// </summary>
   public Task WaitForResourceHealthyAsync(string resourceName, CancellationToken cancellationToken = default)
-  {
-    return App.ResourceNotifications.WaitForResourceHealthyAsync(resourceName, cancellationToken);
-  }
+      => App.ResourceNotifications.WaitForResourceHealthyAsync(resourceName, cancellationToken);
+
+  /// <summary>
+  /// Allows derived environments to register services used by the Aspire test host before the application is built.
+  /// </summary>
+  protected virtual ValueTask ConfigureTestingServicesAsync(IServiceCollection services)
+      => ValueTask.CompletedTask;
+
+  /// <summary>
+  /// Allows derived environments to perform additional readiness steps after the application has started.
+  /// </summary>
+  protected virtual ValueTask OnApplicationStartedAsync()
+      => ValueTask.CompletedTask;
 }

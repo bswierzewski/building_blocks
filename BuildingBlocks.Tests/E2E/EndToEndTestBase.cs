@@ -11,15 +11,17 @@ namespace BuildingBlocks.Tests.E2E;
 public abstract class EndToEndTestBase<TAppHost>(EndToEndTestEnvironment<TAppHost> testEnvironment)
     where TAppHost : class
 {
-  protected EndToEndTestEnvironment<TAppHost> TestEnvironment { get; } = testEnvironment;
+    protected EndToEndTestEnvironment<TAppHost> TestEnvironment { get; } = testEnvironment;
 
-  protected HttpClient CreateHttpsClient(string? resourceName = null)
-  {
-    return TestEnvironment.CreateHttpsClient(resourceName);
-  }
+    /// <summary>
+    /// Creates an HTTPS client for the configured front-door resource or for the specified resource.
+    /// </summary>
+    protected HttpClient CreateHttpsClient(string? resourceName = null)
+        => TestEnvironment.CreateHttpsClient(resourceName);
 
-  protected Task WaitForResourceHealthyAsync(string resourceName, CancellationToken cancellationToken = default)
-  {
-    return TestEnvironment.WaitForResourceHealthyAsync(resourceName, cancellationToken);
-  }
+    /// <summary>
+    /// Waits until the specified resource is reported as healthy by the Aspire test host.
+    /// </summary>
+    protected Task WaitForResourceHealthyAsync(string resourceName, CancellationToken cancellationToken = default)
+        => TestEnvironment.WaitForResourceHealthyAsync(resourceName, cancellationToken);
 }

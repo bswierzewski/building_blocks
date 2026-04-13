@@ -2,45 +2,71 @@
 
 This folder contains the shared infrastructure for application-level integration tests built on Alba, xUnit, Testcontainers, and Respawn.
 
-The design has two main concepts:
+The design has three main concepts:
 
-1. `IntegrationTestCollection<TProgram>`
-   The xUnit fixture for one shared test stack. Starts the PostgreSQL container and handles database resets. Override `ConfigureServices` to register collection-wide service replacements (e.g. a fake HTTP client used by every test in the collection).
+1. `IntegrationTestEnvironment<TProgram>`
+    The shared runtime environment for one integration-test stack. Starts the PostgreSQL container, initializes the schema, handles database resets, and exposes environment-wide service overrides.
 
-2. `IntegrationTestBase<TProgram>`
+2. `IntegrationTestCollection<TEnvironment>`
+    Connects one xUnit collection to one shared integration-test environment.
+
+3. `IntegrationTestBase<TProgram>`
    Base class for individual test classes. For every test it automatically:
    - resets the database
-   - creates the Alba host (applying collection-wide and per-class service overrides)
+    - creates the Alba host (applying environment-wide and per-class service overrides)
    - runs per-class seed logic
    - disposes the host after the test
 
 ## Recommended Usage Model
 
-- Use one collection for one shared application stack.
+- Use one collection for one shared integration-test environment.
 - Mark the collection with `DisableParallelization = true`.
-- Collection-wide service overrides go in `IntegrationTestCollection.ConfigureServices`.
+- Environment-wide service overrides go in `IntegrationTestEnvironment.ConfigureServices`.
 - Per-class overrides go in `IntegrationTestBase.ConfigureServices`.
 - Per-class seed data goes in `SeedDataAsync`.
 
-## Create A Collection
+## Create An Environment
 
 ```csharp
 using BuildingBlocks.Tests.Integration;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace MyApp.IntegrationTests.Shared;
 
-[CollectionDefinition(Name, DisableParallelization = true)]
-public sealed class SharedCollection : IntegrationTestCollection<Program>, ICollectionFixture<SharedCollection>
+public sealed class SharedEnvironment : IntegrationTestEnvironment<Program>
 {
-    public const string Name = "Shared";
-
-    // Optional: collection-wide service replacements
+    // Optional: environment-wide service replacements
     public override void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<IEmailSender, FakeEmailSender>();
     }
+
+    protected override async ValueTask InitializeDatabaseAsync()
+    {
+        await using var dbContext = new MyDbContext(
+            new DbContextOptionsBuilder<MyDbContext>()
+                .UseNpgsql(ConnectionString)
+                .Options);
+
+        await dbContext.Database.MigrateAsync();
+    }
+}
+```
+
+## Create A Collection
+
+```csharp
+using BuildingBlocks.Tests.Integration;
+using Xunit;
+
+namespace MyApp.IntegrationTests.Shared;
+
+[CollectionDefinition(Name, DisableParallelization = true)]
+public sealed class SharedCollection : IntegrationTestCollection<SharedEnvironment>
+{
+    public const string Name = "Shared";
 }
 ```
 
@@ -59,9 +85,9 @@ namespace MyApp.IntegrationTests.Features.Orders;
 
 [Collection(SharedCollection.Name)]
 public sealed class GenerateDeliveryNoteTests(
-    SharedCollection collection,
+    SharedEnvironment environment,
     ITestOutputHelper output)
-    : IntegrationTestBase<Program>(collection)
+    : IntegrationTestBase<Program>(environment)
 {
     private readonly Mock<IProductsClient> _productsClientMock = new();
 
@@ -102,8 +128,8 @@ public sealed class GenerateDeliveryNoteTests(
 
 Create a separate collection when you need a different shared stack, for example:
 
-- different collection-wide service registrations
+- different environment-wide service registrations
 - a different connection string configuration key
 - additional in-memory configuration entries
 
-Each collection gets its own PostgreSQL container.
+Each environment gets its own PostgreSQL container.

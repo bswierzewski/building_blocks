@@ -10,8 +10,8 @@ namespace BuildingBlocks.Tests.Integration.Extensions;
 public static class AlbaScenarioExtensions
 {
     /// <summary>
-    /// Prints the HTTP response body as formatted JSON to the test output.
-    /// Works with any response - errors, success responses, lists, etc.
+    /// Awaits the scenario result, prints the response body to the test output, and returns the same result for fluent chaining.
+    /// JSON payloads are formatted for readability.
     /// </summary>
     /// <param name="resultTask">The Alba scenario result task.</param>
     /// <param name="output">The xUnit test output helper.</param>
