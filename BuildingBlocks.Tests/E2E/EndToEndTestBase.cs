@@ -13,28 +13,13 @@ public abstract class EndToEndTestBase<TAppHost>(EndToEndTestEnvironment<TAppHos
 {
   protected EndToEndTestEnvironment<TAppHost> TestEnvironment { get; } = testEnvironment;
 
-  protected HttpClient CreateHttpClient(string resourceName, string? endpointName = null)
+  protected HttpClient CreateHttpsClient(string? resourceName = null)
   {
-    return endpointName is null
-        ? TestEnvironment.CreateHttpClient(resourceName)
-        : TestEnvironment.CreateHttpClient(resourceName, endpointName);
+    return TestEnvironment.CreateHttpsClient(resourceName);
   }
 
   protected Task WaitForResourceHealthyAsync(string resourceName, CancellationToken cancellationToken = default)
   {
     return TestEnvironment.WaitForResourceHealthyAsync(resourceName, cancellationToken);
-  }
-
-  protected Task WaitForResourceAsync(
-      string resourceName,
-      string state,
-      CancellationToken cancellationToken = default)
-  {
-    return TestEnvironment.WaitForResourceAsync(resourceName, state, cancellationToken);
-  }
-
-  protected Task<string?> GetConnectionStringAsync(string resourceName, CancellationToken cancellationToken = default)
-  {
-    return TestEnvironment.GetConnectionStringAsync(resourceName, cancellationToken);
   }
 }

@@ -19,7 +19,7 @@ The design mirrors the Integration folder, but the runtime model is different:
    Connects one xUnit collection to one shared Aspire environment.
 
 3. `EndToEndTestBase<TAppHost>`
-   Gives test classes simple access to helper methods like `CreateHttpClient`, `WaitForResourceHealthyAsync`, and `GetConnectionStringAsync`.
+    Gives test classes simple access to helper methods like `CreateHttpsClient` and `WaitForResourceHealthyAsync`.
 
 ## Recommended Rules
 
@@ -39,15 +39,9 @@ namespace MyApp.E2ETests.Shared;
 
 public sealed class SharedEnvironment : EndToEndTestEnvironment<Projects.MyApp_AppHost>
 {
-    protected override string[] GetAppHostArguments()
-    {
-        return [
-            "--environment=Testing",
-            "DcpPublisher:RandomizePorts=false"
-        ];
-    }
+    protected override string DefaultHttpsResourceName => "gateway";
 
-    protected override Task ConfigureTestingServicesAsync(IServiceCollection services)
+    protected override ValueTask ConfigureTestingServicesAsync(IServiceCollection services)
     {
         services.AddLogging(logging => logging
             .AddConsole()
@@ -55,7 +49,7 @@ public sealed class SharedEnvironment : EndToEndTestEnvironment<Projects.MyApp_A
             .AddFilter("Microsoft.AspNetCore", LogLevel.Warning)
             .AddFilter("Aspire.Hosting.Dcp", LogLevel.Warning));
 
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 }
 ```
@@ -92,9 +86,9 @@ public sealed class HomePageTests(SharedEnvironment testEnvironment)
     public async Task home_page_returns_ok()
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        await WaitForResourceHealthyAsync("webfrontend", cts.Token);
+        await WaitForResourceHealthyAsync("gateway", cts.Token);
 
-        using var client = CreateHttpClient("webfrontend");
+        using var client = CreateHttpsClient();
         using var response = await client.GetAsync("/", cts.Token);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
