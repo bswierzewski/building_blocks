@@ -8,7 +8,7 @@ public interface ICurrentUser
     /// <summary>
     /// Gets the identifier of the current user.
     /// </summary>
-    Guid Id { get; }
+    string Id { get; }
 
     /// <summary>
     /// Gets the collection of roles assigned to the current user
