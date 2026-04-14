@@ -3,7 +3,6 @@ using BuildingBlocks.Infrastructure.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Npgsql;
 using Wolverine;
 using Wolverine.EntityFrameworkCore;
@@ -21,21 +20,13 @@ namespace BuildingBlocks.Infrastructure.Modules;
 public static class WebApplicationBootstrapExtensions
 {
     /// <summary>
-    /// Registers module services, NpgsqlDataSource, fully-configured Wolverine (with PostgreSQL
-    /// persistence and EF Core transactions), and a hosted service that runs module initialization.
-    /// Use this path for normal application startup.
+    /// Registers shared modular runtime infrastructure for the provided modules.
     /// </summary>
-    public static void AddModularRuntimeInfrastructure(
+    public static void AddModuleInfrastructure(
         this WebApplicationBuilder builder,
         IModule[] modules,
         Action<WolverineOptions>? configure = null)
     {
-        // Let every module register its own services, DbContexts, and options into the DI container.
-        foreach (var module in modules)
-            module.AddServices(builder.Services, builder.Configuration);
-
-        // Build and register one shared NpgsqlDataSource so EF Core DbContexts and Wolverine
-        // outbox/inbox persistence reuse the same underlying connection pool.
         var dataSource = RegisterNpgsqlDataSource(builder.Services, builder.Configuration);
 
         builder.Host.UseWolverine(opts =>
@@ -48,8 +39,6 @@ public static class WebApplicationBootstrapExtensions
             // rather than chaining them into a single pipeline. Prevents unintentional fan-out.
             opts.MultipleHandlerBehavior = MultipleHandlerBehavior.Separated;
 
-            // Pass the same shared pool so Wolverine and all module DbContexts use
-            // one connection pool — no second Npgsql pool is created.
             opts.PersistMessagesWithPostgresql(dataSource, "wolverine");
 
             // Enlist Wolverine in EF Core transactions so that message dispatch and database
@@ -75,16 +64,8 @@ public static class WebApplicationBootstrapExtensions
         });
 
         // Register the ASP.NET Core bridge that maps Wolverine HTTP endpoints into the
-        // routing pipeline. Must be called before MapModularEndpoints on the built app.
+        // routing pipeline. Must be called before MapModuleEndpoints on the built app.
         builder.Services.AddWolverineHttp();
-
-        // Register the module array as a singleton so ModuleInitializerService can resolve
-        // it via constructor injection and iterate over every module during startup.
-        builder.Services.AddSingleton<IModule[]>(modules);
-
-        // Register the hosted service that drives post-startup module initialization
-        // (e.g. applying EF migrations and seeding reference data).
-        builder.Services.AddHostedService<ModuleInitializerService>();
     }
 
     /// <summary>
@@ -95,10 +76,8 @@ public static class WebApplicationBootstrapExtensions
         IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("Default");
-
-        if (string.IsNullOrWhiteSpace(connectionString))
-            throw new InvalidOperationException("Connection string 'Default' not found in configuration.");
+        var connectionString = configuration.GetConnectionString("Default")
+            ?? throw new InvalidOperationException("Connection string 'Default' not found in configuration.");
 
         var dataSource = new NpgsqlDataSourceBuilder(connectionString)
             .EnableDynamicJson()
@@ -110,52 +89,9 @@ public static class WebApplicationBootstrapExtensions
     }
 
     /// <summary>
-    /// Registers module services and Wolverine handler/endpoint discovery only — no database
-    /// connection, no persistence, no hosted initialization. Suitable for OpenAPI document
-    /// generation (<c>ASPNETCORE_ENVIRONMENT=Tooling</c>) where side effects must be prevented.
-    /// </summary>
-    public static void AddModularToolingInfrastructure(
-        this WebApplicationBuilder builder,
-        IModule[] modules,
-        Action<WolverineOptions>? configure = null)
-    {
-        // Register module services so their DI dependencies and OpenAPI metadata are available
-        // to the document generator. No NpgsqlDataSource is built — there is no database connection.
-        foreach (var module in modules)
-            module.AddServices(builder.Services, builder.Configuration);
-
-        builder.Host.UseWolverine(opts =>
-        {
-            // Enable FluentValidation so generated request/response schemas include validation
-            // annotations that would be present at runtime.
-            opts.UseFluentValidation();
-
-            // Mirror the runtime handler behavior setting so the generated spec reflects
-            // the actual routing semantics of the live application.
-            opts.MultipleHandlerBehavior = MultipleHandlerBehavior.Separated;
-
-            // Scan BuildingBlocks so shared endpoint conventions are included in the spec
-            // even when no module-level middleware is registered.
-            opts.Discovery.IncludeAssembly(typeof(LoggingMiddleware).Assembly);
-
-            // Scan every module assembly so all HTTP endpoints appear in the generated document.
-            foreach (var module in modules)
-                opts.Discovery.IncludeAssembly(module.GetType().Assembly);
-
-            // Allow tooling callers to add endpoint conventions or discovery tweaks without
-            // reimplementing the shared OpenAPI-safe bootstrap path.
-            configure?.Invoke(opts);
-        });
-
-        // Register the HTTP bridge so MapModularEndpoints can map discovered endpoints
-        // into the routing pipeline for the document generator to introspect.
-        builder.Services.AddWolverineHttp();
-    }
-
-    /// <summary>
     /// Maps Wolverine HTTP endpoints and enables FluentValidation problem details middleware.
     /// </summary>
-    public static void MapModularEndpoints(this WebApplication app)
+    public static void MapModuleEndpoints(this WebApplication app)
     {
         app.MapWolverineEndpoints(opts =>
         {

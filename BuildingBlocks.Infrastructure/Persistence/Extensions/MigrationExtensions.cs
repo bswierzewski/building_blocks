@@ -18,12 +18,13 @@ public static class MigrationExtensions
         var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
         var logger = services.GetRequiredService<ILogger<TContext>>();
 
-        using var scope = scopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<TContext>();
-
         try
         {
             var contextName = typeof(TContext).Name;
+
+            using var scope = scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<TContext>();
+
             logger.LogInformation("Checking migrations for {ContextName}...", contextName);
 
             var pendingMigrations = (await context.Database.GetPendingMigrationsAsync(cancellationToken)).ToList();

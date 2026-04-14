@@ -19,7 +19,7 @@ public interface IModule
   void AddServices(IServiceCollection services, IConfiguration configuration);
 
   /// <summary>
-  /// Performs startup initialization after the host has been built.
+  /// Runs post-build module setup against the fully constructed application's service provider.
   /// </summary>
   Task InitializeAsync(IServiceProvider services, CancellationToken cancellationToken = default);
 }
