@@ -11,7 +11,7 @@ public interface IModule
   /// <summary>
   /// Logical module name used for diagnostics and configuration grouping.
   /// </summary>
-  static abstract string Name { get; }
+  string Name { get; }
 
   /// <summary>
   /// Registers module services in the DI container.
@@ -21,5 +21,13 @@ public interface IModule
   /// <summary>
   /// Runs post-build module setup against the fully constructed application's service provider.
   /// </summary>
-  Task InitializeAsync(IServiceProvider services, CancellationToken cancellationToken = default);
+  Task InitializeAsync(IServiceProvider services, CancellationToken cancellationToken = default)
+      => Task.CompletedTask;
+
+  /// <summary>
+  /// Applies module-specific database migrations when a dedicated migrator host is used.
+  /// Modules without migrations can rely on the default no-op implementation.
+  /// </summary>
+  Task InitializeMigrationsAsync(IServiceProvider services, CancellationToken cancellationToken = default)
+      => Task.CompletedTask;
 }

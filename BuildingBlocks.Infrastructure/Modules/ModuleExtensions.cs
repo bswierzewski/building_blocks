@@ -1,3 +1,4 @@
+using BuildingBlocks.Core.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,9 +15,26 @@ namespace BuildingBlocks.Infrastructure.Modules;
 public static class ModuleExtensions
 {
   /// <summary>
+  /// Registers the shared PostgreSQL data source used by module DbContexts and Wolverine persistence.
+  /// </summary>
+  public static NpgsqlDataSource AddPostgresDataSource(this IServiceCollection services, IConfiguration configuration)
+  {
+    var connectionString = configuration.GetConnectionString("Default")
+        ?? throw new InvalidOperationException("Connection string 'Default' not found in configuration.");
+
+    var dataSource = new NpgsqlDataSourceBuilder(connectionString)
+        .EnableDynamicJson()
+        .Build();
+
+    services.TryAddSingleton(dataSource);
+
+    return dataSource;
+  }
+
+  /// <summary>
   /// Registers a PostgreSQL-backed DbContext with audit interceptors and a schema-specific migrations history table.
   /// </summary>
-  public static IServiceCollection AddPostgres<TDbContext>(this IServiceCollection services, string schema)
+  public static IServiceCollection AddPostgres<TDbContext>(this IServiceCollection services)
       where TDbContext : DbContext
   {
     services.TryAddScoped<AuditableEntityInterceptor>();
@@ -27,7 +45,7 @@ public static class ModuleExtensions
       options.AddInterceptors(auditableInterceptor);
 
       var dataSource = sp.GetRequiredService<NpgsqlDataSource>();
-      options.UseNpgsql(dataSource, npgsqlOptions => npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", schema.ToLowerInvariant()));
+      options.UseNpgsql(dataSource, npgsqlOptions => npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", typeof(TDbContext).ToDbContextSchemaName()));
     });
 
     return services;

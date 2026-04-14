@@ -1,3 +1,4 @@
+using BuildingBlocks.Core.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace BuildingBlocks.Tests.Integration.Utils;
@@ -13,10 +14,10 @@ public static class IntegrationTestDatabaseUtils
   /// Applies pending EF Core migrations for the specified DbContext using a schema-specific
   /// migrations history table.
   /// </summary>
-  public static async Task MigrateDatabaseAsync<TContext>(string connectionString, string schema)
+  public static async Task MigrateDatabaseAsync<TContext>(string connectionString)
       where TContext : DbContext
   {
-    var normalizedSchema = schema.ToLowerInvariant();
+    var normalizedSchema = typeof(TContext).ToDbContextSchemaName();
 
     var options = new DbContextOptionsBuilder<TContext>()
         .UseNpgsql(connectionString, np =>

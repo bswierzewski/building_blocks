@@ -27,7 +27,7 @@ public static class WebApplicationBootstrapExtensions
         IModule[] modules,
         Action<WolverineOptions>? configure = null)
     {
-        var dataSource = RegisterNpgsqlDataSource(builder.Services, builder.Configuration);
+        var dataSource = builder.Services.AddPostgresDataSource(builder.Configuration);
 
         builder.Host.UseWolverine(opts =>
         {
@@ -66,26 +66,6 @@ public static class WebApplicationBootstrapExtensions
         // Register the ASP.NET Core bridge that maps Wolverine HTTP endpoints into the
         // routing pipeline. Must be called before MapModuleEndpoints on the built app.
         builder.Services.AddWolverineHttp();
-    }
-
-    /// <summary>
-    /// Builds the shared PostgreSQL data source from configuration and registers it as a singleton.
-    /// The pool is configured eagerly, but physical connections are still opened lazily by Npgsql.
-    /// </summary>
-    private static NpgsqlDataSource RegisterNpgsqlDataSource(
-        IServiceCollection services,
-        IConfiguration configuration)
-    {
-        var connectionString = configuration.GetConnectionString("Default")
-            ?? throw new InvalidOperationException("Connection string 'Default' not found in configuration.");
-
-        var dataSource = new NpgsqlDataSourceBuilder(connectionString)
-            .EnableDynamicJson()
-            .Build();
-
-        services.AddSingleton(dataSource);
-
-        return dataSource;
     }
 
     /// <summary>
