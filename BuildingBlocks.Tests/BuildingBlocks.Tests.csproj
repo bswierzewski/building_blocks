@@ -8,19 +8,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BuildingBlocks.Core\BuildingBlocks.Core.csproj" />
+    <ProjectReference Include="..\BuildingBlocks.Infrastructure\BuildingBlocks.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- Testing Framework -->
     <PackageReference Include="xunit.v3.extensibility.core" />
-
-    <!-- Integration Testing -->
-    <PackageReference Include="Alba" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" />
-    <PackageReference Include="Npgsql" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
-    <PackageReference Include="Respawn" />
-    <PackageReference Include="Testcontainers.PostgreSql" />
 
     <!-- End-To-End Testing -->
     <PackageReference Include="Aspire.Hosting.Testing" />

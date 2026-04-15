@@ -11,12 +11,12 @@ public interface ICurrentUser
     string Id { get; }
 
     /// <summary>
-    /// Gets the collection of roles assigned to the current user
+    /// Gets the collection of roles assigned to the current user.
     /// </summary>
     IEnumerable<string> Roles { get; }
 
     /// <summary>
     /// Checks if the current user has the specified role.
     /// </summary>
-    bool IsInRole(string role);
+    bool HasRole(string role);
 }
