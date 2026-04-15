@@ -1,4 +1,5 @@
 using Alba;
+using BuildingBlocks.Core.Abstractions;
 using System.Text.Json;
 using Xunit;
 
@@ -10,21 +11,12 @@ namespace BuildingBlocks.Tests.Integration.Extensions;
 public static class AlbaScenarioExtensions
 {
     /// <summary>
-    /// Applies a bearer token to the Alba scenario request.
+    /// Uses the supplied current user for the lifetime of the current Alba scenario.
     /// </summary>
-    public static Scenario AuthenticateWith(this Scenario scenario, string accessToken)
+    public static Scenario As(this Scenario scenario, ICurrentUser user)
     {
-        scenario.WithBearerToken(accessToken);
-
-        return scenario;
-    }
-
-    /// <summary>
-    /// Removes the authorization header from the Alba scenario request.
-    /// </summary>
-    public static Scenario ClearAuthentication(this Scenario scenario)
-    {
-        scenario.RemoveRequestHeader("Authorization");
+        scenario.ConfigureHttpContext(context =>
+            context.Response.RegisterForDispose(IntegrationCurrentUserHandler.UseScope(user)));
 
         return scenario;
     }

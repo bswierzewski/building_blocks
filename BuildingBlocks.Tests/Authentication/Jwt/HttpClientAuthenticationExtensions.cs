@@ -7,17 +7,12 @@ namespace BuildingBlocks.Tests.Authentication.Jwt;
 /// </summary>
 public static class HttpClientAuthenticationExtensions
 {
-    public static HttpClient AuthenticateWith(this HttpClient httpClient, string accessToken)
+    public static HttpClient As(this HttpClient httpClient, string? accessToken)
     {
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        httpClient.DefaultRequestHeaders.Authorization = string.IsNullOrWhiteSpace(accessToken)
+            ? null
+            : new AuthenticationHeaderValue("Bearer", accessToken);
 
-        return httpClient;
-    }
-
-    public static HttpClient ClearAuthentication(this HttpClient httpClient)
-    {
-        httpClient.DefaultRequestHeaders.Authorization = null;
-        
         return httpClient;
     }
 }
