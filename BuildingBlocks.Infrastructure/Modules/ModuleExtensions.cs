@@ -14,13 +14,16 @@ namespace BuildingBlocks.Infrastructure.Modules;
 /// </summary>
 public static class ModuleExtensions
 {
+  public const string DefaultConnectionStringName = "Default";
+  public const string DefaultConnectionStringConfigurationKey = "ConnectionStrings:Default";
+
   /// <summary>
   /// Registers the shared PostgreSQL data source used by module DbContexts and Wolverine persistence.
   /// </summary>
   public static NpgsqlDataSource AddPostgresDataSource(this IServiceCollection services, IConfiguration configuration)
   {
-    var connectionString = configuration.GetConnectionString("Default")
-        ?? throw new InvalidOperationException("Connection string 'Default' not found in configuration.");
+    var connectionString = configuration.GetConnectionString(DefaultConnectionStringName)
+        ?? throw new InvalidOperationException($"Connection string '{DefaultConnectionStringName}' not found in configuration.");
 
     var dataSource = new NpgsqlDataSourceBuilder(connectionString)
         .EnableDynamicJson()

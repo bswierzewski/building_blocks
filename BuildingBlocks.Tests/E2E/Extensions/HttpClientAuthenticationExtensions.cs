@@ -1,6 +1,6 @@
 using System.Net.Http.Headers;
 
-namespace BuildingBlocks.Tests.Authentication.Jwt;
+namespace BuildingBlocks.Tests.E2E.Extensions;
 
 /// <summary>
 /// Applies a bearer token to an HTTP client.

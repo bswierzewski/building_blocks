@@ -1,8 +1,9 @@
+using Alba;
+using BuildingBlocks.Infrastructure.Modules;
+using BuildingBlocks.Tests.Integration.Utils;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
-using Respawn;
-using Respawn.Graph;
-using Testcontainers.PostgreSql;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace BuildingBlocks.Tests.Integration;
@@ -14,43 +15,99 @@ namespace BuildingBlocks.Tests.Integration;
 public abstract class IntegrationTestEnvironment<TProgram> : IAsyncLifetime
     where TProgram : class
 {
-    private readonly SemaphoreSlim _resetLock = new(1, 1);
+    private readonly IntegrationTestDatabaseState _database = new();
 
-    private readonly PostgreSqlContainer _postgresContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:18-alpine")
-        .WithDatabase("db")
-        .WithUsername("postgres")
-        .WithPassword("postgres")
-        .Build();
+    public string ConnectionString => _database.ConnectionString;
 
-    private NpgsqlConnection _connection = default!;
-    private Respawner _respawner = default!;
+    /// <summary>
+    /// Resets shared state, creates an Alba host for one test, and optionally runs per-test seed logic.
+    /// </summary>
+    public async Task<IAlbaHost> InitializeTestAsync(
+        Action<IServiceCollection>? configureTestServices = null,
+        Func<IAlbaHost, Task>? seedDataAsync = null)
+    {
+        await ResetDatabaseAsync();
 
-    public string ConnectionString => _postgresContainer.GetConnectionString();
+        var host = await CreateHostAsync(configureTestServices);
+
+        try
+        {
+            if (seedDataAsync is not null)
+                await seedDataAsync(host);
+
+            return host;
+        }
+        catch
+        {
+            await DisposeTestAsync(host);
+            await ResetDatabaseAsync();
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Creates the Alba host for one test using the shared environment configuration.
+    /// </summary>
+    public async Task<IAlbaHost> CreateHostAsync(Action<IServiceCollection>? configureTestServices = null)
+    {
+        LoadEnvironment();
+
+        return await AlbaHost.For<TProgram>(builder =>
+        {
+            builder.UseEnvironment("Testing");
+            builder.UseSetting(ModuleExtensions.DefaultConnectionStringConfigurationKey, ConnectionString);
+            ConfigureHost(builder);
+            builder.ConfigureLogging(ConfigureLogging);
+
+            builder.ConfigureServices((_, services) =>
+            {
+                services.AddSingleton(TimeProvider.System);
+                ConfigureEnvironmentServices(services);
+                configureTestServices?.Invoke(services);
+            });
+        });
+    }
+
+    /// <summary>
+    /// Disposes the Alba host created for one integration test.
+    /// </summary>
+    public async ValueTask DisposeTestAsync(IAlbaHost? host)
+    {
+        if (host is not null)
+            await host.DisposeAsync();
+    }
 
     /// <summary>
     /// Allows a concrete environment to load any required environment variables before the test host is created.
     /// </summary>
-    public virtual void LoadEnvironment() { }
+    protected virtual void LoadEnvironment() { }
+
+    /// <summary>
+    /// Allows a concrete environment to tweak the test host builder before the Alba host is created.
+    /// </summary>
+    protected virtual void ConfigureHost(IWebHostBuilder builder) { }
+
+    /// <summary>
+    /// Allows a concrete environment to configure logging for all integration-test hosts.
+    /// </summary>
+    protected virtual void ConfigureLogging(ILoggingBuilder logging)
+    {
+        logging.ClearProviders();
+        logging.AddConsole();
+        logging.SetMinimumLevel(LogLevel.Warning);
+    }
+
+    /// <summary>
+    /// Allows a concrete environment to register collection-wide services before the test host is built.
+    /// </summary>
+    protected virtual void ConfigureEnvironmentServices(IServiceCollection services) { }
 
     /// <summary>
     /// Starts the shared PostgreSQL container, initializes the schema, and prepares Respawn.
     /// </summary>
     public async ValueTask InitializeAsync()
     {
-        await _postgresContainer.StartAsync();
-
-        _connection = new NpgsqlConnection(ConnectionString);
-        await _connection.OpenAsync();
-
-        await InitializeDatabaseAsync();
-
-        _respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
-        {
-            DbAdapter = DbAdapter.Postgres,
-            TablesToIgnore = [new Table("__EFMigrationsHistory")],
-            WithReseed = true
-        });
+        await _database.InitializeAsync(async _ => await InitializeEnvironmentAsync());
     }
 
     /// <summary>
@@ -58,16 +115,7 @@ public abstract class IntegrationTestEnvironment<TProgram> : IAsyncLifetime
     /// </summary>
     public async Task ResetDatabaseAsync()
     {
-        await _resetLock.WaitAsync();
-
-        try
-        {
-            await _respawner.ResetAsync(_connection);
-        }
-        finally
-        {
-            _resetLock.Release();
-        }
+        await _database.ResetAsync();
     }
 
     /// <summary>
@@ -75,20 +123,13 @@ public abstract class IntegrationTestEnvironment<TProgram> : IAsyncLifetime
     /// </summary>
     public async ValueTask DisposeAsync()
     {
-        await _connection.DisposeAsync();
-        await _postgresContainer.DisposeAsync();
-        _resetLock.Dispose();
+        await _database.DisposeAsync();
     }
 
     /// <summary>
-    /// Override to register collection-wide service replacements applied to every test in this environment.
+    /// Allows a concrete environment to perform one-time startup after core resources are available
+    /// and before the shared environment is marked ready for tests.
     /// </summary>
-    public virtual void ConfigureServices(IServiceCollection services) { }
-
-    /// <summary>
-    /// Override to initialize the database schema before Respawn inspects tables.
-    /// This is the right place to run application startup that applies EF Core migrations.
-    /// </summary>
-    protected virtual ValueTask InitializeDatabaseAsync()
+    protected virtual ValueTask InitializeEnvironmentAsync()
         => ValueTask.CompletedTask;
 }

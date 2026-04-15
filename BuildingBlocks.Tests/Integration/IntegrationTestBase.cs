@@ -1,7 +1,5 @@
 using Alba;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace BuildingBlocks.Tests.Integration;
@@ -15,59 +13,20 @@ namespace BuildingBlocks.Tests.Integration;
 public abstract class IntegrationTestBase<TProgram>(IntegrationTestEnvironment<TProgram> testEnvironment) : IAsyncLifetime
     where TProgram : class
 {
-    private const string DefaultConnectionStringEnvironmentVariable = "ConnectionStrings__Default";
+    protected IntegrationTestEnvironment<TProgram> TestEnvironment { get; } = testEnvironment;
 
     protected IAlbaHost AlbaHost { get; private set; } = default!;
 
     /// <summary>
-    /// Resets shared state, creates the Alba host, and runs per-test seed logic.
+    /// Delegates per-test host creation and seeding to the shared integration-test environment.
     /// </summary>
     public async ValueTask InitializeAsync()
-    {
-        await testEnvironment.ResetDatabaseAsync();
-        testEnvironment.LoadEnvironment();
-        
-        Environment.SetEnvironmentVariable(DefaultConnectionStringEnvironmentVariable, testEnvironment.ConnectionString);
-
-        AlbaHost = await Alba.AlbaHost.For<TProgram>(builder =>
-        {
-            builder.UseEnvironment("Testing");
-
-            builder.ConfigureLogging(logging =>
-            {
-                logging.ClearProviders();
-                logging.AddConsole();
-                logging.SetMinimumLevel(LogLevel.Warning);
-            });
-
-            builder.ConfigureServices((_, services) =>
-            {
-                services.AddSingleton(TimeProvider.System);
-                testEnvironment.ConfigureServices(services);
-                ConfigureServices(services);
-            });
-        });
-
-        try
-        {
-            await SeedDataAsync();
-        }
-        catch
-        {
-            await AlbaHost.DisposeAsync();
-            await testEnvironment.ResetDatabaseAsync();
-            throw;
-        }
-    }
+        => AlbaHost = await TestEnvironment.InitializeTestAsync(ConfigureServices, _ => SeedDataAsync());
 
     /// <summary>
     /// Disposes the Alba host created for the current test.
     /// </summary>
-    public async ValueTask DisposeAsync()
-    {
-        if (AlbaHost is not null)
-            await AlbaHost.DisposeAsync();
-    }
+    public ValueTask DisposeAsync() => TestEnvironment.DisposeTestAsync(AlbaHost);
 
     /// <summary>
     /// Override to configure service replacements used by all tests in this class.
@@ -77,7 +36,7 @@ public abstract class IntegrationTestBase<TProgram>(IntegrationTestEnvironment<T
     /// <summary>
     /// Resets the shared database state for the current integration-test environment.
     /// </summary>
-    protected Task ResetDatabaseAsync() => testEnvironment.ResetDatabaseAsync();
+    protected Task ResetDatabaseAsync() => TestEnvironment.ResetDatabaseAsync();
 
     /// <summary>
     /// Resolves a required service from the Alba host service provider.

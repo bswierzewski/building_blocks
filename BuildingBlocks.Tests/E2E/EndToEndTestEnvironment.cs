@@ -31,11 +31,11 @@ public abstract class EndToEndTestEnvironment<TAppHost> : IAsyncLifetime
         LoadEnvironment();
 
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<TAppHost>();
-        await ConfigureTestingServicesAsync(builder.Services);
+        ConfigureEnvironmentServices(builder.Services);
 
         App = await builder.BuildAsync();
         await App.StartAsync();
-        await OnApplicationStartedAsync();
+        await InitializeEnvironmentAsync();
     }
 
     /// <summary>
@@ -62,8 +62,7 @@ public abstract class EndToEndTestEnvironment<TAppHost> : IAsyncLifetime
     /// <summary>
     /// Allows derived environments to register services used by the Aspire test host before the application is built.
     /// </summary>
-    protected virtual ValueTask ConfigureTestingServicesAsync(IServiceCollection services)
-        => ValueTask.CompletedTask;
+    protected virtual void ConfigureEnvironmentServices(IServiceCollection services) { }
 
     /// <summary>
     /// Allows derived environments to load any required environment variables before the application is built.
@@ -73,6 +72,6 @@ public abstract class EndToEndTestEnvironment<TAppHost> : IAsyncLifetime
     /// <summary>
     /// Allows derived environments to perform additional readiness steps after the application has started.
     /// </summary>
-    protected virtual ValueTask OnApplicationStartedAsync()
+    protected virtual ValueTask InitializeEnvironmentAsync()
         => ValueTask.CompletedTask;
 }

@@ -1,6 +1,6 @@
 using BuildingBlocks.Core.Abstractions;
 
-namespace BuildingBlocks.Tests.Integration;
+namespace BuildingBlocks.Tests.Integration.Utils;
 
 /// <summary>
 /// Stores the logical current user for integration tests without relying on HttpContext.

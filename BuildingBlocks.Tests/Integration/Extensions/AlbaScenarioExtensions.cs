@@ -1,5 +1,6 @@
 using Alba;
 using BuildingBlocks.Core.Abstractions;
+using BuildingBlocks.Tests.Integration.Utils;
 using System.Text.Json;
 using Xunit;
 
