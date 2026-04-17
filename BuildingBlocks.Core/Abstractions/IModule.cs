@@ -8,26 +8,31 @@ namespace BuildingBlocks.Core.Abstractions;
 /// </summary>
 public interface IModule
 {
-  /// <summary>
-  /// Logical module name used for diagnostics and configuration grouping.
-  /// </summary>
-  string Name { get; }
+    /// <summary>
+    /// Logical module name used for diagnostics and configuration grouping.
+    /// </summary>
+    string Name { get; }
 
-  /// <summary>
-  /// Registers module services in the DI container.
-  /// </summary>
-  void AddServices(IServiceCollection services, IConfiguration configuration);
+    /// <summary>
+    /// Module-scoped permissions that can be assigned to roles.
+    /// </summary>
+    IReadOnlyCollection<Permission> Permissions => [];
 
-  /// <summary>
-  /// Runs post-build module setup against the fully constructed application's service provider.
-  /// </summary>
-  Task InitializeAsync(IServiceProvider services, CancellationToken cancellationToken = default)
-      => Task.CompletedTask;
+    /// <summary>
+    /// Registers module services in the DI container.
+    /// </summary>
+    void AddServices(IServiceCollection services, IConfiguration configuration);
 
-  /// <summary>
-  /// Applies module-specific database migrations when a dedicated migrator host is used.
-  /// Modules without migrations can rely on the default no-op implementation.
-  /// </summary>
-  Task InitializeMigrationsAsync(IServiceProvider services, CancellationToken cancellationToken = default)
-      => Task.CompletedTask;
+    /// <summary>
+    /// Runs post-build module setup against the fully constructed application's service provider.
+    /// </summary>
+    Task InitializeAsync(IServiceProvider services, CancellationToken cancellationToken = default)
+        => Task.CompletedTask;
+
+    /// <summary>
+    /// Applies module-specific database migrations when a dedicated migrator host is used.
+    /// Modules without migrations can rely on the default no-op implementation.
+    /// </summary>
+    Task InitializeMigrationsAsync(IServiceProvider services, CancellationToken cancellationToken = default)
+        => Task.CompletedTask;
 }
