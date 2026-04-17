@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="Modules/Users/BuildingBlocks.Users.Contracts/BuildingBlocks.Users.Contracts.csproj" />
+  <Project Path="Modules/Users/BuildingBlocks.Users/BuildingBlocks.Users.csproj" />
   <Project Path="BuildingBlocks.Core/BuildingBlocks.Core.csproj" />
   <Project Path="BuildingBlocks.Hosting/BuildingBlocks.Hosting.csproj" />
   <Project Path="BuildingBlocks.Infrastructure/BuildingBlocks.Infrastructure.csproj" />
