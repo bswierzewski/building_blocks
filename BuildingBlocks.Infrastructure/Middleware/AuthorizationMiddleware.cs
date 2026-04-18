@@ -1,5 +1,5 @@
-using BuildingBlocks.Core.Abstractions;
 using BuildingBlocks.Core.Attributes;
+using BuildingBlocks.Core.Authentication;
 using BuildingBlocks.Core.Exceptions;
 
 namespace BuildingBlocks.Infrastructure.Middleware;

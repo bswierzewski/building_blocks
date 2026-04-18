@@ -1,4 +1,4 @@
-using BuildingBlocks.Core.Abstractions;
+using BuildingBlocks.Core.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace BuildingBlocks.Tests.Integration.Utils;

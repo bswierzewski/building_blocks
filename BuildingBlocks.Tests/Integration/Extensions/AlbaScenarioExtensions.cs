@@ -1,5 +1,4 @@
 using Alba;
-using BuildingBlocks.Core.Abstractions;
 using BuildingBlocks.Tests.Integration.Utils;
 using System.Text.Json;
 using Xunit;
@@ -11,17 +10,6 @@ namespace BuildingBlocks.Tests.Integration.Extensions;
 /// </summary>
 public static class AlbaScenarioExtensions
 {
-    /// <summary>
-    /// Uses the supplied current user for the lifetime of the current Alba scenario.
-    /// </summary>
-    public static Scenario As(this Scenario scenario, ICurrentUser user)
-    {
-        scenario.ConfigureHttpContext(context =>
-            context.Response.RegisterForDispose(IntegrationCurrentUserHandler.UseScope(user)));
-
-        return scenario;
-    }
-
     /// <summary>
     /// Awaits the scenario result, prints the response body to the test output, and returns the same result for fluent chaining.
     /// JSON payloads are formatted for readability.

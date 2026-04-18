@@ -1,9 +1,9 @@
-namespace BuildingBlocks.Core.Abstractions;
+namespace BuildingBlocks.Core.Extensions;
 
 /// <summary>
 /// Provides naming helpers for module identifiers and database schema names.
 /// </summary>
-public static class ModuleNameExtensions
+public static class ModuleExtensions
 {
   private const string DbContextSuffix = "DbContext";
 

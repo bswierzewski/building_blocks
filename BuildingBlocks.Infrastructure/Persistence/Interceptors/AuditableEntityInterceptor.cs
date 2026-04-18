@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using BuildingBlocks.Core.Abstractions;
+using BuildingBlocks.Core.Authentication;
+using BuildingBlocks.Core.Primitives;
 
 namespace BuildingBlocks.Infrastructure.Persistence.Interceptors;
 

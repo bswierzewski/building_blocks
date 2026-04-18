@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BuildingBlocks.Core.Abstractions;
+namespace BuildingBlocks.Core.Modules;
 
 /// <summary>
 /// Contract for application modules that can register services and expose runtime metadata.
@@ -12,11 +12,6 @@ public interface IModule
     /// Logical module name used for diagnostics and configuration grouping.
     /// </summary>
     string Name { get; }
-
-    /// <summary>
-    /// Module-scoped permissions that can be assigned to roles.
-    /// </summary>
-    IReadOnlyCollection<Permission> Permissions => [];
 
     /// <summary>
     /// Registers module services in the DI container.

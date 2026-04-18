@@ -1,4 +1,4 @@
-using BuildingBlocks.Core.Abstractions;
+using BuildingBlocks.Core.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
