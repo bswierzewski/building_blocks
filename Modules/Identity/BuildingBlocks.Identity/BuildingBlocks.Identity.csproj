@@ -2,6 +2,11 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\..\BuildingBlocks.Core\BuildingBlocks.Core.csproj" />
+        <ProjectReference Include="..\..\..\BuildingBlocks.Infrastructure\BuildingBlocks.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
     </ItemGroup>
 
 </Project>

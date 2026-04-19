@@ -11,7 +11,6 @@ namespace BuildingBlocks.Identity.Domain.Aggregates;
 public sealed class User : AuditableEntity<Guid>
 {
     public Email Email { get; private set; } = null!;
-
     public UserStatus Status { get; private set; }
 
     private readonly List<Role> _roles = new();
@@ -37,11 +36,11 @@ public sealed class User : AuditableEntity<Guid>
     public static User Create(
         ExternalProvider provider,
         string email,
-        string subject,
+        string externalId,
         RegistrationMode registrationMode)
     {
         var user = new User(Guid.CreateVersion7(), Email.Create(email), registrationMode);
-        user.LinkExternalAccount(provider, subject);
+        user.LinkExternalAccount(provider, externalId);
         return user;
     }
 
@@ -50,12 +49,12 @@ public sealed class User : AuditableEntity<Guid>
     /// </summary>
     public void LinkExternalAccount(
         ExternalProvider provider,
-        string subject)
+        string externalId)
     {
-        if (_externalAccounts.Any(x => x.Provider == provider && x.Subject == subject))
+        if (_externalAccounts.Any(x => x.Provider == provider && x.ExternalId == externalId))
             throw new InvalidOperationException("External account already linked.");
 
-        var account = ExternalAccount.Create(Id, provider, subject);
+        var account = ExternalAccount.Create(Id, provider, externalId);
         _externalAccounts.Add(account);
     }
 

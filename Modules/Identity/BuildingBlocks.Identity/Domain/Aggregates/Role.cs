@@ -10,8 +10,8 @@ public sealed class Role : AuditableEntity<Guid>
     public string Name { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
 
-    private readonly HashSet<string> permissions = [];
-    public IReadOnlyCollection<string> Permissions => permissions;
+    private readonly HashSet<string> _permissions = [];
+    public IReadOnlyCollection<string> Permissions => _permissions;
 
     private Role() { }
 
@@ -40,11 +40,11 @@ public sealed class Role : AuditableEntity<Guid>
 
     public void AddPermission(string permission)
     {
-        this.permissions.Add(permission);
+        _permissions.Add(permission);
     }
 
     public void RemovePermission(string permission)
     {
-        this.permissions.Remove(permission);
+        _permissions.Remove(permission);
     }
 }
