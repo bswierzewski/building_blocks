@@ -10,7 +10,7 @@ namespace BuildingBlocks.Infrastructure.Middleware;
 public static class AuthorizationMiddleware
 {
     /// <summary>
-    /// Executes before the handler and enforces authentication plus optional role checks.
+    /// Executes before the handler and enforces authentication plus optional permission checks.
     /// Only runs when AuthorizeAttribute is present on the handler type or method.
     /// </summary>
     public static void Before(AuthorizeAttribute authorize, ICurrentUser currentUser)
@@ -18,13 +18,13 @@ public static class AuthorizationMiddleware
         if (string.IsNullOrWhiteSpace(currentUser.Id))
             throw new UnauthorizedAccessException();
 
-        if (string.IsNullOrWhiteSpace(authorize.Roles))
+        if (string.IsNullOrWhiteSpace(authorize.Permissions))
             return;
 
-        var allowedRoles = authorize.Roles
+        var requiredPermissions = authorize.Permissions
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-        if (allowedRoles.Any(currentUser.HasRole))
+        if (requiredPermissions.Any(currentUser.HasPermission))
             return;
 
         throw new ForbiddenAccessException();
