@@ -1,4 +1,4 @@
-namespace BuildingBlocks.Core.Authentication;
+namespace BuildingBlocks.Core.Modules;
 
 /// <summary>
 /// Describes a permission published by a module.
