@@ -9,7 +9,7 @@ namespace BuildingBlocks.Infrastructure.Persistence.Interceptors;
 /// <summary>
 /// EF Core interceptor that automatically manages audit fields on IAuditable entities when saving changes.
 /// </summary>
-public sealed class AuditableEntityInterceptor(ICurrentUser? currentUser = null, TimeProvider? dateTime = null) : SaveChangesInterceptor
+public sealed class AuditableEntityInterceptor(ICurrentUser currentUser, TimeProvider dateTime) : SaveChangesInterceptor
 {
     /// <summary>
     /// Intercepts synchronous SaveChanges calls to update audit fields.
@@ -46,8 +46,8 @@ public sealed class AuditableEntityInterceptor(ICurrentUser? currentUser = null,
         {
             if (entry.State is EntityState.Added or EntityState.Modified || entry.HasChangedOwnedEntities())
             {
-                var utcNow = (dateTime ?? TimeProvider.System).GetUtcNow();
-                var currentUserId = currentUser?.Id ?? string.Empty;
+                var utcNow = dateTime.GetUtcNow();
+                var currentUserId = currentUser.Id;
 
                 if (entry.State == EntityState.Added)
                 {

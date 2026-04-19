@@ -15,16 +15,16 @@ public static class AuthorizationMiddleware
     /// </summary>
     public static void Before(AuthorizeAttribute authorize, ICurrentUser currentUser)
     {
-        if (string.IsNullOrWhiteSpace(currentUser.Id))
+        if (!currentUser.IsAuthenticated)
             throw new UnauthorizedAccessException();
 
-        if (string.IsNullOrWhiteSpace(authorize.Permissions))
+        if (authorize.Roles.Length > 0 && !authorize.Roles.Any(currentUser.HasRole))
+            throw new ForbiddenAccessException();
+
+        if (authorize.Permissions.Length == 0)
             return;
 
-        var requiredPermissions = authorize.Permissions
-            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-        if (requiredPermissions.Any(currentUser.HasPermission))
+        if (authorize.Permissions.Any(currentUser.HasPermission))
             return;
 
         throw new ForbiddenAccessException();
