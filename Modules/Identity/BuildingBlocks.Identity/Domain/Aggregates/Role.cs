@@ -10,6 +10,9 @@ public sealed class Role : AuditableEntity<Guid>
     public string Name { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
 
+    private readonly List<User> _users = new();
+    public IReadOnlyCollection<User> Users => _users;
+
     private readonly HashSet<string> _permissions = [];
     public IReadOnlyCollection<string> Permissions => _permissions;
 
