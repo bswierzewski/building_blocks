@@ -1,6 +1,6 @@
 using BuildingBlocks.Core.Attributes;
-using BuildingBlocks.Core.Authentication;
 using BuildingBlocks.Core.Exceptions;
+using BuildingBlocks.Core.Interfaces;
 
 namespace BuildingBlocks.Infrastructure.Middleware;
 

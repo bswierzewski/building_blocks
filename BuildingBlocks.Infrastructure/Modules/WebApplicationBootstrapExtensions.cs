@@ -1,4 +1,4 @@
-using BuildingBlocks.Core.Modules;
+using BuildingBlocks.Core.Interfaces;
 using BuildingBlocks.Infrastructure.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;

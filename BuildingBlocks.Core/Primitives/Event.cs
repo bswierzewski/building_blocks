@@ -1,16 +1,6 @@
+using BuildingBlocks.Core.Interfaces;
+
 namespace BuildingBlocks.Core.Primitives;
-
-/// <summary>
-/// Represents a domain event that occurred in the system.
-/// </summary>
-public interface IEvent
-{
-    /// <summary>Gets the unique identifier of this event.</summary>
-    Guid Id { get; }
-
-    /// <summary>Gets the timestamp when this event occurred.</summary>
-    DateTime OccurredOn { get; }
-}
 
 /// <summary>
 /// Base record for domain events with automatic ID and timestamp generation
