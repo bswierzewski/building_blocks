@@ -1,6 +1,5 @@
 using BuildingBlocks.Core.Interfaces;
 using BuildingBlocks.Identity.Infrastructure.Persistence;
-using BuildingBlocks.Infrastructure.Modules;
 using BuildingBlocks.Infrastructure.Persistence.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

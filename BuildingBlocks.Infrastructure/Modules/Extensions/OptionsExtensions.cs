@@ -2,12 +2,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace BuildingBlocks.Infrastructure.Modules;
+namespace BuildingBlocks.Infrastructure.Modules.Extensions;
 
 /// <summary>
-/// Provides shared service registration helpers for application modules.
+/// Provides shared service registration helpers for validated options binding.
 /// </summary>
-public static class ModuleExtensions
+public static class OptionsExtensions
 {
   /// <summary>
   /// Binds options from configuration, enables data annotation validation, and validates them on application startup.
