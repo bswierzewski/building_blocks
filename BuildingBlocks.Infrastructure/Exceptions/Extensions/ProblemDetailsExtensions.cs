@@ -2,7 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BuildingBlocks.Infrastructure.Exceptions.ProblemDetails;
+namespace BuildingBlocks.Infrastructure.Exceptions.Extensions;
 
 /// <summary>
 /// Provides extensions for enriching ProblemDetails responses with diagnostic data.

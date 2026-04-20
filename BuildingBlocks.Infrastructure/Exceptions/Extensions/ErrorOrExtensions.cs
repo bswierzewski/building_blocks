@@ -1,7 +1,7 @@
 using ErrorOr;
 using Microsoft.AspNetCore.Http;
 
-namespace BuildingBlocks.Infrastructure.Exceptions.ProblemDetails;
+namespace BuildingBlocks.Infrastructure.Exceptions.Extensions;
 
 /// <summary>
 /// Maps ErrorOr results to RFC 7807-compatible minimal API responses.
