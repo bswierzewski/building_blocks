@@ -1,11 +1,6 @@
-using BuildingBlocks.Core.Extensions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using Npgsql;
-using BuildingBlocks.Infrastructure.Persistence.Interceptors;
 
 namespace BuildingBlocks.Infrastructure.Modules;
 
@@ -14,46 +9,6 @@ namespace BuildingBlocks.Infrastructure.Modules;
 /// </summary>
 public static class ModuleExtensions
 {
-  public const string DefaultConnectionStringName = "Default";
-  public const string DefaultConnectionStringConfigurationKey = "ConnectionStrings:Default";
-
-  /// <summary>
-  /// Registers the shared PostgreSQL data source used by module DbContexts and Wolverine persistence.
-  /// </summary>
-  public static NpgsqlDataSource AddPostgresDataSource(this IServiceCollection services, IConfiguration configuration)
-  {
-    var connectionString = configuration.GetConnectionString(DefaultConnectionStringName)
-        ?? throw new InvalidOperationException($"Connection string '{DefaultConnectionStringName}' not found in configuration.");
-
-    var dataSource = new NpgsqlDataSourceBuilder(connectionString)
-        .EnableDynamicJson()
-        .Build();
-
-    services.TryAddSingleton(dataSource);
-
-    return dataSource;
-  }
-
-  /// <summary>
-  /// Registers a PostgreSQL-backed DbContext with audit interceptors and a schema-specific migrations history table.
-  /// </summary>
-  public static IServiceCollection AddPostgres<TDbContext>(this IServiceCollection services)
-      where TDbContext : DbContext
-  {
-    services.TryAddScoped<AuditableEntityInterceptor>();
-
-    services.AddDbContext<TDbContext>((sp, options) =>
-    {
-      var auditableInterceptor = sp.GetRequiredService<AuditableEntityInterceptor>();
-      options.AddInterceptors(auditableInterceptor);
-
-      var dataSource = sp.GetRequiredService<NpgsqlDataSource>();
-      options.UseNpgsql(dataSource, npgsqlOptions => npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", typeof(TDbContext).ToDbContextSchemaName()));
-    });
-
-    return services;
-  }
-
   /// <summary>
   /// Binds options from configuration, enables data annotation validation, and validates them on application startup.
   /// </summary>

@@ -1,0 +1,82 @@
+using BuildingBlocks.Core.Interfaces;
+using BuildingBlocks.Infrastructure.Middleware;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
+using Wolverine;
+using Wolverine.EntityFrameworkCore;
+using Wolverine.FluentValidation;
+using Wolverine.Http;
+using Wolverine.Http.FluentValidation;
+using Wolverine.Postgresql;
+
+namespace BuildingBlocks.Infrastructure.Wolverine.Extensions;
+
+/// <summary>
+/// Provides Wolverine bootstrap extension methods for modular ASP.NET Core applications.
+/// </summary>
+public static class WolverineExtensions
+{
+    /// <summary>
+    /// Registers shared Wolverine infrastructure for the provided modules.
+    /// </summary>
+    public static void AddWolverine(
+        this WebApplicationBuilder builder,
+        IModule[] modules,
+        NpgsqlDataSource dataSource,
+        Action<WolverineOptions>? configure = null)
+    {
+        builder.Host.UseWolverine(opts =>
+        {
+            // Enable FluentValidation integration so message and HTTP handler validation
+            // failures are automatically converted to structured problem details responses.
+            opts.UseFluentValidation();
+
+            // Treat each handler type that matches a given message as a separate execution path
+            // rather than chaining them into a single pipeline. Prevents unintentional fan-out.
+            opts.MultipleHandlerBehavior = MultipleHandlerBehavior.Separated;
+
+            // Use the durable outbox pattern with PostgreSQL to ensure messages are not lost in the event of a failure 
+            opts.PersistMessagesWithPostgresql(dataSource, "wolverine");
+
+            // Enlist Wolverine in EF Core transactions so that message dispatch and database
+            // writes participate in the same unit of work and commit atomically.
+            opts.UseEntityFrameworkCoreTransactions();
+
+            // Automatically wrap every handler that opens a DbContext in the transactional
+            // outbox policy without requiring per-handler opt-in attributes.
+            opts.Policies.AutoApplyTransactions();
+
+            // Always scan the BuildingBlocks.Infrastructure assembly so that shared middleware
+            // (e.g. LoggingMiddleware) is discovered regardless of which module assemblies are loaded.
+            opts.Discovery.IncludeAssembly(typeof(LoggingMiddleware).Assembly);
+
+            // Scan each module assembly so Wolverine discovers its HTTP endpoints,
+            // message handlers, and any module-specific middleware or policies.
+            foreach (var module in modules)
+                opts.Discovery.IncludeAssembly(module.GetType().Assembly);
+
+            // Allow the caller to extend or override Wolverine options without modifying
+            // this shared helper — useful for application-specific transports or policies.
+            configure?.Invoke(opts);
+        });
+
+        // Register the ASP.NET Core bridge that maps Wolverine HTTP endpoints into the
+        // routing pipeline. Must be called before MapModuleEndpoints on the built app.
+        builder.Services.AddWolverineHttp();
+    }
+
+    /// <summary>
+    /// Maps Wolverine HTTP endpoints and enables FluentValidation problem details middleware.
+    /// </summary>
+    public static void MapModuleEndpoints(this WebApplication app)
+    {
+        app.MapWolverineEndpoints(opts =>
+        {
+            // Add middleware that intercepts FluentValidation failures thrown by Wolverine
+            // HTTP handlers and converts them to RFC 7807 ValidationProblemDetails responses,
+            // keeping the error format consistent across the entire API surface.
+            opts.UseFluentValidationProblemDetailMiddleware();
+        });
+    }
+}
