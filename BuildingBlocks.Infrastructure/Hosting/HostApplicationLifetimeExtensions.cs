@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Hosting;
 
-namespace BuildingBlocks.Infrastructure.Extensions;
+namespace BuildingBlocks.Infrastructure.Hosting;
 
 /// <summary>
 /// Provides helpers for coordinating background work with the host application lifetime.

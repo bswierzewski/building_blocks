@@ -1,14 +1,13 @@
 using ErrorOr;
 using Microsoft.AspNetCore.Http;
 
-namespace BuildingBlocks.Infrastructure.Extensions;
+namespace BuildingBlocks.Infrastructure.Exceptions.ProblemDetails;
 
 /// <summary>
 /// Maps ErrorOr results to RFC 7807-compatible minimal API responses.
 /// </summary>
 public static class ErrorOrExtensions
 {
-    // Fallback message used when no explicit error details are available.
     private const string UnexpectedErrorMessage = "An unexpected error occurred.";
     private const string ValidationErrorDetail = "One or more validation failures have occurred.";
 
@@ -22,7 +21,6 @@ public static class ErrorOrExtensions
     /// </summary>
     public static IResult Problem(this Error error) => CreateProblemResult([error]);
 
-    // Keep all HTTP mapping rules in one place so response creation stays simple.
     private static IResult CreateProblemResult(List<Error> errors)
     {
         if (errors is null or { Count: 0 })
@@ -82,7 +80,6 @@ public static class ErrorOrExtensions
             "https://tools.ietf.org/html/rfc7231#section-6.6.1")
     };
 
-    // Validation errors are grouped by code so ASP.NET can emit a standard validation payload.
     private static Dictionary<string, string[]> ToDictionary(this IEnumerable<Error> errors) =>
         errors
             .GroupBy(error => error.Code)
