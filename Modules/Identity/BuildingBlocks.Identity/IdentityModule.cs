@@ -1,4 +1,7 @@
 using BuildingBlocks.Core.Interfaces;
+using BuildingBlocks.Identity.Configuration;
+using BuildingBlocks.Infrastructure.Modules.Extensions;
+using BuildingBlocks.Identity.Infrastructure.Authentication.Services;
 using BuildingBlocks.Identity.Infrastructure.Persistence;
 using BuildingBlocks.Infrastructure.Persistence.Extensions;
 using Microsoft.Extensions.Configuration;
@@ -15,6 +18,14 @@ public sealed class IdentityModule : IModule
 
     public void AddServices(IServiceCollection services, IConfiguration configuration)
     {
+        services.AddValidatedOptions<JitProvisioningOptions>(configuration, JitProvisioningOptions.SectionName);
+
+        services.AddScoped<ICurrentUser, CurrentUser>();
+        services.AddScoped<JitProvisioningService>();
+
+        services.AddHttpContextAccessor();
+        services.AddAuthorization();
+
         services.AddPostgres<IdentityDbContext>(IdentityDbContext.SchemaName);
     }
 
