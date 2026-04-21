@@ -1,9 +1,8 @@
 using BuildingBlocks.Core.Interfaces;
-using BuildingBlocks.Identity.Configuration;
-using BuildingBlocks.Infrastructure.Modules.Extensions;
-using BuildingBlocks.Identity.Infrastructure.Authentication.Services;
 using BuildingBlocks.Identity.Infrastructure.Persistence;
+using BuildingBlocks.Identity.Infrastructure.Services;
 using BuildingBlocks.Infrastructure.Persistence.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,12 +17,13 @@ public sealed class IdentityModule : IModule
 
     public void AddServices(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddValidatedOptions<JitProvisioningOptions>(configuration, JitProvisioningOptions.SectionName);
-
-        services.AddScoped<ICurrentUser, CurrentUser>();
-        services.AddScoped<JitProvisioningService>();
-
         services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUser, CurrentUser>();
+
+        services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer();
+
         services.AddAuthorization();
 
         services.AddPostgres<IdentityDbContext>(IdentityDbContext.SchemaName);
