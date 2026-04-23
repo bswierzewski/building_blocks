@@ -12,12 +12,12 @@ public static class DistributedApplicationExtensions
     /// <summary>
     /// Creates a DbContext instance using the connection string exposed by the specified Aspire resource.
     /// </summary>
-    public static TDbContext CreateDbContext<TDbContext>(
+    public static async Task<TDbContext> CreateDbContextAsync<TDbContext>(
         this DistributedApplication app,
         string resourceName)
         where TDbContext : DbContext
     {
-        var connectionString = app.GetConnectionString(resourceName)
+        var connectionString = await app.GetConnectionStringAsync(resourceName)
             ?? throw new InvalidOperationException($"Resource '{resourceName}' did not expose a connection string.");
 
         var options = new DbContextOptionsBuilder<TDbContext>()
