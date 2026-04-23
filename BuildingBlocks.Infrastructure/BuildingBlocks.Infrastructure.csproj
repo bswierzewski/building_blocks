@@ -6,6 +6,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Environment variables -->
+    <PackageReference Include="DotNetEnv" />
+
     <!-- ErrorOr -->
     <PackageReference Include="ErrorOr" />
 
