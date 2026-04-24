@@ -20,7 +20,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" />
     <PackageReference Include="Npgsql" />
     <PackageReference Include="Respawn" />
-    <PackageReference Include="Testcontainers.PostgreSql" />
 
     <!-- End-To-End Testing -->
     <PackageReference Include="Aspire.Hosting.Testing" />
