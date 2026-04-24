@@ -15,9 +15,7 @@
     <!-- Testing Framework -->
     <PackageReference Include="xunit.v3.extensibility.core" />
 
-    <!-- Integration Testing -->
-    <PackageReference Include="Alba" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" />
+    <!-- Shared Database Testing -->
     <PackageReference Include="Npgsql" />
     <PackageReference Include="Respawn" />
 

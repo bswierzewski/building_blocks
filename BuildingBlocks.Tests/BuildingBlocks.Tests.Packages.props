@@ -6,9 +6,5 @@
     <!-- Common Testing -->
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.2.2" />
     <PackageVersion Include="Respawn" Version="7.0.0" />
-
-    <!-- Integration Testing -->
-    <PackageVersion Include="Alba" Version="8.4.0" />
-    <PackageVersion Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.3.9" />
   </ItemGroup>
 </Project>
