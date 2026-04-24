@@ -24,8 +24,7 @@ public static class DistributedApplicationExtensions
             .UseNpgsql(connectionString)
             .Options;
 
-        return (TDbContext)Activator.CreateInstance(typeof(TDbContext), options)
-            ?? throw new InvalidOperationException(
-                $"Could not create {typeof(TDbContext).Name}. Ensure it has a constructor accepting DbContextOptions<{typeof(TDbContext).Name}>.");
+        return Activator.CreateInstance(typeof(TDbContext), options) as TDbContext
+            ?? throw new InvalidOperationException($"Could not create {typeof(TDbContext).Name}. Ensure it has a constructor accepting DbContextOptions<{typeof(TDbContext).Name}>.");
     }
 }
