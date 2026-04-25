@@ -1,4 +1,5 @@
 using BuildingBlocks.Core.Interfaces;
+using BuildingBlocks.Core.Primitives;
 using BuildingBlocks.Identity.Infrastructure.Persistence;
 using BuildingBlocks.Identity.Infrastructure.Services;
 using BuildingBlocks.Infrastructure.Persistence.Extensions;
@@ -14,6 +15,14 @@ namespace BuildingBlocks.Identity;
 public sealed class IdentityModule : IModule
 {
     public string Name => "Identity";
+
+    public IReadOnlyCollection<Permission> Permissions =>
+    [
+        new("identity.users.read", "Read identity users"),
+        new("identity.users.write", "Manage identity users"),
+        new("identity.roles.read", "Read identity roles"),
+        new("identity.roles.write", "Manage identity roles")
+    ];
 
     public void AddServices(IServiceCollection services, IConfiguration configuration)
     {
