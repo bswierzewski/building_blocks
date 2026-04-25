@@ -8,7 +8,7 @@ namespace BuildingBlocks.Identity.Features.GetRoles;
 
 public sealed class GetRolesHandler
 {
-    [WolverineGet("/identity/roles")]
+    [WolverineGet("/api/identity/roles")]
     [Tags("Identity")]
     [EndpointName("GetRoles")]
     [EndpointSummary("Get all roles")]

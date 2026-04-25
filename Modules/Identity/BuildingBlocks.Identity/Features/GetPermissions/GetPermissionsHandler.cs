@@ -7,7 +7,7 @@ namespace BuildingBlocks.Identity.Features.GetPermissions;
 
 public sealed class GetPermissionsHandler
 {
-    [WolverineGet("/identity/permissions")]
+    [WolverineGet("/api/identity/permissions")]
     [Tags("Identity")]
     [EndpointName("GetPermissions")]
     [EndpointSummary("Get all published permissions")]

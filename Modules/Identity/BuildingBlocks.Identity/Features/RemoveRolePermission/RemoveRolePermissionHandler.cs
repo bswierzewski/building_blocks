@@ -10,7 +10,7 @@ namespace BuildingBlocks.Identity.Features.RemoveRolePermission;
 
 public sealed class RemoveRolePermissionHandler
 {
-    [WolverineDelete("/identity/roles/{id}/permissions/{permissionCode}")]
+    [WolverineDelete("/api/identity/roles/{id}/permissions/{permissionCode}")]
     [Tags("Identity")]
     [EndpointName("RemoveRolePermission")]
     [EndpointSummary("Remove permission from role")]

@@ -11,7 +11,7 @@ namespace BuildingBlocks.Identity.Features.CreateRole;
 
 public sealed class CreateRoleHandler
 {
-    [WolverinePost("/identity/roles")]
+    [WolverinePost("/api/identity/roles")]
     [Tags("Identity")]
     [EndpointName("CreateRole")]
     [EndpointSummary("Create a new role")]

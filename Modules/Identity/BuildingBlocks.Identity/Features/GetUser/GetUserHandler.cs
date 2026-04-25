@@ -9,7 +9,7 @@ namespace BuildingBlocks.Identity.Features.GetUser;
 
 public sealed class GetUserHandler
 {
-    [WolverineGet("/identity/users/{id}")]
+    [WolverineGet("/api/identity/users/{id}")]
     [Tags("Identity")]
     [EndpointName("GetUser")]
     [EndpointSummary("Get user by ID")]

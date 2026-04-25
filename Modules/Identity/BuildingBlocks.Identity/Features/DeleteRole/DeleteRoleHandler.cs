@@ -9,7 +9,7 @@ namespace BuildingBlocks.Identity.Features.DeleteRole;
 
 public sealed class DeleteRoleHandler
 {
-    [WolverineDelete("/identity/roles/{id}")]
+    [WolverineDelete("/api/identity/roles/{id}")]
     [Tags("Identity")]
     [EndpointName("DeleteRole")]
     [EndpointSummary("Delete role")]

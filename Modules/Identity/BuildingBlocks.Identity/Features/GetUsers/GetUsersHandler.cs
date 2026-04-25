@@ -8,7 +8,7 @@ namespace BuildingBlocks.Identity.Features.GetUsers;
 
 public sealed class GetUsersHandler
 {
-    [WolverineGet("/identity/users")]
+    [WolverineGet("/api/identity/users")]
     [Tags("Identity")]
     [EndpointName("GetUsers")]
     [EndpointSummary("Get all users")]

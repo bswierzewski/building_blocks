@@ -10,7 +10,7 @@ namespace BuildingBlocks.Identity.Features.AssignRolePermission;
 
 public sealed class AssignRolePermissionHandler
 {
-    [WolverinePut("/identity/roles/{id}/permissions/{permissionCode}")]
+    [WolverinePut("/api/identity/roles/{id}/permissions/{permissionCode}")]
     [Tags("Identity")]
     [EndpointName("AssignRolePermission")]
     [EndpointSummary("Assign permission to role")]

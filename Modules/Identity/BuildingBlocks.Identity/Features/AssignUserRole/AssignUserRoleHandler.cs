@@ -9,7 +9,7 @@ namespace BuildingBlocks.Identity.Features.AssignUserRole;
 
 public sealed class AssignUserRoleHandler
 {
-    [WolverinePut("/identity/users/{id}/roles/{roleId}")]
+    [WolverinePut("/api/identity/users/{id}/roles/{roleId}")]
     [Tags("Identity")]
     [EndpointName("AssignUserRole")]
     [EndpointSummary("Assign role to user")]
