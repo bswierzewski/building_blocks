@@ -15,9 +15,11 @@
     <!-- Testing Framework -->
     <PackageReference Include="xunit.v3.extensibility.core" />
 
-    <!-- Shared Database Testing -->
+    <!-- Integration Testing -->
+    <PackageReference Include="Alba" />
     <PackageReference Include="Npgsql" />
     <PackageReference Include="Respawn" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
 
     <!-- End-To-End Testing -->
     <PackageReference Include="Aspire.Hosting.Testing" />
