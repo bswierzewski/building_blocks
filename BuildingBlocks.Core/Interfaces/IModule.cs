@@ -17,7 +17,12 @@ public interface IModule
     /// <summary>
     /// Gets the permissions owned and published by this module.
     /// </summary>
-    IReadOnlyCollection<Permission> Permissions => [];
+    IReadOnlyCollection<Permission> Permissions { get; }
+
+    /// <summary>
+    /// Gets the roles owned and published by this module.
+    /// </summary>
+    IReadOnlyCollection<Role> Roles { get; }
 
     /// <summary>
     /// Registers module services in the DI container.
