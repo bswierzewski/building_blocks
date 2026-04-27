@@ -13,11 +13,11 @@ public abstract class AuditableEntity<TId> : Entity<TId>, IAuditable
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
     /// <summary>User ID who created this entity</summary>
-    public Guid CreatedBy { get; set; }
+    public string CreatedBy { get; set; } = string.Empty;
 
     /// <summary>When this entity was last modified</summary>
     public DateTimeOffset? ModifiedAt { get; set; }
 
     /// <summary>User ID who last modified this entity</summary>
-    public Guid? ModifiedBy { get; set; }
+    public string? ModifiedBy { get; set; }
 }

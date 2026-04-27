@@ -1,4 +1,5 @@
 using BuildingBlocks.Core.Interfaces;
+using BuildingBlocks.Infrastructure.Identity.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

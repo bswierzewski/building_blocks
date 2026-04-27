@@ -9,11 +9,11 @@ public interface IAuditable
     DateTimeOffset CreatedAt { get; set; }
 
     /// <summary>Gets or sets the user ID who created this entity.</summary>
-    Guid CreatedBy { get; set; }
+    string CreatedBy { get; set; }
 
     /// <summary>Gets or sets when this entity was last modified.</summary>
     DateTimeOffset? ModifiedAt { get; set; }
 
     /// <summary>Gets or sets the user ID who last modified this entity.</summary>
-    Guid? ModifiedBy { get; set; }
+    string? ModifiedBy { get; set; }
 }
