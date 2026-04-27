@@ -1,4 +1,3 @@
-using BuildingBlocks.Core.Primitives;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,16 +12,6 @@ public interface IModule
     /// Logical module name used for diagnostics and configuration grouping.
     /// </summary>
     string Name { get; }
-
-    /// <summary>
-    /// Gets the permissions owned and published by this module.
-    /// </summary>
-    IReadOnlyCollection<Permission> Permissions { get; }
-
-    /// <summary>
-    /// Gets the roles owned and published by this module.
-    /// </summary>
-    IReadOnlyCollection<Role> Roles { get; }
 
     /// <summary>
     /// Registers module services in the DI container.

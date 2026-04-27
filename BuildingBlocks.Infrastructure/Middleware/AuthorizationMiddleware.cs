@@ -1,7 +1,6 @@
 using BuildingBlocks.Core.Attributes;
 using BuildingBlocks.Core.Exceptions;
 using BuildingBlocks.Core.Interfaces;
-using BuildingBlocks.Infrastructure.Identity;
 
 namespace BuildingBlocks.Infrastructure.Middleware;
 
@@ -14,18 +13,15 @@ public static class AuthorizationMiddleware
     /// Executes before the handler and enforces authentication plus optional permission checks.
     /// Only runs when AuthorizeAttribute is present on the handler type or method.
     /// </summary>
-    public static void Before(AuthorizeAttribute authorize, ICurrentUser currentUser, IRolePermissionRegistry rolePermissionRegistry)
+    public static void Before(AuthorizeAttribute authorize, ICurrentUser currentUser)
     {
         if (!currentUser.IsAuthenticated)
             throw new UnauthorizedAccessException();
 
-        if (authorize.Roles.Length > 0 && !authorize.Roles.Any(role => rolePermissionRegistry.HasRole(currentUser.Roles, role)))
-            throw new ForbiddenAccessException();
-
         if (authorize.Permissions.Length == 0)
             return;
 
-        if (authorize.Permissions.Any(permission => rolePermissionRegistry.HasPermission(currentUser.Roles, permission)))
+        if (authorize.Permissions.Any(currentUser.HasPermission))
             return;
 
         throw new ForbiddenAccessException();

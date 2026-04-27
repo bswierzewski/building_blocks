@@ -23,5 +23,15 @@ public interface ICurrentUser
     /// <summary>
     /// Gets the collection of roles assigned to the current user.
     /// </summary>
-    IReadOnlyCollection<string> Roles { get; }
+    IReadOnlySet<string> Roles { get; }
+
+    /// <summary>
+    /// Gets the effective permissions assigned to the current user.
+    /// </summary>
+    IReadOnlySet<string> Permissions { get; }
+
+    /// <summary>
+    /// Determines whether the current user has the specified permission.
+    /// </summary>
+    bool HasPermission(string permission);
 }
