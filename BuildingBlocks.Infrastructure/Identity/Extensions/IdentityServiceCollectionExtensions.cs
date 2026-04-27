@@ -1,5 +1,6 @@
 using BuildingBlocks.Core.Interfaces;
 using BuildingBlocks.Infrastructure.Identity.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -19,6 +20,8 @@ public static class IdentityServiceCollectionExtensions
         services.AddHttpContextAccessor();
 
         services.TryAddScoped<ICurrentUser, CurrentUser>();
+        services.TryAddSingleton<RolePermissionService>();
+        services.TryAddTransient<IClaimsTransformation, PermissionClaimsTransformation>();
 
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
