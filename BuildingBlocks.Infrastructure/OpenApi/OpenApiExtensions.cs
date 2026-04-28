@@ -1,3 +1,4 @@
+using BuildingBlocks.Core.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
@@ -97,5 +98,43 @@ public static class OpenApiExtensions
         }
 
         return new OpenApiSchemaReference(ProblemDetailsSchemaName, context.Document);
+    }
+
+    public static OpenApiOptions AddBearerSecurityScheme(this OpenApiOptions options)
+    {
+        options.AddDocumentTransformer((document, context, cancellationToken) =>
+        {
+            document.Components ??= new OpenApiComponents();
+            document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+            document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
+            {
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                Description = "Paste your Clerk JWT token (without the 'Bearer ' prefix)"
+            };
+
+            return Task.CompletedTask;
+        });
+
+        options.AddOperationTransformer((operation, context, cancellationToken) =>
+        {
+            var hasAuthorize = context.Description.ActionDescriptor.EndpointMetadata
+                .OfType<AuthorizeAttribute>()
+                .Any();
+
+            if (!hasAuthorize)
+                return Task.CompletedTask;
+
+            operation.Security ??= [];
+            operation.Security.Add(new OpenApiSecurityRequirement
+            {
+                [new OpenApiSecuritySchemeReference("Bearer", context.Document)] = []
+            });
+
+            return Task.CompletedTask;
+        });
+
+        return options;
     }
 }

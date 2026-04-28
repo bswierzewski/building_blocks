@@ -7,13 +7,9 @@ namespace BuildingBlocks.Infrastructure.Identity.Services;
 /// Aggregates role-to-permission mappings from all registered <see cref="IRolePermissionProvider"/> instances
 /// and exposes fast frozen lookups keyed by role name.
 /// </summary>
-public sealed class RolePermissionService
+public sealed class RolePermissionService(IEnumerable<IRolePermissionProvider> providers)
 {
-    private readonly FrozenDictionary<string, FrozenSet<string>> _rolePermissions;
-
-    public RolePermissionService(IEnumerable<IRolePermissionProvider> providers)
-    {
-        _rolePermissions = providers
+    private readonly FrozenDictionary<string, FrozenSet<string>> _rolePermissions = providers
             .SelectMany(p => p.GetRolePermissions())
             .GroupBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(
@@ -21,7 +17,6 @@ public sealed class RolePermissionService
                 g => g.SelectMany(r => r.Permissions.Select(p => p.Code))
                        .ToFrozenSet(StringComparer.OrdinalIgnoreCase),
                 StringComparer.OrdinalIgnoreCase);
-    }
 
     /// <summary>
     /// Returns the set of permission codes granted by the specified role.
