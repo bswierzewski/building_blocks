@@ -1,5 +1,4 @@
 using BuildingBlocks.Core.Interfaces;
-using BuildingBlocks.Infrastructure.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -46,10 +45,6 @@ public static class WolverineExtensions
             // Automatically wrap every handler that opens a DbContext in the transactional
             // outbox policy without requiring per-handler opt-in attributes.
             opts.Policies.AutoApplyTransactions();
-
-            // Always scan the BuildingBlocks.Infrastructure assembly so that shared middleware
-            // (e.g. LoggingMiddleware) is discovered regardless of which module assemblies are loaded.
-            opts.Discovery.IncludeAssembly(typeof(LoggingMiddleware).Assembly);
 
             // Scan each module assembly so Wolverine discovers its HTTP endpoints,
             // message handlers, and any module-specific middleware or policies.

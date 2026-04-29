@@ -29,6 +29,7 @@
     <PackageVersion Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
 
     <!-- WolverineFx -->
+    <PackageVersion Include="JasperFx" Version="1.24.1" />
     <PackageVersion Include="WolverineFx" Version="5.30.0" />
     <PackageVersion Include="WolverineFx.EntityFrameworkCore" Version="5.29.0" />
     <PackageVersion Include="WolverineFx.FluentValidation" Version="5.29.0" />

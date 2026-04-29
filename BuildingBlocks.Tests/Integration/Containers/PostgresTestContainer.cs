@@ -12,8 +12,7 @@ public sealed class PostgresTestContainer : IAsyncDisposable
 
     public PostgresTestContainer()
     {
-        _container = new PostgreSqlBuilder()
-            .WithImage("postgres:18-alpine")
+        _container = new PostgreSqlBuilder("postgres:18-alpine")
             .WithDatabase("scaffold")
             .WithUsername("postgres")
             .WithPassword("postgres")

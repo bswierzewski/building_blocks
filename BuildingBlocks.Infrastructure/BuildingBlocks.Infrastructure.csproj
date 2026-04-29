@@ -35,6 +35,7 @@
     <PackageReference Include="Serilog.Sinks.OpenTelemetry" />
 
     <!-- WolverineFx -->
+    <PackageReference Include="JasperFx" />
     <PackageReference Include="WolverineFx" />
     <PackageReference Include="WolverineFx.EntityFrameworkCore" />
     <PackageReference Include="WolverineFx.FluentValidation" />

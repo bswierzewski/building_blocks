@@ -1,4 +1,4 @@
-using BuildingBlocks.Core.Attributes;
+using BuildingBlocks.Infrastructure.Middleware;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
