@@ -1,6 +1,5 @@
 using BuildingBlocks.Core.Interfaces;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Wolverine;
 using Wolverine.EntityFrameworkCore;

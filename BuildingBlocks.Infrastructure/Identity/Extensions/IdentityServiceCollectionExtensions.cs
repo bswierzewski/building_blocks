@@ -25,7 +25,15 @@ public static class IdentityServiceCollectionExtensions
 
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer();
+            .AddJwtBearer(options =>
+            {
+                // Clerk tokens do not include an 'aud' claim, so audience validation must be disabled.
+                options.TokenValidationParameters.ValidateAudience = false;
+
+                // In .NET 8+, MapInboundClaims defaults to false, meaning JWT claim names are preserved as-is (e.g. 'sub', 'roles'). 
+                options.TokenValidationParameters.NameClaimType = ClaimNames.Sub;
+                options.TokenValidationParameters.RoleClaimType = ClaimNames.Roles;
+            });
 
         services.AddAuthorization();
 

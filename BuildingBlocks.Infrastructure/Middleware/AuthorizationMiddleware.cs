@@ -19,7 +19,6 @@ internal sealed class AuthorizationFrame : SyncFrame
 {
     // Required permissions that the current user must hold. Empty means "authenticated only".
     private readonly string[] _permissions;
-
     // Resolved at code-generation time via FindVariables; holds the ICurrentUser variable reference.
     private Variable _currentUser = null!;
 
@@ -45,18 +44,17 @@ internal sealed class AuthorizationFrame : SyncFrame
     public override void GenerateCode(GeneratedMethod method, ISourceWriter writer)
     {
         // Throw 401 Unauthorized if the current user is not authenticated.
-        writer.Write(
-            $"if (!{_currentUser.Usage}.{nameof(ICurrentUser.IsAuthenticated)}) " +
-            $"throw new {typeof(UnauthorizedAccessException).FullNameInCode()}();");
+        writer.WriteLine($"if (!{_currentUser.Usage}.{nameof(ICurrentUser.IsAuthenticated)})");
+        writer.WriteLine($"    throw new {typeof(UnauthorizedAccessException).FullNameInCode()}();");
 
         // Throw 403 Forbidden when specific permissions are required but the user does not hold them.
         if (_permissions.Length > 0)
         {
-            var permsLiteral = string.Join(", ", _permissions.Select(p => $"\"{p}\""));
-            writer.Write(
-                $"if (!System.Array.Exists(new string[] {{ {permsLiteral} }}, " +
-                $"{_currentUser.Usage}.{nameof(ICurrentUser.HasPermission)})) " +
-                $"throw new {typeof(ForbiddenAccessException).FullNameInCode()}();");
+            var checks = _permissions.Select(p => $"!{_currentUser.Usage}.{nameof(ICurrentUser.HasPermission)}(\"{p}\")");
+            var condition = string.Join(" || ", checks);
+
+            writer.WriteLine($"if ({condition})");
+            writer.WriteLine($"    throw new {typeof(ForbiddenAccessException).FullNameInCode()}();");
         }
 
         // Continue with the next frame (the actual handler invocation).
