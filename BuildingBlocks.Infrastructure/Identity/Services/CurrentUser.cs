@@ -11,18 +11,18 @@ public sealed class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICur
 {
     private ClaimsPrincipal Principal => httpContextAccessor.HttpContext?.User ?? new ClaimsPrincipal(new ClaimsIdentity());
 
-    public string Id => Principal.FindFirstValue(ClaimNames.Sub) ?? string.Empty;
+    public string Id => Principal.FindFirstValue(CustomClaimTypes.Sub) ?? string.Empty;
 
     public string Email => Principal.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
 
     public bool IsAuthenticated => Principal.Identity?.IsAuthenticated == true;
 
     public IReadOnlySet<string> Roles =>
-        Principal.FindAll(ClaimNames.Roles).Select(c => c.Value).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        Principal.FindAll(CustomClaimTypes.Roles).Select(c => c.Value).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
     public IReadOnlySet<string> Permissions =>
-        Principal.FindAll(ClaimNames.Permission).Select(c => c.Value).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        Principal.FindAll(CustomClaimTypes.Permission).Select(c => c.Value).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
     public bool HasPermission(string permission) =>
-        Principal.HasClaim(ClaimNames.Permission, permission);
+        Principal.HasClaim(CustomClaimTypes.Permission, permission);
 }

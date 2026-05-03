@@ -1,12 +1,12 @@
 namespace BuildingBlocks.Infrastructure.Identity;
 
 /// <summary>
-/// JWT claim names used throughout the identity infrastructure.
+/// Custom JWT claim types used throughout the identity infrastructure.
 /// Centralised here so every layer refers to the same string literals.
 /// </summary>
-public static class ClaimNames
+public static class CustomClaimTypes
 {
-    /// <summary>Subject – the user's unique identifier ('sub' in JWT).</summary>
+    /// <summary>Subject - the user's unique identifier ('sub' in JWT).</summary>
     public const string Sub = "sub";
 
     /// <summary>Roles assigned to the user ('roles' in JWT).</summary>

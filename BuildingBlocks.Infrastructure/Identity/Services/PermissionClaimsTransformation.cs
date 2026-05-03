@@ -11,15 +11,15 @@ public sealed class PermissionClaimsTransformation(RolePermissionService rolePer
 {
     public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
     {
-        var roles = principal.FindAll(ClaimNames.Roles).Select(c => c.Value);
+        var roles = principal.FindAll(CustomClaimTypes.Roles).Select(c => c.Value);
         var permissions = rolePermissionService.GetPermissionsForRoles(roles);
 
         var identity = new ClaimsIdentity();
 
         foreach (var permission in permissions)
         {
-            if (!principal.HasClaim(ClaimNames.Permission, permission))
-                identity.AddClaim(new Claim(ClaimNames.Permission, permission));
+            if (!principal.HasClaim(CustomClaimTypes.Permission, permission))
+                identity.AddClaim(new Claim(CustomClaimTypes.Permission, permission));
         }
 
         if (identity.Claims.Any())

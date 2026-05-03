@@ -42,15 +42,15 @@ public static class JwtSecurityStubExtensions
     private static IEnumerable<Claim> ToClaims(ICurrentUser currentUser)
     {
         if (!string.IsNullOrWhiteSpace(currentUser.Id))
-            yield return new Claim(ClaimNames.Sub, currentUser.Id);
+            yield return new Claim(CustomClaimTypes.Sub, currentUser.Id);
 
         if (!string.IsNullOrWhiteSpace(currentUser.Email))
             yield return new Claim(ClaimTypes.Email, currentUser.Email);
 
         foreach (var role in currentUser.Roles)
-            yield return new Claim(ClaimNames.Roles, role);
+            yield return new Claim(CustomClaimTypes.Roles, role);
 
         foreach (var permission in currentUser.Permissions)
-            yield return new Claim(ClaimNames.Permission, permission);
+            yield return new Claim(CustomClaimTypes.Permission, permission);
     }
 }
