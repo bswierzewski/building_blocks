@@ -23,11 +23,4 @@ public interface IModule
     /// </summary>
     Task InitializeAsync(IServiceProvider services, CancellationToken cancellationToken = default)
         => Task.CompletedTask;
-
-    /// <summary>
-    /// Applies module-specific database migrations when a dedicated migrator host is used.
-    /// Modules without migrations can rely on the default no-op implementation.
-    /// </summary>
-    Task InitializeMigrationsAsync(IServiceProvider services, CancellationToken cancellationToken = default)
-        => Task.CompletedTask;
 }

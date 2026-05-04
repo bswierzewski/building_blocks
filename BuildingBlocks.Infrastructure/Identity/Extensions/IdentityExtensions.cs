@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 
-namespace BuildingBlocks.Infrastructure.Identity;
+namespace BuildingBlocks.Infrastructure.Identity.Extensions;
 
 /// <summary>
 /// Registers authentication, authorization, and current-user services.

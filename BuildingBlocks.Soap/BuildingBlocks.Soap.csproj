@@ -7,6 +7,7 @@
 		<PackageReference Include="Microsoft.Extensions.Resilience" />
 
 		<!-- System Service Model -->
+		<PackageReference Include="System.Security.Cryptography.Xml" />
 		<PackageReference Include="System.ServiceModel.Http" />
 	</ItemGroup>
 

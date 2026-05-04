@@ -8,7 +8,7 @@ using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
-namespace BuildingBlocks.Hosting;
+namespace BuildingBlocks.Hosting.Extensions;
 
 public static class HostingExtensions
 {
