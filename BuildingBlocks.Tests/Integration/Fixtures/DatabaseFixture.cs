@@ -6,12 +6,18 @@ using Xunit;
 
 namespace BuildingBlocks.Tests.Integration.Fixtures;
 
+/// <summary>
+/// Shared PostgreSQL test fixture that owns the Testcontainers instance and Respawn reset pipeline.
+/// </summary>
 public sealed class DatabaseFixture : IAsyncLifetime
 {
     private readonly PostgreSqlContainer _dbContainer;
     private Respawner? _respawner;
     private NpgsqlConnection? _dbConnection;
 
+    /// <summary>
+    /// Connection string exposed to integration hosts and direct database access in tests.
+    /// </summary>
     public string ConnectionString => _dbContainer.GetConnectionString();
 
     public DatabaseFixture()
@@ -23,6 +29,9 @@ public sealed class DatabaseFixture : IAsyncLifetime
             .Build();
     }
 
+    /// <summary>
+    /// Starts the PostgreSQL container and opens the shared connection used by Respawn.
+    /// </summary>
     public async ValueTask InitializeAsync()
     {
         await _dbContainer.StartAsync();
@@ -31,6 +40,9 @@ public sealed class DatabaseFixture : IAsyncLifetime
         await _dbConnection.OpenAsync();
     }
 
+    /// <summary>
+    /// Resets all included schemas while preserving ignored tables such as EF migration history.
+    /// </summary>
     public async Task ResetDatabaseAsync()
     {
         if (_dbConnection is null)
@@ -52,6 +64,9 @@ public sealed class DatabaseFixture : IAsyncLifetime
         await _respawner.ResetAsync(_dbConnection);
     }
 
+    /// <summary>
+    /// Disposes the shared reset connection and stops the PostgreSQL container.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         if (_dbConnection is not null)
