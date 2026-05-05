@@ -1,7 +1,6 @@
 using Alba;
 using Alba.Security;
 using BuildingBlocks.Tests.Integration.Fixtures;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -46,19 +45,15 @@ public abstract class IntegrationTestBase<TEntryPoint>(DatabaseFixture databaseF
     /// </summary>
     public async ValueTask InitializeAsync()
     {
+        var configValues = new Dictionary<string, string?>
+        {
+            ["ConnectionStrings:Default"] = _dbFixture.ConnectionString
+        };
+
         Host = await AlbaHost.For<TEntryPoint>(builder =>
         {
-            builder.ConfigureAppConfiguration((context, config) =>
-            {
-                config.AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    ["ConnectionStrings:Default"] = _dbFixture.ConnectionString
-                });
-            });
-
             builder.ConfigureServices((_, services) => OnConfigureServices(services));
-
-        }, _jwtSecurity);
+        }, ConfigurationOverride.Create(configValues), _jwtSecurity);
 
         await ResetDatabaseAsync();
         await OnInitializeAsync(Host.Services);
