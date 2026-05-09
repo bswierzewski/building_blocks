@@ -11,11 +11,6 @@ public interface ICurrentUser
     string Id { get; }
 
     /// <summary>
-    /// Gets the email address of the current user.
-    /// </summary>
-    string Email { get; }
-
-    /// <summary>
     /// Gets a value indicating whether the current request is authenticated.
     /// </summary>
     bool IsAuthenticated { get; }

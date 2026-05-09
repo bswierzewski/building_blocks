@@ -37,7 +37,9 @@ public static class IdentityExtensions
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                // In .NET 8+, MapInboundClaims defaults to false, meaning JWT claim names are preserved as-is (e.g. 'sub', 'roles').
+                // Preserve JWT claim names as-is so CurrentUser can read claims directly ('sub', 'roles').
+                options.MapInboundClaims = false;
+
                 options.TokenValidationParameters.NameClaimType = CustomClaimTypes.Sub;
                 options.TokenValidationParameters.RoleClaimType = CustomClaimTypes.Roles;
                 options.TokenValidationParameters.ClockSkew = TimeSpan.Zero;

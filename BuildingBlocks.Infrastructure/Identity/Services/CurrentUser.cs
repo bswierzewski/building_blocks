@@ -13,8 +13,6 @@ public sealed class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICur
 
     public string Id => Principal.FindFirstValue(CustomClaimTypes.Sub) ?? string.Empty;
 
-    public string Email => Principal.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
-
     public bool IsAuthenticated => Principal.Identity?.IsAuthenticated == true;
 
     public IReadOnlySet<string> Roles =>

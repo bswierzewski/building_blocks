@@ -42,9 +42,6 @@ public static class TestJwtTokenFactory
         if (!string.IsNullOrWhiteSpace(currentUser.Id))
             yield return new Claim(CustomClaimTypes.Sub, currentUser.Id);
 
-        if (!string.IsNullOrWhiteSpace(currentUser.Email))
-            yield return new Claim(ClaimTypes.Email, currentUser.Email);
-
         foreach (var role in currentUser.Roles)
             yield return new Claim(CustomClaimTypes.Roles, role);
 

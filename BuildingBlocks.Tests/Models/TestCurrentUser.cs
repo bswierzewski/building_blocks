@@ -7,14 +7,11 @@ namespace BuildingBlocks.Tests.Models;
 /// </summary>
 public sealed class TestCurrentUser(
     string id = "test-user",
-    string email = "test.user@scaffold.local",
     bool isAuthenticated = true,
     IEnumerable<string>? roles = null,
     IEnumerable<string>? permissions = null) : ICurrentUser
 {
     public string Id { get; } = id;
-
-    public string Email { get; } = email;
 
     public bool IsAuthenticated { get; } = isAuthenticated;
 
