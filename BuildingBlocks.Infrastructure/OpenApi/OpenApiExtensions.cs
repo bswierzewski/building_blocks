@@ -22,10 +22,8 @@ public static class OpenApiExtensions
 
         options.AddSchemaTransformer((schema, context, _) =>
         {
-            if (context.JsonTypeInfo.Type != typeof(HttpValidationProblemDetails))
-                return Task.CompletedTask;
-
-            if (schema is not OpenApiSchema openApiSchema)
+            if (context.JsonTypeInfo.Type != typeof(HttpValidationProblemDetails)
+                || schema is not OpenApiSchema openApiSchema)
                 return Task.CompletedTask;
 
             openApiSchema.Description ??= "RFC 7807 validation-style problem details returned by the API.";
@@ -50,20 +48,33 @@ public static class OpenApiExtensions
         options.AddOperationTransformer(async (operation, context, cancellationToken) =>
         {
             operation.Responses ??= [];
+            var problemDetailsSchema = await GetProblemDetailsSchemaAsync();
 
-            if (operation.Responses.ContainsKey("default"))
-                return;
+            operation.Responses.TryAdd(
+                "default",
+                CreateProblemDetailsResponse(DefaultErrorResponseDescription, problemDetailsSchema));
 
-            IOpenApiSchema problemDetailsSchema;
-
-            if (context.Document is null)
+            foreach (var (statusCode, response) in operation.Responses.ToArray())
             {
-                problemDetailsSchema = await context.GetOrCreateSchemaAsync(
-                    typeof(HttpValidationProblemDetails),
-                    cancellationToken: cancellationToken);
+                if (!IsErrorStatusCode(statusCode) || HasStructuredErrorSchema(response))
+                    continue;
+
+                operation.Responses[statusCode] = CreateProblemDetailsResponse(
+                    string.IsNullOrWhiteSpace(response.Description)
+                        ? DefaultErrorResponseDescription
+                        : response.Description,
+                    problemDetailsSchema);
             }
-            else
+
+            async Task<IOpenApiSchema> GetProblemDetailsSchemaAsync()
             {
+                if (context.Document is null)
+                {
+                    return await context.GetOrCreateSchemaAsync(
+                        typeof(HttpValidationProblemDetails),
+                        cancellationToken: cancellationToken);
+                }
+
                 context.Document.Components ??= new OpenApiComponents();
                 context.Document.Components.Schemas ??= new Dictionary<string, IOpenApiSchema>();
 
@@ -76,24 +87,48 @@ public static class OpenApiExtensions
                             cancellationToken: cancellationToken));
                 }
 
-                problemDetailsSchema = new OpenApiSchemaReference(ProblemDetailsSchemaName, context.Document);
+                return new OpenApiSchemaReference(ProblemDetailsSchemaName, context.Document);
             }
-
-            operation.Responses["default"] = new OpenApiResponse
-            {
-                Description = DefaultErrorResponseDescription,
-                Content = new Dictionary<string, OpenApiMediaType>
-                {
-                    [ProblemJsonContentType] = new OpenApiMediaType
-                    {
-                        Schema = problemDetailsSchema
-                    }
-                }
-            };
         });
 
         return options;
     }
+
+    private static OpenApiResponse CreateProblemDetailsResponse(string description, IOpenApiSchema schema)
+        => new()
+        {
+            Description = description,
+            Content = new Dictionary<string, OpenApiMediaType>
+            {
+                [ProblemJsonContentType] = new OpenApiMediaType
+                {
+                    Schema = schema
+                }
+            }
+        };
+
+    private static bool IsErrorStatusCode(string statusCode)
+        => int.TryParse(statusCode, out var parsedStatusCode)
+            && parsedStatusCode >= StatusCodes.Status400BadRequest;
+
+    private static bool HasStructuredErrorSchema(IOpenApiResponse response)
+        => response.Content?.Values.Any(mediaType => !IsEmptySchema(mediaType.Schema)) == true;
+
+    private static bool IsEmptySchema(IOpenApiSchema? schema)
+        => schema switch
+        {
+            null => true,
+            OpenApiSchemaReference => false,
+            OpenApiSchema openApiSchema => openApiSchema.Type is null
+                && string.IsNullOrWhiteSpace(openApiSchema.Format)
+                && openApiSchema.Items is null
+                && openApiSchema.AdditionalProperties is null
+                && (openApiSchema.Properties?.Count ?? 0) == 0
+                && (openApiSchema.AllOf?.Count ?? 0) == 0
+                && (openApiSchema.AnyOf?.Count ?? 0) == 0
+                && (openApiSchema.OneOf?.Count ?? 0) == 0,
+            _ => false
+        };
 
     public static OpenApiOptions AddBearerSecurityScheme(this OpenApiOptions options)
     {
