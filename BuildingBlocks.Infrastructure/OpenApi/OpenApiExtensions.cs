@@ -20,6 +20,33 @@ public static class OpenApiExtensions
     {
         ArgumentNullException.ThrowIfNull(options);
 
+        options.AddSchemaTransformer((schema, context, _) =>
+        {
+            if (context.JsonTypeInfo.Type != typeof(HttpValidationProblemDetails))
+                return Task.CompletedTask;
+
+            if (schema is not OpenApiSchema openApiSchema)
+                return Task.CompletedTask;
+
+            openApiSchema.Description ??= "RFC 7807 validation-style problem details returned by the API.";
+            openApiSchema.Properties ??= new Dictionary<string, IOpenApiSchema>();
+
+            openApiSchema.Properties.TryAdd("traceId", new OpenApiSchema
+            {
+                Type = JsonSchemaType.String,
+                Description = "The trace identifier for request tracking."
+            });
+
+            openApiSchema.Properties.TryAdd("timestamp", new OpenApiSchema
+            {
+                Type = JsonSchemaType.String,
+                Format = "date-time",
+                Description = "Timestamp when the error occurred in UTC."
+            });
+
+            return Task.CompletedTask;
+        });
+
         options.AddOperationTransformer(async (operation, context, cancellationToken) =>
         {
             operation.Responses ??= [];
