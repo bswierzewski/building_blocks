@@ -1,5 +1,6 @@
 using System.ServiceModel;
 using BuildingBlocks.Soap.Abstractions;
+using BuildingBlocks.Soap.Middleware;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BuildingBlocks.Soap.Builders;

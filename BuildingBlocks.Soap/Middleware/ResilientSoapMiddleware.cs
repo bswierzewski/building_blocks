@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Retry;
 
-namespace BuildingBlocks.Soap;
+namespace BuildingBlocks.Soap.Middleware;
 
 /// <summary>
 /// Resilient SOAP middleware that wraps operations with retry and timeout.

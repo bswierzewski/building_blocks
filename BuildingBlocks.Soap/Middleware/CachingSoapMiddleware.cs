@@ -4,7 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace BuildingBlocks.Soap;
+namespace BuildingBlocks.Soap.Middleware;
 
 /// <summary>
 /// Caching SOAP middleware that caches operation results.

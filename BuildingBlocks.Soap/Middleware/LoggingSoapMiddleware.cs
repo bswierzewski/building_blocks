@@ -4,7 +4,7 @@ using BuildingBlocks.Soap.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace BuildingBlocks.Soap;
+namespace BuildingBlocks.Soap.Middleware;
 
 /// <summary>
 /// Logging SOAP middleware that logs operation start, completion, and failures.
