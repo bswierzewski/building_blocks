@@ -1,18 +1,18 @@
 <Project>
   <ItemGroup>
     <!-- Authentication -->
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
 
     <!-- ASP.NET Core OpenAPI -->
-    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
 
     <!-- Entity Framework Core -->
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.8" />
 
     <!-- Npgsql -->
-    <PackageVersion Include="Npgsql" Version="10.0.0" />
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+    <PackageVersion Include="Npgsql" Version="10.0.2" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
 
     <!-- Serilog -->
     <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
@@ -26,12 +26,12 @@
     <PackageVersion Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
 
     <!-- WolverineFx -->
-    <PackageVersion Include="JasperFx" Version="1.24.1" />
-    <PackageVersion Include="WolverineFx" Version="5.30.0" />
-    <PackageVersion Include="WolverineFx.EntityFrameworkCore" Version="5.29.0" />
-    <PackageVersion Include="WolverineFx.FluentValidation" Version="5.29.0" />
-    <PackageVersion Include="WolverineFx.Http" Version="5.29.0" />
-    <PackageVersion Include="WolverineFx.Http.FluentValidation" Version="5.29.0" />
-    <PackageVersion Include="WolverineFx.Postgresql" Version="5.29.0" />
+    <PackageVersion Include="JasperFx" Version="1.31.0" />
+    <PackageVersion Include="WolverineFx" Version="5.39.3" />
+    <PackageVersion Include="WolverineFx.EntityFrameworkCore" Version="5.39.3" />
+    <PackageVersion Include="WolverineFx.FluentValidation" Version="5.39.3" />
+    <PackageVersion Include="WolverineFx.Http" Version="5.39.3" />
+    <PackageVersion Include="WolverineFx.Http.FluentValidation" Version="5.39.3" />
+    <PackageVersion Include="WolverineFx.Postgresql" Version="5.39.3" />
   </ItemGroup>
 </Project>
