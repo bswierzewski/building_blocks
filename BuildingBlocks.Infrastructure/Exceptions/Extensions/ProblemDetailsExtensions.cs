@@ -1,4 +1,5 @@
 using BuildingBlocks.Core.Exceptions;
+using FluentValidation;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,11 +22,20 @@ public static class ProblemDetailsExtensions
 
         return exception switch
         {
-            ValidationException ex => CreateProblemDetails(
+            BuildingBlocks.Core.Exceptions.ValidationException ex => CreateProblemDetails(
                 StatusCodes.Status400BadRequest,
                 "Validation errors",
                 ex.Message,
                 ex.Errors),
+            FluentValidation.ValidationException ex => CreateProblemDetails(
+                StatusCodes.Status400BadRequest,
+                "Validation errors",
+                ex.Message,
+                ex.Errors
+                    .GroupBy(error => error.PropertyName)
+                    .ToDictionary(
+                        group => group.Key,
+                        group => group.Select(error => error.ErrorMessage).Distinct().ToArray())),
             NotFoundException ex => CreateProblemDetails(
                 StatusCodes.Status404NotFound,
                 "Resource not found",

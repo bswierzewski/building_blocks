@@ -4,8 +4,6 @@ using Npgsql;
 using Wolverine;
 using Wolverine.EntityFrameworkCore;
 using Wolverine.FluentValidation;
-using Wolverine.Http;
-using Wolverine.Http.FluentValidation;
 using Wolverine.Postgresql;
 
 namespace BuildingBlocks.Infrastructure.Wolverine.Extensions;
@@ -73,22 +71,5 @@ public static class WolverineExtensions
             configure?.Invoke(opts);
         });
 
-        // Register the ASP.NET Core bridge that maps Wolverine HTTP endpoints into the
-        // routing pipeline. Must be called before MapModuleEndpoints on the built app.
-        builder.Services.AddWolverineHttp();
-    }
-
-    /// <summary>
-    /// Maps Wolverine HTTP endpoints and enables FluentValidation problem details middleware.
-    /// </summary>
-    public static void MapModuleEndpoints(this WebApplication app)
-    {
-        app.MapWolverineEndpoints(opts =>
-        {
-            // Add middleware that intercepts FluentValidation failures thrown by Wolverine
-            // HTTP handlers and converts them to RFC 7807 ValidationProblemDetails responses,
-            // keeping the error format consistent across the entire API surface.
-            opts.UseFluentValidationProblemDetailMiddleware();
-        });
     }
 }
