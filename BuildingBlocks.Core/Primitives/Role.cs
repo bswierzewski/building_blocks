@@ -27,7 +27,7 @@ public sealed record Role
     public static string NormalizeName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new InvalidOperationException("Role name cannot be empty.");
+            throw new InvalidOperationException("Nazwa roli nie może być pusta.");
 
         return name.Trim();
     }

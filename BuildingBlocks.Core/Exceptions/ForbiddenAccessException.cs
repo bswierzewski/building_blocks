@@ -6,7 +6,7 @@ namespace BuildingBlocks.Core.Exceptions;
 public class ForbiddenAccessException : Exception
 {
     public ForbiddenAccessException()
-        : base("Access to this resource is forbidden.") { }
+        : base("Dostęp do tego zasobu jest zabroniony.") { }
 
     public ForbiddenAccessException(string message)
         : base(message) { }

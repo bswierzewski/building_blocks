@@ -33,7 +33,7 @@ public static class XmlExtensions
 
         return XmlCache<T>.Serializer.Deserialize(reader) is T result
           ? result
-          : throw new InvalidOperationException($"Unable to deserialize XML to type {typeof(T).FullName}.");
+          : throw new InvalidOperationException($"Nie udało się zdeserializować XML do typu {typeof(T).FullName}.");
     }
 
     /// <summary>

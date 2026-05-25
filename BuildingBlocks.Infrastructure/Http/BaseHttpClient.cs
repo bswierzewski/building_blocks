@@ -1,5 +1,4 @@
 using System.Net.Http.Json;
-using BuildingBlocks.Core.Exceptions;
 
 namespace BuildingBlocks.Infrastructure.Http;
 
@@ -37,17 +36,10 @@ public abstract class BaseHttpClient(HttpClient httpClient)
         using var response = await httpClient.SendAsync(request, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-        {
             throw await ParseExceptionAsync(response, cancellationToken);
-        }
 
-        var content = await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken);
-
-        if (content is null)
-        {
-            throw new Exception("API returned an empty response body.");
-        }
-
+        var content = await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken)
+            ?? throw new Exception("Brak treści odpowiedzi.");
         return content;
     }
 

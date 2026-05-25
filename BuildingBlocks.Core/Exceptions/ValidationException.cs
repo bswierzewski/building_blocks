@@ -9,7 +9,7 @@ public class ValidationException : Exception
         : this(new Dictionary<string, string[]>()) { }
 
     public ValidationException(IDictionary<string, string[]> errors)
-        : base("One or more validation failures have occurred.")
+        : base("Wystąpił co najmniej jeden błąd walidacji.")
     {
         ArgumentNullException.ThrowIfNull(errors);
 

@@ -27,7 +27,7 @@ public sealed record Permission
     public static string NormalizeCode(string code)
     {
         if (string.IsNullOrWhiteSpace(code))
-            throw new InvalidOperationException("Permission code cannot be empty.");
+            throw new InvalidOperationException("Kod uprawnienia nie może być pusty.");
 
         return code.ToLower().Trim();
     }
@@ -35,7 +35,7 @@ public sealed record Permission
     private static string NormalizeDescription(string description)
     {
         if (string.IsNullOrWhiteSpace(description))
-            throw new InvalidOperationException("Permission description cannot be empty.");
+            throw new InvalidOperationException("Opis uprawnienia nie może być pusty.");
 
         return description.Trim();
     }

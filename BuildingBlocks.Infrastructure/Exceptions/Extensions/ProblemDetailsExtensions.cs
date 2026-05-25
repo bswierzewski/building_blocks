@@ -1,8 +1,6 @@
 using BuildingBlocks.Core.Exceptions;
-using FluentValidation;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 
 namespace BuildingBlocks.Infrastructure.Exceptions.Extensions;
@@ -24,12 +22,12 @@ public static class ProblemDetailsExtensions
         {
             BuildingBlocks.Core.Exceptions.ValidationException ex => CreateProblemDetails(
                 StatusCodes.Status400BadRequest,
-                "Validation errors",
+                "Błędy walidacji",
                 ex.Message,
                 ex.Errors),
             FluentValidation.ValidationException ex => CreateProblemDetails(
                 StatusCodes.Status400BadRequest,
-                "Validation errors",
+                "Błędy walidacji",
                 ex.Message,
                 ex.Errors
                     .GroupBy(error => error.PropertyName)
@@ -38,26 +36,26 @@ public static class ProblemDetailsExtensions
                         group => group.Select(error => error.ErrorMessage).Distinct().ToArray())),
             NotFoundException ex => CreateProblemDetails(
                 StatusCodes.Status404NotFound,
-                "Resource not found",
+                "Nie znaleziono zasobu",
                 ex.Message),
             DomainException ex => CreateProblemDetails(
                 StatusCodes.Status400BadRequest,
-                "Domain rule violation",
+                "Naruszenie zasad biznesowych",
                 ex.Message),
             UnauthorizedAccessException => CreateProblemDetails(
                 StatusCodes.Status401Unauthorized,
-                "Unauthorized",
+                "Brak autoryzacji",
                 exception.Message),
             ForbiddenAccessException => CreateProblemDetails(
                 StatusCodes.Status403Forbidden,
-                "Forbidden",
+                "Brak dostępu",
                 exception.Message),
             _ => CreateProblemDetails(
                 StatusCodes.Status500InternalServerError,
-                "Internal Server Error",
+                "Błąd wewnętrzny serwera",
                 env.IsDevelopment()
                     ? exception.Message
-                    : "An unexpected error occurred. Please contact support.")
+                    : "Wystąpił nieoczekiwany błąd. Skontaktuj się z pomocą techniczną.")
         };
     }
 
@@ -84,8 +82,8 @@ public static class ProblemDetailsExtensions
                 var totalErrors = validationProblem.Errors.Sum(error => error.Value.Length);
 
                 problem.Detail = totalErrors == 1
-                    ? "Request validation failed. See 'errors' property for details."
-                    : $"Request validation failed with {totalErrors} error(s). See 'errors' property for details.";
+                    ? "Walidacja żądania nie powiodła się. Szczegóły znajdują się we właściwości 'errors'."
+                    : $"Walidacja żądania nie powiodła się dla {totalErrors} błędów. Szczegóły znajdują się we właściwości 'errors'.";
             }
         };
 
